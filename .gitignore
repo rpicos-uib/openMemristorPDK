@@ -1,8 +1,29 @@
-data/
-saves/
-export/
+# Unlike openPDKcreator's own IHP-based dev checkout, data/ here is
+# this project's OWN original, authored content (layers, magic tech,
+# LEF, DRC) -- the actual deliverable -- so it is tracked, not
+# gitignored. Same for saves/ (Magic Types/DRC edits have no other
+# tracked home -- they are never written back into data/ itself) and
+# export/ (the real, patched open_pdks-format output -- for Layers
+# specifically, the ONLY place the real content ends up at all, since
+# Layers edits are not persisted via saves/ the way LEF/DRC/Magic
+# Types are; a real, documented gap, see docs/presentation/).
 shell_env/
 __pycache__/
 *.pyc
 .venv/
 .cache/
+
+# Regeneratable build artifacts -- real, but reproducible from the
+# tracked .va/.sp/.py sources via docs/simulation/run_simulation.sh.
+*.osdi
+docs/simulation/.spiceinit
+docs/simulation/memristor_tran.csv
+
+# LaTeX build byproducts.
+docs/presentation/*.aux
+docs/presentation/*.log
+docs/presentation/*.nav
+docs/presentation/*.out
+docs/presentation/*.snm
+docs/presentation/*.toc
+docs/presentation/*.vrb

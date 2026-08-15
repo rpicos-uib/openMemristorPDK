@@ -1,0 +1,21 @@
+tech
+  format 35
+  openmemristorpdk
+end
+
+version
+ version 0.1.0
+ description "New technology -- edit this description"
+end
+
+planes
+end
+
+types
+end
+
+contact
+end
+
+aliases
+end

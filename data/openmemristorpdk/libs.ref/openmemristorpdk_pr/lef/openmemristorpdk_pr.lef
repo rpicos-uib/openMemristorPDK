@@ -1,0 +1,24 @@
+VERSION 5.7 ;
+BUSBITCHARS "[]" ;
+DIVIDERCHAR "/" ;
+MACRO memristor
+  CLASS CORE ;
+  SIZE 1.0 BY 1.0 ;
+  SYMMETRY X Y ;
+  PIN BE
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER BE ;
+      RECT 0.0 0.0 1.0 0.2 ;
+    END
+  END BE
+  PIN TE
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER TE ;
+      RECT 0.0 0.8 1.0 1.0 ;
+    END
+  END TE
+END memristor

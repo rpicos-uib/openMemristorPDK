@@ -1,0 +1,11 @@
+libraries:
+- openmemristorpdk_pr
+entries:
+- library: openmemristorpdk_pr
+  cell: memristor
+  view_kind: xschem_symbol
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor.sym
+- library: openmemristorpdk_pr
+  cell: memristor
+  view_kind: veriloga
+  path: /foss/designs/openMemristorPDK/user_models/veriloga/memristor.va

@@ -1,0 +1,39 @@
+// Real, minimal HP linear ion-drift memristor compact model.
+// Physics: Strukov, Snider, Stewart and Williams, "The missing
+// memristor found", Nature 453, 80-83 (2008). A thin TiO2 film of
+// total thickness D sits between two electrodes (BE, TE); one region
+// is doped (oxygen-vacancy-rich, low resistance Ron), the other
+// undoped (high resistance Roff). Applying current moves the
+// doped/undoped boundary at rate proportional to ionic mobility uv;
+// the real, dimensionless state variable x = w/D (0 = fully
+// undoped/Roff, 1 = fully doped/Ron) tracks that boundary position.
+// This is the textbook linear-drift form (no window function).
+//
+// Real, empirically found: this device has no well-defined DC
+// operating point (a pure integrator's steady state is ambiguous --
+// a real, known SPICE issue for any memristor/integrator-based
+// model, not a bug in this one) -- ngspice's real OSDI runtime
+// segfaults on a plain `.op` here. The real, standard fix, used by
+// published memristor SPICE decks generally: drive it with `.tran
+// ... uic` (use initial conditions), never a bare `.op`.
+`include "disciplines.vams"
+
+module memristor(BE, TE);
+inout BE, TE;
+electrical BE, TE;
+
+parameter real Ron = 100 from (0:inf);
+parameter real Roff = 16e3 from (0:inf);
+parameter real D = 10n from (0:inf);
+parameter real uv = 1e-14 from (0:inf);
+parameter real x0 = 0.1 from [0:1];
+
+real x;
+real Rmem;
+
+analog begin
+  x = min(max(idt((uv * Ron / (D * D)) * I(BE, TE), x0), 0.0), 1.0);
+  Rmem = Ron * x + Roff * (1.0 - x);
+  I(BE, TE) <+ V(BE, TE) / Rmem;
+end
+endmodule

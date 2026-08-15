@@ -1,0 +1,46 @@
+// Real, minimal HP linear ion-drift memristor compact model -- the
+// exact same physics as user_models/veriloga/memristor.va (the
+// PDK's own real cell model, auto-created via the Library Manager's
+// pin inference from the real LEF macro's BE/TE pins). Renamed to
+// hp_memristor here, for one real, empirically-found reason: ngspice
+// ships its own *built-in* XSPICE code model literally named
+// "memristor" (see `devhelp` after `osdi ...` -- "memristor :
+// Memristor interface"), and `.model mm memristor` collides with
+// that reserved name regardless of instance-letter prefix used
+// ("unrecognized parameter (memristor)" / "incorrect model type! ..."
+// depending on prefix) -- never reaching this real, OSDI-loaded
+// module at all. Renaming only the Verilog-A `module` identifier
+// (not the PDK's own cell name, LEF macro, or xschem symbol -- those
+// stay "memristor") sidesteps the collision cleanly for the
+// standalone simulation shown here.
+//
+// Physics: Strukov, Snider, Stewart and Williams, "The missing
+// memristor found", Nature 453, 80-83 (2008). A thin TiO2 film of
+// total thickness D sits between two electrodes (BE, TE); one region
+// is doped (oxygen-vacancy-rich, low resistance ron), the other
+// undoped (high resistance roff). Applying current moves the
+// doped/undoped boundary at rate proportional to ionic mobility uv;
+// the real, dimensionless state variable x = w/D (0 = fully
+// undoped/roff, 1 = fully doped/ron) tracks that boundary position.
+// This is the textbook linear-drift form (no window function).
+`include "disciplines.vams"
+
+module hp_memristor(BE, TE);
+inout BE, TE;
+electrical BE, TE;
+
+parameter real ron = 100 from (0:inf);
+parameter real roff = 16e3 from (0:inf);
+parameter real D = 10n from (0:inf);
+parameter real uv = 1e-14 from (0:inf);
+parameter real x0 = 0.1 from [0:1];
+
+real x;
+real rmem;
+
+analog begin
+  x = min(max(idt((uv * ron / (D * D)) * I(BE, TE), x0), 0.0), 1.0);
+  rmem = ron * x + roff * (1.0 - x);
+  I(BE, TE) <+ V(BE, TE) / rmem;
+end
+endmodule

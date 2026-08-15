@@ -1,0 +1,29 @@
+project_name: Untitled PDK Project
+drc_rules: []
+magic_types:
+  openmemristorpdk: []
+magic_planes:
+  openmemristorpdk: []
+magic_contacts:
+  openmemristorpdk: []
+magic_aliases:
+  openmemristorpdk: []
+lef_pins:
+  libs.ref/openmemristorpdk_pr/lef/openmemristorpdk_pr.lef:
+    memristor:
+    - name: BE
+      direction: INOUT
+      use: SIGNAL
+      ports:
+      - layer: BE
+        rect_count: 1
+      start_line: 8
+      end_line: 15
+    - name: TE
+      direction: INOUT
+      use: SIGNAL
+      ports:
+      - layer: TE
+        rect_count: 1
+      start_line: 16
+      end_line: 23
