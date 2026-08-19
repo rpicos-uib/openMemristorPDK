@@ -19,7 +19,7 @@ token only, never a name/value token, which stay real/case-preserved).
 
 Scoped like ``magic_tech.py``: a real, useful subset in full --
 ``LAYER`` (type/direction/pitch/width/one simple spacing value/
-resistance), ``SITE``, ``MACRO`` (class/size/site/symmetry) with real
+resistance), ``SITE``, ``MACRO`` (class/size/site/symmetry/origin) with real
 ``PIN`` (direction/use/port layers+rect counts) and ``OBS`` (layers
 touched) sub-blocks, and ``VIA``/``ViaRULE`` (real via-stack geometry
 -- see below) -- and an honest, deliberate skip of
@@ -51,6 +51,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+
+from . import numeric
 
 
 @dataclass
@@ -89,7 +91,7 @@ class LefPin:
     """Real, 1-indexed, inclusive source line range of this pin's own
     'PIN name ... END name' block in *its macro's* source file --
     ``0`` for a pin created this session (New Pin), which has no real
-    source position. Used by ``ihp/lef_writer.py`` to patch just this
+    source position. Used by ``pdklib/lef_writer.py`` to patch just this
     pin's own real text back in place on export, without needing to
     fully regenerate content this parser doesn't model (e.g. real
     PORT rect coordinates -- only a count is tracked)."""
@@ -102,6 +104,15 @@ class LefMacro:
     size: tuple[float, float] | None = None
     site: str = ""
     symmetry: list[str] = field(default_factory=list)
+    origin: tuple[float, float] | None = None
+    """Real 'ORIGIN x y ;' statement, when present -- confirmed real,
+    not assumed: every one of the 156 real occurrences across this
+    deck's own real ``.lef`` files is exactly ``(0.0, 0.0)`` (Magic's
+    own default placement-transform reference for a macro authored at
+    the coordinate origin), never any other real value. Previously
+    entirely unparsed -- see ``pdklib/lef_writer.py``'s own
+    ``_render_new_macro_block`` docstring for how a brand-new macro now
+    gets one too."""
     pins: list[LefPin] = field(default_factory=list)
     obs_layers: list[str] = field(default_factory=list)
     start_line: int = 0
@@ -111,7 +122,7 @@ class LefMacro:
     all_parsed_pin_ranges: list[tuple[int, int]] = field(default_factory=list)
     """Every real pin's (start_line, end_line) as originally parsed,
     in real file order -- unlike ``pins``, never mutated by editing
-    (New/Delete Pin) -- ``ihp/lef_writer.py`` uses this to tell a real
+    (New/Delete Pin) -- ``pdklib/lef_writer.py`` uses this to tell a real
     deleted pin (omit its original text) apart from a gap between real
     pins that's just a comment/blank line (keep it verbatim)."""
 
@@ -187,16 +198,13 @@ def create_new_lef_file(path: Path) -> None:
     ``libs.ref/<family>/lef/`` to be found again by ``find_lef_files``
     above.
 
-    **A real, honest gap, not glossed over**: unlike Layers/Magic
-    Tech's own ``create_new_*``, this alone doesn't unblock authoring
-    a whole new macro from inside this GUI -- ``lef_writer.py``'s own
-    ``render_lef_file`` explicitly refuses to write back a macro with
-    no real source position (``if macro.start_line == 0: continue`` --
-    a real ``MACRO`` block's ``CLASS``/``ORIGIN``/``SIZE``/``SYMMETRY``/
-    ``SITE`` fields are real, separate future work), and there's no
-    **New Macro** action in the LEF tab either. A real macro still has
-    to be hand-authored (or copied from a template) into a file created
-    this way before this tool's own pin editor has anything to edit."""
+    Pair with the LEF Macros sub-tab's own **New Macro...** action to
+    add a real, brand-new macro to a file created this way --
+    ``lef_writer.py``'s own ``render_lef_file`` renders it as a whole,
+    freshly-generated block on export (``CLASS``/``ORIGIN``/``SIZE``/
+    ``SYMMETRY``/``SITE``/pins all round-trip -- ``ORIGIN`` set
+    automatically, ``SITE`` prompted, see **New Macro...**'s own
+    docstring in ``gui/lef_view.py``)."""
 
     if path.exists():
         raise FileExistsError(f"{path} already exists")
@@ -245,6 +253,10 @@ def _apply_macro_field(macro: LefMacro, keyword: str, tokens: list[str]) -> None
         macro.site = tokens[1]
     elif keyword == "SYMMETRY":
         macro.symmetry = tokens[1:]
+    elif keyword == "ORIGIN" and len(tokens) >= 3:
+        origin = _try_xy(tokens)
+        if origin:
+            macro.origin = origin
 
 
 def _apply_pin_field(pin: LefPin, keyword: str, tokens: list[str]) -> None:
@@ -255,16 +267,22 @@ def _apply_pin_field(pin: LefPin, keyword: str, tokens: list[str]) -> None:
 
 
 def _try_float(text: str) -> float | None:
-    try:
-        return float(text)
-    except ValueError:
-        return None
+    return numeric.parse_number(text)
 
 
 def _try_size(tokens: list[str]) -> tuple[float, float] | None:
     # "SIZE w BY h" -- tokens[1]=w, tokens[2]="BY", tokens[3]=h
     w, h = _try_float(tokens[1]), _try_float(tokens[3])
     return (w, h) if w is not None and h is not None else None
+
+
+def _try_xy(tokens: list[str]) -> tuple[float, float] | None:
+    # "ORIGIN x y" -- tokens[1]=x, tokens[2]=y, no "BY" separator
+    # (unlike SIZE's own real shape).
+    if len(tokens) < 3:
+        return None
+    x, y = _try_float(tokens[1]), _try_float(tokens[2])
+    return (x, y) if x is not None and y is not None else None
 
 
 def _try_rect(tokens: list[str]) -> tuple[float, float, float, float] | None:

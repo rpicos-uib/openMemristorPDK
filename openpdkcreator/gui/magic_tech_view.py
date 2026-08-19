@@ -1,36 +1,195 @@
 """Magic Tech tab: real, parsed Magic ``.tech`` data
-(``openpdkcreator/ihp/magic_tech.py``), one real technology at a time
-(``ihp-sg13g2`` and ``ihp-sg13g2-GDS`` for IHP -- the two genuinely
-separate technologies; the fragment files ``include``d into
-``ihp-sg13g2.tech`` have no own header/name and are skipped in the
-picker since they were never meant to be viewed standalone).
+(``openpdkcreator/pdklib/magic_tech.py``), one real technology at a time.
+
+**The Technology picker now shows every real ``.tech`` file found**,
+not just the two with their own real ``tech``/``version`` header
+(``ihp-sg13g2``/``ihp-sg13g2-GDS`` for IHP). The other four
+(``ihp-sg13g2-cifin``/``-cifout``/``-drc``/``-extract``) are real
+fragment files, ``include``d into ``ihp-sg13g2.tech`` and never meant
+to carry their own header -- ``tech.name`` genuinely comes back empty
+for them, so ``load()`` falls back to the real file's own stem as a
+display name instead (``tech.name or path.stem``), rather than
+inventing a fake real name on the parsed model itself. This used to
+filter them out of the picker entirely; now they're real, independently
+selectable/editable technologies in their own right, since
+``pdklib/magic_tech.py``'s own ``parse_tech_file`` already parses each
+real ``.tech`` file completely on its own regardless of picker
+visibility -- confirmed real, not assumed: none of the four fragments
+has an ``include`` line of its own, so each one's *own* real content is
+safely, fully line-mapped when parsed as that file directly (see
+``pdklib/magic_tech_writer.py``'s own docstring for exactly why this
+matters for write-back).
 
 A sub-`Notebook` per real, tabular data domain -- planes/types/
-contacts/aliases/styles/CIF layers/**CIF Input**/**CIF Input
-Recipes**, plus **Compose**/**Connect**/**DRC (Magic)**/**Extract**/
-**Extract Coefficients**/**Extract Devices**/**Extract Misc** (real
-``cifinput``/``compose``/``connect``/``drc``/``extract`` section
-content -- see ``ihp/magic_tech.py``'s own docstring for exactly
-what's extracted from each and why). **Types**/**Planes**/
-**Contacts**/**Aliases** are editable -- Types keeps its own
-hand-written list + form pane (a real comma-split aliases list, a
-boolean obsolete combo); Planes/Contacts/Aliases share one generic,
-reusable `simple_list_editor.SimpleListEditor` instead (flat,
-plain-string-field dataclasses, a clean fit for one shared
-implementation rather than three hand-copies of the same
+contacts/aliases/styles/compose/connect/**CIF Layers**/**CIF Input**/
+**CIF Input Recipes**, plus **DRC (Magic)**/**Extract**/**Extract
+Coefficients**/**Extract Devices**/**Extract Misc** (real
+``cifinput``'s own recipe blocks/``drc``/``extract`` section content --
+see ``pdklib/magic_tech.py``'s own docstring for exactly what's
+extracted from each and why). **Types**/**Planes**/**Contacts**/
+**Aliases**/**Styles**/**Compose**/**Connect**/**CIF Input**'s own two
+flat sub-panes (ignored layers, layer hints)/**CIF Input Recipes**'s
+own header fields/**CIF Layers**/**Extract Misc**/**Extract
+Coefficients**/**Extract Devices**/**Extract**'s own **Plane order**
+and **Sheet resistance** sub-panes/**DRC (Magic)**'s own **angles**
+and **width/spacing/maxwidth** sub-panes are editable -- every real
+construct this module recognizes in `extract`/`drc` is now editable,
+no read-only sub-tab remains in either domain; **CIF Input Recipes**
+alone is still split, its own real op content staying read-only (see
+``CifInputRecipeBlock``'s own docstring, in ``pdklib/magic_tech.py``,
+for why only the header fields are safe to edit). Types keeps its
+own hand-written list + form pane (a real
+comma-split aliases list, a boolean obsolete combo); every other one
+shares one generic, reusable `simple_list_editor.SimpleListEditor`
+instead (flat, plain-string-field dataclasses, a clean fit for one
+shared implementation rather than a hand-copy per domain of the same
 commit-on-switch pattern ``LayersView``/``RulesView``/``LefView``
-already use). Every other domain stays read-only for now (each would
-need its own real editor design -- Styles' own real
-`type_name -> list[style_names]` shape and the harder mini-DSL
-sections aren't a clean fit for either existing editor shape; see
-README's own Future Work). Editing is in-memory, same as DRC Rules/
-LEF pins, with native write-back into the real ``.tech`` file via
-``ihp/magic_tech_writer.py`` (``File > Export Edited Magic
+already use) -- a non-string real field is always exposed to this
+string-only editor through a real Python property, never edited
+directly: Styles' own real `type_name -> list[style_names]` list field
+(``StyleEntry.style_names_text``), Compose's own fixed `args` 3-tuple
+(``ComposeStatement.arg1``/``arg2``/``arg3``), and CIF Input's/CIF
+Layers' own real `int`/`int | None` fields -- the first ``int``-typed
+editable fields anywhere in this module (``CifInputLayerHint.
+gds_layer_text``/``gds_datatype_text``, the latter also round-tripping
+the file's own real wildcard ``*`` convention; ``CifOutputLayerMapping.
+gds_layer_text``/``gds_datatype_text``, no wildcard concept there) --
+all the same real "expose a non-string field as a plain string for the
+generic editor" shape ``AliasEntry.members_raw`` already uses directly
+(that one just never needed converting back into anything more
+structured). Compose/Connect turned out to be exactly as flat as
+Planes/Contacts/Aliases once actually read closely -- a fixed 4-token
+line and a fixed 2-token line respectively -- despite initially
+looking like they belonged with the harder mini-DSL sections; CIF
+Input's own ignored-layers/layer-hints tables are just as flat
+individually, but real-world messier in two ways neither of those was:
+they share one real section with each other (and with the real, still-
+read-only ``layer``/``templayer`` recipe blocks -- see ``pdklib/
+magic_tech_writer.py``'s own docstring for how write-back handles a
+shared section), and they don't even live in the same real file as
+most of what's editable above (see this docstring's own opening
+paragraph). **CIF Layers is a real, deliberate exception to every
+other editable domain here**: unlike them, it supports editing an
+*existing* ``calma`` line's own real layer/datatype in place, but no
+New/Delete at all (``SimpleListEditor``'s own new ``allow_new_delete=
+False`` -- the buttons don't exist, not just disabled) -- a real
+``calma`` line means nothing without the real geometry recipe
+(``shrink``/``or``/``bloat-all``/...) leading up to it, which this
+project has no way to author, so a brand-new entry has no coherent
+real write-back target (see ``CifOutputLayerMapping``'s own
+docstring). It's also flattened to one real row per real ``calma``
+line, not one row per Magic type name (the same real name can appear
+on more than one row -- e.g. real ``DNWELL``, built across two
+separate real ``layer DNWELL ...`` blocks -- rather than merging them
+into one row with an inner list, the shape this domain used to have
+before write-back). ``CifInputRecipe`` (cifinput's own real recipe
+blocks) stays read-only for now, and for a genuinely harder reason
+than CIF Layers: real content merges across more than one
+non-contiguous real block sharing the same name, *and* the current
+data model doesn't even track which block each real op line came from
+-- a real write-back would need a data-model redesign first, real
+separate future work. **Extract Misc** (``ExtractMiscStatement`` --
+``contact``/``devresist``/``antenna``/``disconnect``/``substrate``
+statements) turned out to be another real, flat, editable domain once
+looked at closely, despite living in the same real ``extract`` section
+as several still-read-only constructs (``resist``/``order``/cap-
+coefficients/``device``) -- the same "flat, one real line per entry"
+shape ``SimpleListEditor`` already fits, with its own variable-length
+``args`` tuple exposed via ``args_text``, the same pattern
+``StyleEntry.style_names_text`` already established. A real ``contact``
+line can repeat once per real ``variants(...)`` PVT-corner block with a
+different value each time (the same real fact ``resist`` shares, still
+undocumented as a check here) -- each real occurrence is just its own
+independently-editable row, no attempt made to resolve which corner it
+belongs to. **Extract**'s own **Plane order** sub-pane
+(``ExtractPlaneOrder`` -- real ``planeorder NAME ORDER`` lines) is
+editable the same way, sharing that same real ``extract`` section with
+Extract Misc -- confirmed real to sit entirely before the section's
+own first real ``variants (...)`` line, so (unlike ``contact``) it
+never has a real per-corner repeat; its own ``int``-typed ``order``
+field is exposed via ``order_text``, the same "expose a non-string
+field as a plain string" pattern as everywhere else in this module.
+**Extract**'s own **Sheet resistance** sub-pane (``ExtractResist`` --
+real ``resist LAYER_SPEC VALUE`` lines) is also editable, the third
+real group sharing that same ``extract`` section -- unlike
+``planeorder``, a real ``resist`` line *does* repeat once per real
+``variants(...)`` corner block (the same real fact ``contact``
+shares), handled the same independently-editable-row way; its own
+``int``-typed ``milliohms_per_square`` field is exposed via
+``milliohms_text``. **Extract Coefficients** (``ExtractCapCoefficient``
+-- real `default*` parasitic-capacitance directives) is the fourth
+real group sharing that section: unlike the other three, its own
+trailing content is a variable-length blob (per-directive token
+count, split into a real ``args`` tuple and a real ``values`` float
+tuple), exposed to this generic editor through two properties,
+``args_text``/``values_text`` -- the same "expose a non-string field
+as a plain string" pattern, just applied twice to one entry. A real
+`default*` entry can also repeat once per real ``variants(...)``
+corner block, the same real fact ``resist``/``contact`` share.
+**Extract Devices** (``ExtractDevice`` -- real
+``device <class> <model> <type> ...`` statements) is the fifth and
+last real group sharing that section, and the only one whose own real
+entries can span more than one real physical line (a trailing ``\\``
+continuation -- confirmed real for 5 of the real 50 entries, every
+real ``msubcircuit`` MOSFET): tracked by a real ``(start_line,
+end_line)`` range rather than a single ``line_no``, mirroring
+``pdklib/lef.py``'s own ``LefMacro.all_parsed_pin_ranges`` real
+range-tracking precedent, and its own trailing ``rest`` tuple is
+exposed via ``rest_text``. An unchanged, real multi-line entry's own
+original wrapping/indentation is preserved completely verbatim; a
+real, deliberate edit collapses it to one freshly formatted line
+rather than attempting to reproduce the original author's own real
+line-wrapping choice. Every real ``extract``-section construct this
+parser recognizes is now editable -- this domain has no remaining
+read-only sub-tab of its own. **DRC (Magic)**'s own **angles** sub-pane
+(``MagicAngleCheck``) and **width/spacing/maxwidth** sub-pane
+(``MagicDrcCheck``) are the same real ranged shape as Extract Devices
+(``allm7`` and 70 of the real 192 ``MagicDrcCheck`` entries also wrap
+across real physical lines) -- both share
+``pdklib/magic_tech_writer.py``'s own ``_render_section_patch``'s
+*range_groups* mechanism, generalized once and reused here rather than
+rebuilt each time. ``MagicDrcCheck`` needed a real prerequisite first
+(a new ``filler_raw`` field capturing the real ``mode``/exception-list
+text those lines routinely carry, previously discarded entirely) --
+see ``MagicAngleCheck``'s own docstring (``pdklib/magic_tech.py``) for
+the full real reasoning. A third, wide pane below the two covers every
+other real drc-section keyword at once -- ``surround``/``edge4way``/
+``widespacing``/``cifmaxwidth``/``cifwidth``/``cifspacing``/``area``/
+``exact_overlap``/``overhang``/``extend``/``rect_only``/``cifarea``/
+``no_overlap`` (``MagicDrcMiscStatement``, 148 real lines across 13
+real directives, none dominant enough to justify its own bespoke
+parser the way ``width``/``spacing``/``maxwidth`` share one -- kept
+fully raw and positional instead, edited as ``directive``/``args_text``,
+the same "don't guess further" shape ``ComposeStatement``/``Extract
+Misc`` already established; see that dataclass's own docstring, in
+``pdklib/magic_tech.py``, for exactly why real ``variants``/``style``/
+``scalefactor``/``cifstyle`` lines are deliberately excluded -- a
+different real *kind* of line, section-level scope/config, not a
+per-rule check). Every real construct both `extract` and
+`drc` parse is now editable -- neither section has any remaining
+read-only content of its own (real ``surround``/``edge4way``/
+``variants``/... constructs used to be flagged as unparsed entirely;
+now every one of the 13 real per-rule keywords is parsed and editable
+too, real ``variants``/``style``/``scalefactor``/``cifstyle`` still
+deliberately unparsed since they're a different kind of content, not
+merely a differently-shaped one). **CIF Input Recipes**
+(``CifInputRecipeBlock``) is editable in a more limited, deliberate
+way: only its own real header fields (``name``/``kind_text``/
+``base_layer``), not its own real op content, which stays read-only in
+a separate ``Treeview`` for reference -- see that dataclass's own
+docstring for why. Every other remaining domain across the rest of
+Magic Tech stays read-only (each would need its own real editor design
+-- the genuinely harder mini-DSL sections aren't a clean fit for any
+existing editor shape; see README's own Future Work). Editing is
+in-memory, same as
+DRC Rules/LEF pins, with native write-back into the real ``.tech``
+file via ``pdklib/magic_tech_writer.py`` (``File > Export Edited Magic
 Types``/``main.py export-magic-types`` -- despite the menu/command
-label, this now writes back all four editable domains at once, not
-just Types). "View File" opens the real, underlying ``.tech`` file
-directly (``file_view_dialog.view_file_dialog``), which *can* be
-edited, as raw text.
+label, this now writes back every editable domain at once, not just
+Types). "View
+File" opens the real, underlying ``.tech`` file directly
+(``file_view_dialog.view_file_dialog``), which *can* be edited, as raw
+text.
 """
 
 from __future__ import annotations
@@ -39,7 +198,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import messagebox, simpledialog, ttk
 
-from ..ihp import magic_tech as magic_tech_mod
+from ..pdklib import magic_tech as magic_tech_mod
 from .file_view_dialog import view_file_dialog
 from .list_filter import build_filter_row, matches
 from .simple_list_editor import SimpleListEditor
@@ -99,22 +258,140 @@ class MagicTechView(ttk.Frame):
             entry_label="Alias",
             help_text="Real Magic .tech alias: 'name member1,member2,...'.",
         )
-        self.styles_tree = self._make_tab(sub, "Styles", ("type_name", "style_names"), (160, 560))
-        self.cif_tree = self._make_tab(sub, "CIF Layers", ("name", "gds_pairs"), (200, 400))
+        self.styles_editor = self._build_simple_editor(
+            sub, "Styles", [("type_name", "Type Name", 200), ("style_names_text", "Style Names (space-separated)", 460)],
+            lambda: magic_tech_mod.StyleEntry(type_name="newtype", style_names=[]),
+            entry_label="Style",
+            help_text="Real Magic .tech style: 'type_name style1 style2 ...'.",
+        )
+        self.cif_layers_editor = self._build_simple_editor(
+            sub, "CIF Layers",
+            [("name", "Name", 200), ("gds_layer_text", "GDS Layer", 100), ("gds_datatype_text", "GDS Datatype", 100)],
+            None,
+            entry_label="Layer Mapping",
+            help_text="Real cifoutput 'calma LAYER DATATYPE' inside a 'layer'/'templayer' NAME block. "
+                      "Edit an existing mapping's own layer/datatype -- no New/Delete: a new one needs a real "
+                      "geometry recipe (shrink/or/bloat-all/...) this project doesn't author.",
+            allow_new_delete=False,
+        )
         self._build_cifinput_tab(sub)
-        self.cifinput_recipes_tree = self._make_tab(
-            sub, "CIF Input Recipes", ("name", "kind", "base_layers", "ops"), (140, 90, 160, 460),
+        self._build_cifinput_recipes_tab(sub)
+        self.compose_editor = self._build_simple_editor(
+            sub, "Compose",
+            [("verb", "Verb", 100), ("arg1", "Arg 1", 140), ("arg2", "Arg 2", 140), ("arg3", "Arg 3", 140)],
+            lambda: magic_tech_mod.ComposeStatement(verb="paint", args=("a", "b", "c")),
+            entry_label="Compose Statement",
+            help_text="Real Magic .tech compose statement: 'compose|decompose|paint arg1 arg2 arg3'.",
         )
-        self.compose_tree = self._make_tab(sub, "Compose", ("verb", "arg1", "arg2", "arg3"), (100, 140, 140, 140))
-        self.connect_tree = self._make_tab(sub, "Connect", ("types_a", "types_b"), (330, 330))
-        self.drc_tree = self._make_tab(
-            sub, "DRC (Magic)", ("check_type", "layers", "value_um", "rule_ids", "message"),
-            (80, 220, 80, 100, 300),
+        self.connect_editor = self._build_simple_editor(
+            sub, "Connect", [("types_a", "Types A", 330), ("types_b", "Types B", 330)],
+            lambda: magic_tech_mod.ConnectRule(types_a="newtype", types_b="newtype"),
+            entry_label="Connect Rule",
+            help_text="Real Magic .tech connectivity rule: 'types_a types_b' (each a comma-separated type list).",
         )
+        self._build_drc_tab(sub)
         self._build_extract_tab(sub)
-        self._build_extract_coefficients_tab(sub)
-        self._build_extract_devices_tab(sub)
-        self._build_extract_misc_tab(sub)
+        self.extract_coeff_editor = self._build_simple_editor(
+            sub, "Extract Coefficients",
+            [("directive", "Directive", 140), ("args_text", "Args", 220), ("values_text", "Values", 160)],
+            lambda: magic_tech_mod.ExtractCapCoefficient(directive="defaultareacap", args=(), values=()),
+            entry_label="Cap Coefficient",
+            help_text="Real extract-section 'default*' parasitic-capacitance coefficient line "
+                      "('defaultoverlap'/'defaultsideoverlap'/'defaultareacap'/'defaultperimeter'/"
+                      "'defaultsidewall'). Argument semantics aren't asserted -- edited raw and positional. "
+                      "A real entry can repeat once per real variants(...) corner block -- each row here is "
+                      "its own independently-editable real line, not resolved to a specific corner.",
+        )
+        self.extract_devices_editor = self._build_simple_editor(
+            sub, "Extract Devices",
+            [("devclass", "Devclass", 110), ("model", "Model", 160), ("type_name", "Type", 110),
+             ("rest_text", "Rest", 400)],
+            lambda: magic_tech_mod.ExtractDevice(devclass="mosfet", model="None", type_name="newtype", rest=()),
+            entry_label="Device",
+            help_text="Real extract-section 'device <class> <model> <type> ...' statement. Argument semantics "
+                      "past the first three tokens aren't asserted -- edited raw and positional. A real entry "
+                      "can span more than one real physical line (a trailing '\\' continuation) -- editing it "
+                      "collapses it to one fresh line, the original multi-line wrap isn't reproduced.",
+        )
+        self.extract_misc_editor = self._build_simple_editor(
+            sub, "Extract Misc", [("directive", "Directive", 110), ("args_text", "Args", 500)],
+            lambda: magic_tech_mod.ExtractMiscStatement(directive="contact", args=()),
+            entry_label="Extract Misc Statement",
+            help_text="Real extract-section 'contact|devresist|antenna|disconnect|substrate ...' statement. "
+                      "A real 'contact' entry can repeat once per real variants(...) corner block -- each row "
+                      "here is its own independently-editable real line, not resolved to a specific corner.",
+        )
+
+    def _build_drc_tab(self, notebook: ttk.Notebook):
+        """Real ``width``/``spacing``/``maxwidth``/``angles`` DRC
+        statements from the ``drc`` section -- both are now editable
+        (see ``MagicDrcCheck``'s own docstring, in
+        ``pdklib/magic_tech.py``, for the real ``mode``/exception-list
+        filler that had to be captured into ``filler_raw`` first, and
+        ``MagicAngleCheck``'s own for why ``angles`` needed no such
+        prerequisite). A third, wide pane below covers every other real
+        drc-section keyword (``surround``/``edge4way``/``widespacing``/
+        ``cifmaxwidth``/... -- see ``MagicDrcMiscStatement``'s own
+        docstring for the full real list and why they share one flat,
+        raw/positional shape rather than a bespoke parser each)."""
+
+        frame = ttk.Frame(notebook)
+        notebook.add(frame, text="DRC (Magic)")
+        frame.columnconfigure(0, weight=2)
+        frame.columnconfigure(1, weight=1)
+        frame.rowconfigure(1, weight=1)
+        frame.rowconfigure(3, weight=1)
+
+        ttk.Label(frame, text="width/spacing/maxwidth:").grid(
+            row=0, column=0, sticky="w", padx=(0, 4)
+        )
+        checks_frame = ttk.Frame(frame)
+        checks_frame.grid(row=1, column=0, sticky="nsew", padx=(0, 4))
+        self.drc_checks_editor = SimpleListEditor(
+            checks_frame,
+            [("check_type", "Check Type", 80), ("layers_text", "Layers", 200), ("value_text", "Value Um", 70),
+             ("filler_raw", "Mode/Exceptions", 160), ("message", "Message", 280)],
+            lambda: magic_tech_mod.MagicDrcCheck(
+                check_type="width", layer_args=[["newlayer"]], value_um=0.0, message="new message",
+                rule_ids_raw=None,
+            ),
+            entry_label="DRC Check",
+            help_text="Real drc-section 'width|spacing|maxwidth LAYERS VALUE [mode] \"MESSAGE\"' statement. "
+                      "'Layers' is one comma-separated real type-list for width/maxwidth, two ' | '-separated "
+                      "lists for spacing. 'Mode/Exceptions' is the real, raw mode/exception-list text between "
+                      "the value and the message (e.g. 'touching_ok') -- edited raw and positional, argument "
+                      "semantics aren't asserted. A real rule ID lives inside the message's own trailing "
+                      "'(...)' -- edit the message directly to change it.",
+        )
+        self.drc_checks_editor.pack(fill="both", expand=True)
+
+        ttk.Label(frame, text="angles:").grid(row=0, column=1, sticky="w")
+        angles_frame = ttk.Frame(frame)
+        angles_frame.grid(row=1, column=1, sticky="nsew")
+        self.drc_angles_editor = SimpleListEditor(
+            angles_frame, [("layer", "Layer", 120), ("degrees_text", "Degrees", 60), ("message", "Message", 260)],
+            lambda: magic_tech_mod.MagicAngleCheck(layer="newlayer", degrees=90, message="new message"),
+            entry_label="Angle Check",
+            help_text="Real drc-section 'angles LAYER DEGREES \"MESSAGE\"' statement.",
+        )
+        self.drc_angles_editor.pack(fill="both", expand=True)
+
+        ttk.Label(
+            frame, text="surround/edge4way/widespacing/cifmaxwidth/cifwidth/cifspacing/area/"
+                        "exact_overlap/overhang/extend/rect_only/cifarea/no_overlap:",
+        ).grid(row=2, column=0, columnspan=2, sticky="w", pady=(8, 0))
+        misc_frame = ttk.Frame(frame)
+        misc_frame.grid(row=3, column=0, columnspan=2, sticky="nsew")
+        self.drc_misc_editor = SimpleListEditor(
+            misc_frame, [("directive", "Directive", 110), ("args_text", "Args", 600)],
+            lambda: magic_tech_mod.MagicDrcMiscStatement(directive="surround", args=()),
+            entry_label="DRC Statement",
+            help_text="Every other real drc-section statement -- 'DIRECTIVE ARG1 ARG2 ...', kept fully raw and "
+                      "positional (argument semantics vary too much per directive to assert, same 'don't guess "
+                      "further' discipline as Compose/Extract Misc). A trailing quoted message, when present, "
+                      "is just more whitespace-split tokens in Args -- edited as one plain string.",
+        )
+        self.drc_misc_editor.pack(fill="both", expand=True)
 
     def _build_extract_tab(self, notebook: ttk.Notebook):
         frame = ttk.Frame(notebook)
@@ -126,57 +403,118 @@ class MagicTechView(ttk.Frame):
         ttk.Label(frame, text="Sheet resistance (real per-layer, milliohms/square):").grid(
             row=0, column=0, sticky="w", padx=(0, 4)
         )
-        resist_columns = ("layer_spec", "milliohms_per_square")
-        self.extract_resist_tree = ttk.Treeview(frame, columns=resist_columns, show="headings")
-        for col, width in zip(resist_columns, (260, 180)):
-            self.extract_resist_tree.heading(col, text=col.replace("_", " ").title())
-            self.extract_resist_tree.column(col, width=width, anchor="w")
-        self.extract_resist_tree.grid(row=1, column=0, sticky="nsew", padx=(0, 4))
+        resist_frame = ttk.Frame(frame)
+        resist_frame.grid(row=1, column=0, sticky="nsew", padx=(0, 4))
+        self.extract_resist_editor = SimpleListEditor(
+            resist_frame, [("layer_spec", "Layer Spec", 220), ("milliohms_text", "milliohms/sq", 100)],
+            lambda: magic_tech_mod.ExtractResist(layer_spec="(newlayer)/metal1", milliohms_per_square=0),
+            entry_label="Resist Entry",
+            help_text="Real extract-section 'resist LAYER_SPEC VALUE' line (milliohms/square). "
+                      "A real layer can repeat once per real variants(...) corner block -- each row "
+                      "here is its own independently-editable real line, not resolved to a specific corner.",
+        )
+        self.extract_resist_editor.pack(fill="both", expand=True)
 
         ttk.Label(frame, text="Plane order:").grid(row=0, column=1, sticky="w")
-        order_columns = ("name", "order")
-        self.extract_plane_order_tree = ttk.Treeview(frame, columns=order_columns, show="headings")
-        for col, width in zip(order_columns, (160, 60)):
-            self.extract_plane_order_tree.heading(col, text=col.title())
-            self.extract_plane_order_tree.column(col, width=width, anchor="w")
-        self.extract_plane_order_tree.grid(row=1, column=1, sticky="nsew")
-
-    def _build_extract_coefficients_tab(self, notebook: ttk.Notebook):
-        columns = ("directive", "args", "values")
-        self.extract_coeff_tree = self._make_tab(notebook, "Extract Coefficients", columns, (140, 260, 160))
-
-    def _build_extract_devices_tab(self, notebook: ttk.Notebook):
-        columns = ("devclass", "model", "type_name", "rest")
-        self.extract_devices_tree = self._make_tab(notebook, "Extract Devices", columns, (110, 160, 110, 400))
-
-    def _build_extract_misc_tab(self, notebook: ttk.Notebook):
-        columns = ("directive", "args")
-        self.extract_misc_tree = self._make_tab(notebook, "Extract Misc", columns, (110, 500))
+        order_frame = ttk.Frame(frame)
+        order_frame.grid(row=1, column=1, sticky="nsew")
+        self.extract_plane_order_editor = SimpleListEditor(
+            order_frame, [("name", "Name", 140), ("order_text", "Order", 60)],
+            lambda: magic_tech_mod.ExtractPlaneOrder(name="newplane", order=0),
+            entry_label="Plane Order Entry",
+            help_text="Real extract-section 'planeorder NAME ORDER' line.",
+        )
+        self.extract_plane_order_editor.pack(fill="both", expand=True)
 
     def _build_cifinput_tab(self, notebook: ttk.Notebook):
+        """Real, editable list+form panes for cifinput's own two flat
+        sub-structures, side by side -- unlike every other
+        ``SimpleListEditor`` use in this file, these two share one
+        real ``cifinput``...``end`` section (with each other, and with
+        every real ``layer``/``templayer`` recipe block's own header,
+        also editable -- see ``_build_cifinput_recipes_tab`` below)
+        rather than each owning an exclusive section; see
+        ``pdklib/magic_tech_writer.py``'s own docstring for how
+        write-back handles that."""
+
         frame = ttk.Frame(notebook)
         notebook.add(frame, text="CIF Input")
         frame.columnconfigure(0, weight=1)
-        frame.columnconfigure(1, weight=2)
-        frame.rowconfigure(1, weight=1)
+        frame.columnconfigure(1, weight=1)
+        frame.rowconfigure(0, weight=1)
 
-        ttk.Label(frame, text="Ignored layers (real, on CIF/GDS read):").grid(
-            row=0, column=0, sticky="w", padx=(0, 4)
+        ignore_frame = ttk.Frame(frame)
+        ignore_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 4))
+        self.cifinput_ignore_editor = SimpleListEditor(
+            ignore_frame, [("name", "Ignored Layer", 200)],
+            lambda: magic_tech_mod.CifInputIgnoredLayer(name="NEWLAYER"),
+            entry_label="Ignored Layer",
+            help_text="Real cifinput 'ignore LAYERNAME' -- skipped entirely on CIF/GDS read.",
         )
-        self.cifinput_ignore_tree = ttk.Treeview(frame, columns=("layer",), show="headings")
-        self.cifinput_ignore_tree.heading("layer", text="Layer")
-        self.cifinput_ignore_tree.column("layer", width=200, anchor="w")
-        self.cifinput_ignore_tree.grid(row=1, column=0, sticky="nsew", padx=(0, 4))
+        self.cifinput_ignore_editor.pack(fill="both", expand=True)
 
-        ttk.Label(frame, text="Layer hints (real, standalone 'calma NAME L D' table):").grid(
-            row=0, column=1, sticky="w"
+        hints_frame = ttk.Frame(frame)
+        hints_frame.grid(row=0, column=1, sticky="nsew")
+        self.cifinput_hints_editor = SimpleListEditor(
+            hints_frame,
+            [("name", "Name", 160), ("gds_layer_text", "GDS Layer", 90), ("gds_datatype_text", "GDS Datatype", 90)],
+            lambda: magic_tech_mod.CifInputLayerHint(name="NEWLAYER", gds_layer=0, gds_datatype=0),
+            entry_label="Layer Hint",
+            help_text="Real cifinput 'calma NAME LAYER DATATYPE' -- standalone (not nested in a recipe). "
+                       "Datatype '*' means any.",
         )
-        hint_columns = ("name", "gds_layer", "gds_datatype")
-        self.cifinput_hints_tree = ttk.Treeview(frame, columns=hint_columns, show="headings")
-        for col, width in zip(hint_columns, (200, 90, 90)):
-            self.cifinput_hints_tree.heading(col, text=col.replace("_", " ").title())
-            self.cifinput_hints_tree.column(col, width=width, anchor="w")
-        self.cifinput_hints_tree.grid(row=1, column=1, sticky="nsew")
+        self.cifinput_hints_editor.pack(fill="both", expand=True)
+
+    def _build_cifinput_recipes_tab(self, notebook: ttk.Notebook):
+        """cifinput's own ``layer``/``templayer`` recipe blocks -- one
+        real entry per real block *occurrence* (``CifInputRecipeBlock``,
+        not merged by name -- see that dataclass's own docstring in
+        ``pdklib/magic_tech.py``). **Editable header fields only**
+        (``name``/``kind_text``/``base_layer``) in the left-hand
+        ``SimpleListEditor``, ``allow_new_delete=False`` since a
+        brand-new block with no real op content would be functionally
+        inert, the same real reasoning ``CifOutputLayerMapping``'s own
+        edit-in-place-only mode already established. Real op content
+        stays read-only, shown for reference (not editing) in the
+        right-hand ``Treeview`` -- ``SimpleListEditor`` has no concept
+        of a read-only column, so real op content that can't safely be
+        edited here stays in a genuinely separate, non-form widget
+        rather than a form field that looks editable but silently
+        isn't."""
+
+        frame = ttk.Frame(notebook)
+        notebook.add(frame, text="CIF Input Recipes")
+        frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=1)
+        frame.rowconfigure(0, weight=1)
+
+        editor_frame = ttk.Frame(frame)
+        editor_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 4))
+        self.cifinput_recipes_editor = SimpleListEditor(
+            editor_frame, [("name", "Name", 140), ("kind_text", "Kind", 90), ("base_layer", "Base Layer", 160)],
+            None,
+            entry_label="Recipe Block",
+            help_text="Real cifinput 'layer|templayer NAME BASE' recipe block header -- one real entry per "
+                      "real block occurrence (a real name can appear more than once). Real op content "
+                      "(right) stays read-only -- this project doesn't model or author real geometry-boolean "
+                      "op semantics well enough to safely let one be added here.",
+            allow_new_delete=False,
+        )
+        self.cifinput_recipes_editor.pack(fill="both", expand=True)
+
+        self.cifinput_recipes_tree = self._make_tab_tree(
+            frame, ("name", "kind", "base_layer", "ops"), (140, 90, 160, 400), column=1,
+        )
+
+    def _make_tab_tree(
+        self, frame: ttk.Frame, columns: tuple[str, ...], widths: tuple[int, ...], column: int,
+    ) -> ttk.Treeview:
+        tree = ttk.Treeview(frame, columns=columns, show="headings")
+        for col, width in zip(columns, widths):
+            tree.heading(col, text=col.replace("_", " ").title())
+            tree.column(col, width=width, anchor="w")
+        tree.grid(row=0, column=column, sticky="nsew")
+        return tree
 
     def _make_tab(self, notebook: ttk.Notebook, title: str, columns: tuple[str, ...], widths: tuple[int, ...]) -> ttk.Treeview:
         frame = ttk.Frame(notebook)
@@ -190,11 +528,14 @@ class MagicTechView(ttk.Frame):
 
     def _build_simple_editor(
         self, notebook: ttk.Notebook, title: str, columns: list[tuple[str, str, int]],
-        new_entry_factory, entry_label: str, help_text: str,
+        new_entry_factory, entry_label: str, help_text: str, allow_new_delete: bool = True,
     ) -> SimpleListEditor:
         frame = ttk.Frame(notebook)
         notebook.add(frame, text=title)
-        editor = SimpleListEditor(frame, columns, new_entry_factory, entry_label=entry_label, help_text=help_text)
+        editor = SimpleListEditor(
+            frame, columns, new_entry_factory, entry_label=entry_label, help_text=help_text,
+            allow_new_delete=allow_new_delete,
+        )
         editor.pack(fill="both", expand=True)
         return editor
 
@@ -270,7 +611,7 @@ class MagicTechView(ttk.Frame):
 
     def _new_tech_file(self):
         """A real, minimal, valid Magic ``.tech`` skeleton
-        (``ihp/magic_tech.py``'s own ``create_new_tech_file``) --
+        (``pdklib/magic_tech.py``'s own ``create_new_tech_file``) --
         genuinely usable immediately afterward: **New Type**/**New
         Plane**/**New Contact**/**New Alias** below all work against
         it the same as against a real, downloaded file (see that
@@ -303,6 +644,20 @@ class MagicTechView(ttk.Frame):
         self.planes_editor.commit_pending_edits()
         self.contacts_editor.commit_pending_edits()
         self.aliases_editor.commit_pending_edits()
+        self.styles_editor.commit_pending_edits()
+        self.compose_editor.commit_pending_edits()
+        self.connect_editor.commit_pending_edits()
+        self.cifinput_ignore_editor.commit_pending_edits()
+        self.cifinput_hints_editor.commit_pending_edits()
+        self.cifinput_recipes_editor.commit_pending_edits()
+        self.cif_layers_editor.commit_pending_edits()
+        self.extract_misc_editor.commit_pending_edits()
+        self.extract_plane_order_editor.commit_pending_edits()
+        self.extract_resist_editor.commit_pending_edits()
+        self.extract_coeff_editor.commit_pending_edits()
+        self.extract_devices_editor.commit_pending_edits()
+        self.drc_angles_editor.commit_pending_edits()
+        self.drc_checks_editor.commit_pending_edits()
 
     def collect_types_by_tech(self) -> dict[str, list[magic_tech_mod.TypeEntry]]:
         return {name: tech.types for name, tech in self.technologies.items()}
@@ -316,14 +671,69 @@ class MagicTechView(ttk.Frame):
     def collect_aliases_by_tech(self) -> dict[str, list[magic_tech_mod.AliasEntry]]:
         return {name: tech.aliases for name, tech in self.technologies.items()}
 
+    def collect_styles_by_tech(self) -> dict[str, list[magic_tech_mod.StyleEntry]]:
+        return {name: tech.styles for name, tech in self.technologies.items()}
+
+    def collect_compose_by_tech(self) -> dict[str, list[magic_tech_mod.ComposeStatement]]:
+        return {name: tech.compose for name, tech in self.technologies.items()}
+
+    def collect_connect_by_tech(self) -> dict[str, list[magic_tech_mod.ConnectRule]]:
+        return {name: tech.connect for name, tech in self.technologies.items()}
+
+    def collect_cifinput_ignored_layers_by_tech(self) -> dict[str, list[magic_tech_mod.CifInputIgnoredLayer]]:
+        return {name: tech.cifinput_ignored_layers for name, tech in self.technologies.items()}
+
+    def collect_cifinput_layer_hints_by_tech(self) -> dict[str, list[magic_tech_mod.CifInputLayerHint]]:
+        return {name: tech.cifinput_layer_hints for name, tech in self.technologies.items()}
+
+    def collect_cifinput_recipes_by_tech(self) -> dict[str, list[magic_tech_mod.CifInputRecipeBlock]]:
+        return {name: tech.cifinput_recipes for name, tech in self.technologies.items()}
+
+    def collect_cif_layers_by_tech(self) -> dict[str, list[magic_tech_mod.CifOutputLayerMapping]]:
+        return {name: tech.cif_layers for name, tech in self.technologies.items()}
+
+    def collect_extract_misc_by_tech(self) -> dict[str, list[magic_tech_mod.ExtractMiscStatement]]:
+        return {name: tech.extract_misc for name, tech in self.technologies.items()}
+
+    def collect_extract_plane_order_by_tech(self) -> dict[str, list[magic_tech_mod.ExtractPlaneOrder]]:
+        return {name: tech.extract_plane_order for name, tech in self.technologies.items()}
+
+    def collect_extract_resist_by_tech(self) -> dict[str, list[magic_tech_mod.ExtractResist]]:
+        return {name: tech.extract_resist for name, tech in self.technologies.items()}
+
+    def collect_extract_cap_coefficients_by_tech(self) -> dict[str, list[magic_tech_mod.ExtractCapCoefficient]]:
+        return {name: tech.extract_cap_coefficients for name, tech in self.technologies.items()}
+
+    def collect_extract_devices_by_tech(self) -> dict[str, list[magic_tech_mod.ExtractDevice]]:
+        return {name: tech.extract_devices for name, tech in self.technologies.items()}
+
+    def collect_drc_angle_checks_by_tech(self) -> dict[str, list[magic_tech_mod.MagicAngleCheck]]:
+        return {name: tech.drc_angle_checks for name, tech in self.technologies.items()}
+
+    def collect_drc_checks_by_tech(self) -> dict[str, list[magic_tech_mod.MagicDrcCheck]]:
+        return {name: tech.drc_checks for name, tech in self.technologies.items()}
+
+    def collect_drc_misc_by_tech(self) -> dict[str, list[magic_tech_mod.MagicDrcMiscStatement]]:
+        return {name: tech.drc_misc for name, tech in self.technologies.items()}
+
     # -- data ---------------------------------------------------------------
 
     def load(self):
         self.technologies = {}
         for path in magic_tech_mod.find_tech_files(self.pdk_root):
             tech = magic_tech_mod.parse_tech_file(path)
-            if tech.name:
-                self.technologies[tech.name] = tech
+            # A real fragment file (ihp-sg13g2-cifin.tech/-cifout.tech/
+            # -drc.tech/-extract.tech) has no own tech/version header,
+            # so tech.name comes back empty -- falls back to the real
+            # file's own stem so it's still selectable (previously
+            # silently skipped entirely), rather than inventing a fake
+            # tech.name on the parsed model itself. This is what makes
+            # cifinput's own real ignored-layers/layer-hints tables
+            # editable at all: their real write-back target is that
+            # fragment file directly, not ihp-sg13g2.tech (see
+            # pdklib/magic_tech_writer.py's own docstring).
+            display_name = tech.name or path.stem
+            self.technologies[display_name] = tech
 
         names = sorted(self.technologies)
         self.tech_combo["values"] = names
@@ -339,22 +749,48 @@ class MagicTechView(ttk.Frame):
         self.planes_editor.commit_pending_edits()
         self.contacts_editor.commit_pending_edits()
         self.aliases_editor.commit_pending_edits()
+        self.styles_editor.commit_pending_edits()
+        self.compose_editor.commit_pending_edits()
+        self.connect_editor.commit_pending_edits()
+        self.cifinput_ignore_editor.commit_pending_edits()
+        self.cifinput_hints_editor.commit_pending_edits()
+        self.cifinput_recipes_editor.commit_pending_edits()
+        self.cif_layers_editor.commit_pending_edits()
+        self.extract_misc_editor.commit_pending_edits()
+        self.extract_plane_order_editor.commit_pending_edits()
+        self.extract_resist_editor.commit_pending_edits()
+        self.extract_coeff_editor.commit_pending_edits()
+        self.extract_devices_editor.commit_pending_edits()
+        self.drc_angles_editor.commit_pending_edits()
+        self.drc_checks_editor.commit_pending_edits()
+        self.drc_misc_editor.commit_pending_edits()
         for tree in (
-            self.styles_tree, self.cif_tree,
-            self.cifinput_ignore_tree, self.cifinput_hints_tree, self.cifinput_recipes_tree,
-            self.compose_tree, self.connect_tree, self.drc_tree,
-            self.extract_resist_tree, self.extract_plane_order_tree,
-            self.extract_coeff_tree, self.extract_devices_tree, self.extract_misc_tree,
+            self.cifinput_recipes_tree,
         ):
             for row in tree.get_children():
                 tree.delete(row)
 
         tech = self._current_tech()
         if tech is None:
-            self.summary_var.set("No Magic .tech data loaded -- has ihp/fetch.py been run?")
+            self.summary_var.set("No Magic .tech data loaded -- has pdklib/fetch.py been run?")
             self.planes_editor.set_entries(None)
             self.contacts_editor.set_entries(None)
             self.aliases_editor.set_entries(None)
+            self.styles_editor.set_entries(None)
+            self.compose_editor.set_entries(None)
+            self.connect_editor.set_entries(None)
+            self.cifinput_ignore_editor.set_entries(None)
+            self.cifinput_hints_editor.set_entries(None)
+            self.cifinput_recipes_editor.set_entries(None)
+            self.cif_layers_editor.set_entries(None)
+            self.extract_misc_editor.set_entries(None)
+            self.extract_plane_order_editor.set_entries(None)
+            self.extract_resist_editor.set_entries(None)
+            self.extract_coeff_editor.set_entries(None)
+            self.extract_devices_editor.set_entries(None)
+            self.drc_angles_editor.set_entries(None)
+            self.drc_checks_editor.set_entries(None)
+            self.drc_misc_editor.set_entries(None)
             self._refresh_types()
             return
 
@@ -363,67 +799,42 @@ class MagicTechView(ttk.Frame):
         self._refresh_types()
         self.contacts_editor.set_entries(tech.contacts)
         self.aliases_editor.set_entries(tech.aliases)
-        for style in tech.styles:
-            self.styles_tree.insert("", "end", values=(style.type_name, ", ".join(style.style_names)))
-        for cif_layer in tech.cif_layers:
-            pairs = ", ".join(f"{layer}/{datatype}" for layer, datatype in cif_layer.gds_pairs)
-            self.cif_tree.insert("", "end", values=(cif_layer.name, pairs))
-        for layer_name in tech.cifinput_ignored_layers:
-            self.cifinput_ignore_tree.insert("", "end", values=(layer_name,))
-        for hint in tech.cifinput_layer_hints:
-            datatype = "*" if hint.gds_datatype is None else hint.gds_datatype
-            self.cifinput_hints_tree.insert("", "end", values=(hint.name, hint.gds_layer, datatype))
+        self.styles_editor.set_entries(tech.styles)
+        self.compose_editor.set_entries(tech.compose)
+        self.connect_editor.set_entries(tech.connect)
+        self.cifinput_ignore_editor.set_entries(tech.cifinput_ignored_layers)
+        self.cifinput_hints_editor.set_entries(tech.cifinput_layer_hints)
+        self.cifinput_recipes_editor.set_entries(tech.cifinput_recipes)
+        self.cif_layers_editor.set_entries(tech.cif_layers)
+        self.extract_misc_editor.set_entries(tech.extract_misc)
+        self.extract_plane_order_editor.set_entries(tech.extract_plane_order)
+        self.extract_resist_editor.set_entries(tech.extract_resist)
+        self.extract_coeff_editor.set_entries(tech.extract_cap_coefficients)
+        self.extract_devices_editor.set_entries(tech.extract_devices)
+        self.drc_angles_editor.set_entries(tech.drc_angle_checks)
+        self.drc_checks_editor.set_entries(tech.drc_checks)
+        self.drc_misc_editor.set_entries(tech.drc_misc)
         for recipe in tech.cifinput_recipes:
             ops_text = " ".join(f"{op.verb}({op.args})" if op.args else op.verb for op in recipe.ops)
             self.cifinput_recipes_tree.insert(
                 "", "end",
                 values=(
-                    recipe.name, "templayer" if recipe.is_templayer else "layer",
-                    ",".join(recipe.base_layers), ops_text,
+                    recipe.name, recipe.kind_text,
+                    recipe.base_layer, ops_text,
                 ),
             )
-        for statement in tech.compose:
-            self.compose_tree.insert("", "end", values=(statement.verb, *statement.args))
-        for rule in tech.connect:
-            self.connect_tree.insert("", "end", values=(rule.types_a, rule.types_b))
-        for check in tech.drc_checks:
-            layers_text = " | ".join(",".join(group) for group in check.layer_args)
-            self.drc_tree.insert(
-                "", "end",
-                values=(check.check_type, layers_text, f"{check.value_um:g}", check.rule_ids_raw or "", check.message),
-            )
-        for angle_check in tech.drc_angle_checks:
-            # Real degrees, not microns -- the '°' suffix keeps this
-            # column honest rather than implying the same unit as
-            # width/spacing/maxwidth's own real value_um.
-            self.drc_tree.insert(
-                "", "end",
-                values=("angles", angle_check.layer, f"{angle_check.degrees}°", "", angle_check.message),
-            )
-        for resist in tech.extract_resist:
-            self.extract_resist_tree.insert("", "end", values=(resist.layer_spec, resist.milliohms_per_square))
-        for name, order in tech.extract_plane_order:
-            self.extract_plane_order_tree.insert("", "end", values=(name, order))
-        for coeff in tech.extract_cap_coefficients:
-            values_text = ", ".join(f"{v:g}" for v in coeff.values)
-            self.extract_coeff_tree.insert("", "end", values=(coeff.directive, " ".join(coeff.args), values_text))
-        for device in tech.extract_devices:
-            self.extract_devices_tree.insert(
-                "", "end", values=(device.devclass, device.model, device.type_name, " ".join(device.rest)),
-            )
-        for misc in tech.extract_misc:
-            self.extract_misc_tree.insert("", "end", values=(misc.directive, " ".join(misc.args)))
-
         summary = (
             f"format {tech.format} | v{tech.version} -- {tech.description} | "
             f"planes:{len(tech.planes)} types:{len(tech.types)} contacts:{len(tech.contacts)} "
             f"aliases:{len(tech.aliases)} styles:{len(tech.styles)} cif_layers:{len(tech.cif_layers)} "
             f"compose:{len(tech.compose)} connect:{len(tech.connect)} "
-            f"drc_checks:{len(tech.drc_checks)}+{len(tech.drc_angle_checks)}angles({len(tech.drc_skipped)} skipped) "
+            f"drc_checks:{len(tech.drc_checks)}+{len(tech.drc_angle_checks)}angles+"
+            f"{len(tech.drc_misc)}misc({len(tech.drc_skipped)} skipped) "
             f"extract_resist:{len(tech.extract_resist)} "
             f"extract_cap_coefficients:{len(tech.extract_cap_coefficients)} "
             f"extract_devices:{len(tech.extract_devices)} "
-            f"extract_misc:{len(tech.extract_misc)}"
+            f"extract_misc:{len(tech.extract_misc)} "
+            f"extract_plane_order:{len(tech.extract_plane_order)}"
         )
         if tech.included_files:
             summary += f" | includes: {', '.join(tech.included_files)}"

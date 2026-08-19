@@ -12,7 +12,7 @@ Two real, cleanly recognizable statement kinds are extracted in full:
   (e.g. ``.MODEL darea D (tnom=27 is=... )`` vs. ``.model dinner_mod d
   tnom=27 level=1``); real keyword case varies file to file
   (``.MODEL``/``.model``), matched case-insensitively like every other
-  keyword-driven parser here (``ihp/lef.py``). Real parameter values
+  keyword-driven parser here (``pdklib/lef.py``). Real parameter values
   are kept as raw strings, not converted to float -- some real BSIM/PSP
   model cards use a quoted formula expression as a value (e.g.
   ``vfbo = '-0.94312*sg13g2_lv_nmos_vfbo'``), not a plain number, so
@@ -21,7 +21,7 @@ Two real, cleanly recognizable statement kinds are extracted in full:
   physical lines via a leading ``+`` continuation marker (SPICE's own
   convention, distinct from Magic's trailing ``\\``) are joined first.
 - ``.subckt NAME port1 port2 ... / .ends NAME`` -- a real port list,
-  the same bounded shape ``ihp/netlist.py``'s own CDL/SPICE
+  the same bounded shape ``pdklib/netlist.py``'s own CDL/SPICE
   ``.SUBCKT`` extraction already uses. A real ``.model`` can sit
   *inside* a real ``.subckt`` body (a locally-scoped model, confirmed
   real -- e.g. ``resistors_mod.lib``'s own ``rsil`` subckt defines its
@@ -105,11 +105,33 @@ def find_lib_files(pdk_root: Path) -> list[Path]:
     return sorted((pdk_root / "libs.tech" / "ngspice" / "models").glob("*.lib"))
 
 
+def create_new_lib_file(path: Path) -> None:
+    """Writes a minimal, valid, real empty ngspice ``.lib`` skeleton --
+    a real, bare comment line, no ``.model``/``.subckt``/``.LIB``
+    statements. Genuinely usable immediately afterward, not just a
+    stub: ngspice's own real ``.lib``/``.include`` grammar has no
+    mandatory header (unlike LEF's ``VERSION``/Magic's ``tech``
+    section) -- a real file with nothing but a comment parses cleanly
+    to zero real models/subckts/corners here, the same honest "empty,
+    not broken" result ``parse_lib_file`` already gives a real file
+    with genuinely nothing in it. *path* must sit under
+    ``libs.tech/ngspice/models/`` to be found again by
+    ``find_lib_files`` above. No editor exists for adding real
+    ``.model``/``.subckt`` content from inside this GUI yet -- a real,
+    separate future work, matching every other read-only-content
+    domain here (see README's own gap note)."""
+
+    if path.exists():
+        raise FileExistsError(f"{path} already exists")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("* New, empty ngspice model library.\n", encoding="utf-8")
+
+
 def _join_plus_continuations(lines: list[str]) -> list[str]:
     """Real ngspice ``.lib`` statements wrap across lines with a
     *leading* ``+`` marker on the continuation line -- SPICE's own,
     different convention from Magic's trailing ``\\`` (see
-    ``ihp/magic_tech.py``'s own ``_join_backslash_continuations``)."""
+    ``pdklib/magic_tech.py``'s own ``_join_backslash_continuations``)."""
 
     joined: list[str] = []
     for line in lines:

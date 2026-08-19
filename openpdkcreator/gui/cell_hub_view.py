@@ -1,6 +1,6 @@
 """By Cell tab: a hierarchical, cell-centric view -- for one real cell
 (matched by name across every real view directory under a real
-``libs.ref/<family>/``, via ``openpdkcreator/ihp/cells.py``), see which
+``libs.ref/<family>/``, via ``openpdkcreator/pdklib/cells.py``), see which
 views actually exist (LEF footprint, CDL/SPICE netlist, Verilog
 behavioral model, Liberty timing, GDS layout) and jump straight to
 that cell's own real block inside each one -- rather than hunting
@@ -13,6 +13,13 @@ cell inside, e.g. ``sg13g2_stdcell.cdl``; or one real file per cell,
 e.g. ``sg13g2_sram``'s 28 real hard-macro ``.cdl`` files) -- both
 handled by ``cells.build_cell_index`` already, this view just displays
 its result.
+
+**Library Manager-registered entries show up here too**, not just
+real ones -- a ``✓`` marks a real view, a ``+`` a project-authored one
+registered via the Library Manager with no real ``libs.ref/``
+counterpart (only for a cell already known from some real view; a
+wholly new, registered-only cell stays the Library Manager's own job,
+not this tab's -- see ``pdklib/cells.py``'s own docstring).
 
 Defaults to only real, top-level cells (ones with a real LEF macro --
 the physically instantiable ones); a real netlist can contain many more
@@ -31,14 +38,14 @@ domain still deliberately read-only, see README's Future Work. The
 ``pin_editor.PinEditor``, the same widget the **LEF** tab's own "LEF
 Macros" sub-tab uses -- and, critically, the exact same in-memory
 ``LefMacro`` object: both tabs parse through ``App.get_parsed_lef``,
-a single shared, App-owned cache (``ihp/cells.py``'s own
+a single shared, App-owned cache (``pdklib/cells.py``'s own
 ``build_cell_index`` takes an injectable ``get_lef`` hook for exactly
 this), so a pin edited here is immediately visible on the LEF tab too,
 and vice versa -- not two independently-drifting copies of the same
 real pin list.
 
 **GDS**: real, not just a presence flag, when ``klayout.db`` is
-importable (``ihp/gds.py``, lazily imported) -- a real bounding box
+importable (``pdklib/gds.py``, lazily imported) -- a real bounding box
 and per-layer shape count for the selected cell's own real GDS
 structure, shown as a plain text line (not a raw file View, since GDS
 is binary) below the View buttons. Degrades honestly, not silently, if
@@ -46,7 +53,7 @@ is binary) below the View buttons. Degrades honestly, not silently, if
 parsed" rather than pretending there's nothing there.
 
 **CDL/SPICE/Verilog ports** are also real, structured-editable data
-(``ihp/netlist.py``'s ``NetlistPort``/``ihp/verilog.py``'s
+(``pdklib/netlist.py``'s ``NetlistPort``/``pdklib/verilog.py``'s
 ``VerilogPort`` -- real per-port direction from a real CDL
 ``*.PININFO`` comment or real Verilog ``input``/``output``/``inout``
 declarations, honestly blank where the real source has none, e.g.
@@ -65,7 +72,7 @@ Timing** button below the Liberty corner-file list -- real per-pin
 direction/capacitance/function and, for a selected pin, its own real
 timing arcs (related_pin/timing_type/timing_sense/when), *not* the
 real lookup tables (``cell_rise``/``cell_fall``/...) those arcs may
-carry -- see ``ihp/liberty.py``'s own docstring for why those stay
+carry -- see ``pdklib/liberty.py``'s own docstring for why those stay
 read-only. Operates on whichever real corner file is selected in the
 listbox (or the first one, if none is), through the same kind of
 shared cache (``App.get_parsed_liberty``) as every other By Cell
@@ -75,11 +82,14 @@ editor here.
 from __future__ import annotations
 
 import tkinter as tk
+from pathlib import Path
 from tkinter import ttk
 
-from ..ihp import cells as cells_mod
-from ..ihp import netlist as netlist_mod
-from ..ihp import verilog as verilog_mod
+from .. import export as export_mod
+from ..pdklib import cells as cells_mod
+from ..pdklib import library_index as li_mod
+from ..pdklib import netlist as netlist_mod
+from ..pdklib import verilog as verilog_mod
 from .file_view_dialog import view_file_dialog
 from .liberty_dialog import edit_liberty_dialog
 from .list_filter import build_filter_row, matches
@@ -87,6 +97,11 @@ from .pin_editor import PinEditor
 from .port_dialog import edit_ports_dialog
 
 _CHECK = "✓"
+_REGISTERED = "+"
+"""Shown in a By Cell column when a cell has no *real* view of a given
+kind, but does have a project-authored one registered via the Library
+Manager (``CellViews.registered_views``) -- distinct from ``_CHECK``,
+matching the Library Manager's own "real"/"(project)" tagging."""
 
 
 class CellHubView(ttk.Frame):
@@ -132,19 +147,23 @@ class CellHubView(ttk.Frame):
 
         left = ttk.Frame(body)
         left.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
-        left.rowconfigure(0, weight=1)
+        left.rowconfigure(1, weight=1)
         left.columnconfigure(0, weight=1)
+        ttk.Label(
+            left, foreground="#616161",
+            text=f"{_CHECK} real   {_REGISTERED} project (Library Manager, no real libs.ref/ view)",
+        ).grid(row=0, column=0, sticky="w", pady=(0, 4))
         columns = ("name", "lef", "cdl", "spice", "verilog", "liberty", "gds", "user")
         self.cells_tree = ttk.Treeview(left, columns=columns, show="headings", selectmode="browse")
         widths = {"name": 220, "lef": 40, "cdl": 40, "spice": 50, "verilog": 60, "liberty": 55, "gds": 40, "user": 45}
         for col in columns:
             self.cells_tree.heading(col, text=col.title() if col != "gds" else "GDS")
             self.cells_tree.column(col, width=widths[col], anchor="w" if col == "name" else "center")
-        self.cells_tree.grid(row=0, column=0, sticky="nsew")
+        self.cells_tree.grid(row=1, column=0, sticky="nsew")
         self.cells_tree.bind("<<TreeviewSelect>>", self._on_cell_select)
         scroll = ttk.Scrollbar(left, orient="vertical", command=self.cells_tree.yview)
         self.cells_tree.configure(yscrollcommand=scroll.set)
-        scroll.grid(row=0, column=1, sticky="ns")
+        scroll.grid(row=1, column=1, sticky="ns")
 
         middle = ttk.Frame(body)
         middle.grid(row=0, column=1, sticky="nsew", padx=(0, 8))
@@ -233,6 +252,31 @@ class CellHubView(ttk.Frame):
 
     # -- data ---------------------------------------------------------------
 
+    @staticmethod
+    def _mark(cv: cells_mod.CellViews, real_present: bool, view_kind: str) -> str:
+        if real_present:
+            return _CHECK
+        return _REGISTERED if view_kind in cv.registered_views else ""
+
+    def _registered_by_cell(self, family: str) -> dict[str, dict[str, Path]]:
+        """This family's own ``library_index.yaml`` entries with
+        ``source == "registered"`` -- e.g. a hand-authored LEF/CDL
+        registered via the Library Manager's own **Add...**, with no
+        real ``libs.ref/`` counterpart -- reshaped from
+        ``merged_entries``'s own ``(cell, view_kind) -> ViewEntry``
+        into the plain ``cell -> view_kind -> path`` shape
+        ``cells.build_cell_index`` expects (see its own docstring for
+        why it stays decoupled from ``library_index.py``'s own
+        dataclasses)."""
+
+        result: dict[str, dict[str, Path]] = {}
+        entries = li_mod.merged_entries(self.pdk_root, export_mod.PROJECT_ROOT, family)
+        for (cell, view_kind), entry in entries.items():
+            if entry.source != "registered":
+                continue
+            result.setdefault(cell, {})[view_kind] = entry.path
+        return result
+
     def load(self):
         self.families = cells_mod.discover_families(self.pdk_root)
         self.family_combo["values"] = self.families
@@ -245,7 +289,7 @@ class CellHubView(ttk.Frame):
             self.cells_tree.delete(row)
         family = self.family_var.get()
         if not family:
-            self.summary_var.set("No families found -- has ihp/fetch.py been run?")
+            self.summary_var.set("No families found -- has pdklib/fetch.py been run?")
             self.cell_index = {}
             self._show_cell(None)
             return
@@ -257,6 +301,7 @@ class CellHubView(ttk.Frame):
             get_verilog_modules=self.app.get_parsed_verilog,
             get_liberty_cells=self.app.get_parsed_liberty,
             user_models_by_cell=self.app.user_models_by_cell(),
+            registered_by_cell=self._registered_by_cell(family),
         )
         show_all = self.show_all_var.get()
         shown = 0
@@ -276,12 +321,12 @@ class CellHubView(ttk.Frame):
                 "", "end", iid=name,
                 values=(
                     name,
-                    _CHECK if cv.lef_macro else "",
-                    _CHECK if cv.cdl_cell else "",
-                    _CHECK if cv.spice_cell else "",
-                    _CHECK if cv.verilog_module else "",
-                    len(cv.liberty_entries) or "",
-                    _CHECK if cv.gds_present else "",
+                    self._mark(cv, cv.lef_macro is not None, "lef"),
+                    self._mark(cv, cv.cdl_cell is not None, "cdl"),
+                    self._mark(cv, cv.spice_cell is not None, "spice"),
+                    self._mark(cv, cv.verilog_module is not None, "verilog"),
+                    len(cv.liberty_entries) or self._mark(cv, False, "liberty"),
+                    self._mark(cv, cv.gds_present, "gds"),
                     len(cv.user_models) or "",
                 ),
             )

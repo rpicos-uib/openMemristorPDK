@@ -1,4 +1,4 @@
-"""Cells tab: real, parsed LEF data (``openpdkcreator/ihp/lef.py``) --
+"""Cells tab: real, parsed LEF data (``openpdkcreator/pdklib/lef.py``) --
 tech-layer routing rules and real macro/cell footprints (class/size/
 site/symmetry, pins with direction/use/port geometry, obstruction
 layers). A file picker over all real, downloaded ``.lef`` files (a
@@ -17,7 +17,7 @@ in both), and **Vias** (real ``VIA``/``ViaRULE`` via-stack geometry --
 each real layer's own rect count for a fixed ``VIA``, or its own real
 enclosure/spacing/resistance for a ``ViaRULE GENERATE`` -- read-only,
 no editor exists for via geometry, matching every other real,
-display-only domain here; see ``ihp/lef.py``'s own docstring for the
+display-only domain here; see ``pdklib/lef.py``'s own docstring for the
 exact real body structure).
 
 The file picker's own combobox is editable, not a closed real-file
@@ -26,17 +26,18 @@ file pickers already use (``gui/file_picker_utils.py``): typing a real,
 existing relative path (``libs.ref/<family>/lef/<name>.lef``) reads
 **Edit File** (opens ``file_view_dialog.view_file_dialog``); typing one
 that doesn't exist yet reads **Create File** (writes a real, minimal,
-valid empty-library ``.lef`` skeleton via ``ihp/lef.py``'s own
-``create_new_lef_file``, then reloads and selects it) -- see that
-function's own docstring for a real, honestly-surfaced limit: it
-unblocks *loading* a brand-new family's LEF, not authoring a whole new
-**MACRO** from inside this GUI (only pins within an already-existing
-macro are write-back-editable; there's no **New Macro** action).
+valid empty-library ``.lef`` skeleton via ``pdklib/lef.py``'s own
+``create_new_lef_file``, then reloads and selects it). **New Macro...**
+(LEF Macros sub-tab) then adds a real, brand-new, empty macro to
+whichever LEF file is loaded -- pins are added to it afterward through
+the same **New Pin** flow an existing macro already uses;
+``pdklib/lef_writer.py``'s own ``render_lef_file`` renders it as a whole,
+freshly-generated block on export (see that module's own docstring).
 
 Real parsing + persistence live one level up, on ``App`` itself
 (``app.get_parsed_lef``/``app.lef_cache``/``app.lef_pin_overrides``),
 not here -- ``cell_hub_view.py``'s own cell aggregation
-(``ihp/cells.py``) parses the very same ``.lef`` files independently,
+(``pdklib/cells.py``) parses the very same ``.lef`` files independently,
 so caching and saved-pin-override application had to move somewhere
 both tabs share, rather than living inside this one tab as before (a
 real bug, found and fixed here originally, would otherwise re-parse a
@@ -48,9 +49,9 @@ from __future__ import annotations
 
 import tkinter as tk
 from pathlib import Path
-from tkinter import ttk
+from tkinter import messagebox, simpledialog, ttk
 
-from ..ihp import lef as lef_mod
+from ..pdklib import lef as lef_mod
 from .file_picker_utils import handle_action, update_action_button
 from .list_filter import build_filter_row, matches
 from .pin_editor import PinEditor
@@ -151,8 +152,9 @@ class LefView(ttk.Frame):
         left.rowconfigure(1, weight=1)
         left.columnconfigure(0, weight=1)
         filter_row = ttk.Frame(left)
-        filter_row.grid(row=0, column=0, sticky="w", pady=(0, 4))
+        filter_row.grid(row=0, column=0, sticky="ew", pady=(0, 4))
         build_filter_row(filter_row, self._on_macro_filter_changed, label="Filter macros:")
+        ttk.Button(filter_row, text="New Macro...", command=self._new_macro).pack(side="right")
         macro_columns = ("name", "class", "size", "site", "pins", "obs_layers")
         self.macros_tree = ttk.Treeview(left, columns=macro_columns, show="headings")
         for col, width in zip(macro_columns, (220, 110, 100, 90, 50, 120)):
@@ -205,7 +207,7 @@ class LefView(ttk.Frame):
 
         path = self.lef_files.get(self.file_var.get())
         if path is None:
-            self.summary_var.set("No LEF data loaded -- has ihp/fetch.py been run?")
+            self.summary_var.set("No LEF data loaded -- has pdklib/fetch.py been run?")
             self.current = None
             self._show_macro(None)
             return
@@ -269,6 +271,64 @@ class LefView(ttk.Frame):
     def _on_macro_filter_changed(self, query: str):
         self._macro_filter_query = query
         self._refresh_all()
+
+    def _new_macro(self):
+        """Adds a real, brand-new ``LefMacro`` (``start_line == 0``,
+        same real "added this session" convention every other writer
+        here uses) to the currently-loaded LEF file -- CLASS/SIZE/
+        SYMMETRY start blank; real pins are added afterward via the
+        existing PinEditor, the same **New Pin** flow an existing macro
+        already uses. **ORIGIN is set automatically, not prompted**:
+        every one of the real 156 ``ORIGIN`` statements across this
+        deck's own real ``.lef`` files is exactly ``(0.0, 0.0)``, a
+        real, confirmed-safe default (Magic's own placement-transform
+        reference for a macro authored at the coordinate origin), so a
+        brand-new macro no longer starts without one at all. **SITE is
+        prompted, not defaulted**: unlike ``ORIGIN``, a real site name
+        genuinely varies across this deck's own real macros (e.g.
+        ``CoreSite``/``sg13g2_cornerSite``/``sg13g2_ioSite``) -- the
+        prompt pre-fills the currently-loaded file's own most common
+        real site name as a real, confirmable suggestion, never a
+        silent guess; leaving it blank leaves ``site`` unset, same as
+        CLASS/SIZE/SYMMETRY already do. ``pdklib/lef_writer.py``'s own
+        ``render_lef_file`` renders it as a whole, freshly-generated
+        ``MACRO ... END`` block, appended after every real, existing
+        macro on export."""
+
+        if self.current is None:
+            messagebox.showinfo("New Macro", "Load (or create) a LEF file first.", parent=self)
+            return
+        name = simpledialog.askstring("New Macro", "Macro name:", parent=self)
+        if not name:
+            return
+        if any(m.name == name for m in self.current.macros):
+            messagebox.showerror("New Macro", f"A macro named {name!r} already exists.", parent=self)
+            return
+        default_site = self._most_common_site()
+        site = simpledialog.askstring(
+            "New Macro", "Site (optional):", parent=self, initialvalue=default_site,
+        )
+        macro = lef_mod.LefMacro(name=name, origin=(0.0, 0.0))
+        if site:
+            macro.site = site
+        self.current.macros.append(macro)
+        self._refresh_all()
+        self.macros_tree.selection_set(name)
+
+    def _most_common_site(self) -> str:
+        """The currently-loaded real file's own most common real
+        ``site`` value among its existing macros -- a real,
+        confirmable suggestion for **New Macro**'s own Site prompt,
+        never a silent guess (the user still sees and can clear/edit
+        it). ``""`` when no real macro has one set."""
+
+        if self.current is None:
+            return ""
+        counts: dict[str, int] = {}
+        for macro in self.current.macros:
+            if macro.site:
+                counts[macro.site] = counts.get(macro.site, 0) + 1
+        return max(counts, key=counts.get) if counts else ""
 
     def _on_macro_select(self, _event=None):
         if self.current is None:

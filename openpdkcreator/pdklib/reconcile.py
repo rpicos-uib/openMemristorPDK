@@ -1,7 +1,7 @@
 """Cross-reference the two independently-parsed, real (GDS layer, GDS
-datatype) mappings this project has: KLayout's own ``.lyp`` (``ihp/
+datatype) mappings this project has: KLayout's own ``.lyp`` (``pdklib/
 layers.py``, keyed by display name) and Magic's ``cifoutput`` section
-(``ihp/magic_tech.py``, keyed by Magic CIF layer name). Both describe
+(``pdklib/magic_tech.py``, keyed by Magic CIF layer name). Both describe
 the *same* real fabricated GDS stream, from two different tools'
 independent points of view -- reconciling them is a real, concrete
 answer to "is anything in one tool's view missing from the other's."
@@ -42,11 +42,10 @@ def _lyp_index(layers: list[Layer]) -> dict[GdsKey, list[str]]:
 
 def _magic_index(tech: MagicTechnology) -> dict[GdsKey, list[str]]:
     index: dict[GdsKey, list[str]] = {}
-    for cif_layer in tech.cif_layers:
-        for pair in cif_layer.gds_pairs:
-            names = index.setdefault(pair, [])
-            if cif_layer.name not in names:
-                names.append(cif_layer.name)
+    for mapping in tech.cif_layers:
+        names = index.setdefault((mapping.gds_layer, mapping.gds_datatype), [])
+        if mapping.name not in names:
+            names.append(mapping.name)
     return index
 
 

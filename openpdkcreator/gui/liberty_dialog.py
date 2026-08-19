@@ -12,14 +12,14 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 
-from ..ihp import liberty as liberty_mod
+from ..pdklib import liberty as liberty_mod
 from .liberty_editor import LibertyPinEditor
 
 
 def edit_liberty_dialog(parent, title: str, cell: liberty_mod.LibertyCell):
     dialog = tk.Toplevel(parent)
     dialog.title(title)
-    dialog.geometry("820x520")
+    dialog.geometry("820x760")
     dialog.transient(parent.winfo_toplevel())
 
     editor = LibertyPinEditor(dialog)

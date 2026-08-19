@@ -18,13 +18,13 @@ grouped by what they actually represent rather than left flat:
   one sub-tab per tool that defines it: **Layers** (KLayout's real
   ``.lyp``), **Magic Tech** (Magic's real ``.tech`` files), and
   **DRC Rules** (a real KLayout DRC deck, best-effort extracted --
-  ``ihp/drc.py``) -- reusing OpenPDKCreator's own Design Rules tab
+  ``pdklib/drc.py``) -- reusing OpenPDKCreator's own Design Rules tab
   (``RulesView``/``rule_canvas.py``), the same "reuse the existing
   interface" pattern ``LayersView`` already established, just against
   a real, pre-extracted starting set instead of an empty one.
 - **Cells** -- real cell/macro data, two sub-tabs: **LEF** (tech-layer
   routing rules plus real macro/cell footprints with editable pins) and
-  **By Cell** (``CellHubView``/``ihp/cells.py``) -- a hierarchical,
+  **By Cell** (``CellHubView``/``pdklib/cells.py``) -- a hierarchical,
   cell-centric picture: pick one real cell, see which of its real views
   (LEF/CDL/SPICE/Verilog/Liberty/GDS) actually exist across
   ``libs.ref/<family>/*/``, jump straight to that cell's own real block
@@ -32,9 +32,9 @@ grouped by what they actually represent rather than left flat:
   same in-memory macro the LEF tab itself edits (see
   ``App.get_parsed_lef`` below).
 - **Simulation** -- **ngspice Models** (real ``.model``/``.subckt``
-  statements -- ``ihp/spice_models.py``) and **xschem Symbols** (a
+  statements -- ``pdklib/spice_models.py``) and **xschem Symbols** (a
   real symbol's own device-attribute block and real pin list --
-  ``ihp/xschem.py``), both matching the **Technology**/**Cells**
+  ``pdklib/xschem.py``), both matching the **Technology**/**Cells**
   groups' own file-picker/Treeview shape; read-only, no editor exists
   for simulation model or symbol data. Qucs-S schematic data stays
   inventory-only (see the Overview tab) -- no real parser exists yet,
@@ -79,7 +79,7 @@ pane parse and edit real ``.lef`` macros, and must see the exact same,
 single in-memory object for a given real macro -- not two independent
 parses silently drifting apart the moment one tab edits a pin. Owned
 here, at the ``App`` level, rather than inside either tab, for exactly
-that reason (``ihp/cells.py``'s own ``build_cell_index`` takes an
+that reason (``pdklib/cells.py``'s own ``build_cell_index`` takes an
 injectable ``get_lef`` hook so ``CellHubView`` can route through this
 same cache too).
 
@@ -88,20 +88,20 @@ Files** / **DRC Rules** / **Magic Types** / **CDL/SPICE Ports** /
 **Verilog Ports** / **Liberty Files** / **Layers**): unlike
 ``project_io.py``'s own program-format ``saves/``, this writes real,
 valid text back into the real file formats -- ``.lef`` (pin edits,
-``ihp/lef_writer.py``), DRC Rules (a rule's ``rule_id``/``description``
+``pdklib/lef_writer.py``), DRC Rules (a rule's ``rule_id``/``description``
 patched into its real ``.drc`` script's own ``.output()`` call, its
 ``value`` into the one real JSON config file it actually lives in --
-``ihp/drc_writer.py``), Magic Types (a type's own real one-line entry
-in its real ``.tech`` file -- ``ihp/magic_tech_writer.py``),
+``pdklib/drc_writer.py``), Magic Types (a type's own real one-line entry
+in its real ``.tech`` file -- ``pdklib/magic_tech_writer.py``),
 CDL/SPICE/Verilog port lists (a real ``.SUBCKT``/``*.PININFO`` pair or
 real ``module``/``input``/``output``/``inout`` declarations --
-``ihp/netlist_writer.py``/``ihp/verilog_writer.py``), Liberty
+``pdklib/netlist_writer.py``/``pdklib/verilog_writer.py``), Liberty
 pin/timing-arc data (a pin's own real ``direction``/``capacitance``/
 ``function`` attribute lines, a timing arc's own real
 ``related_pin``/``timing_type``/``timing_sense``/``when`` attribute
-lines -- ``ihp/liberty_writer.py``), and Layers (a real ``<name>``/
+lines -- ``pdklib/liberty_writer.py``), and Layers (a real ``<name>``/
 ``<source>``/``<frame-color>``/``<fill-color>`` tag, the only four
-real ``.lyp`` fields a ``Layer`` has -- ``ihp/layers_writer.py``) --
+real ``.lyp`` fields a ``Layer`` has -- ``pdklib/layers_writer.py``) --
 all via surgical, position-targeted text splicing, everything else
 preserved byte-for-byte, to a new ``export/`` tree mirroring each
 file's own real relative path under ``pdk_root``. Never touches
@@ -115,21 +115,22 @@ from __future__ import annotations
 import re
 import tkinter as tk
 from pathlib import Path
-from tkinter import messagebox, simpledialog, ttk
+from tkinter import filedialog, messagebox, simpledialog, ttk
 
 from .. import export as export_mod
 from .. import project_io
-from ..ihp import drc as drc_mod
-from ..ihp import inventory as inventory_mod
-from ..ihp import layers as layers_mod
-from ..ihp import lef as lef_mod
-from ..ihp import liberty as liberty_mod
-from ..ihp import netlist as netlist_mod
-from ..ihp import qucs_sym as qucs_sym_mod
-from ..ihp import user_models as user_models_mod
-from ..ihp import verilog as verilog_mod
-from ..ihp import xschem as xschem_mod
-from ..ihp import xschem_sch as xschem_sch_mod
+from ..pdklib import drc as drc_mod
+from ..pdklib import inventory as inventory_mod
+from ..pdklib import layers as layers_mod
+from ..pdklib import lef as lef_mod
+from ..pdklib import liberty as liberty_mod
+from ..pdklib import netlist as netlist_mod
+from ..pdklib import qucs_sym as qucs_sym_mod
+from ..pdklib import skeleton as skeleton_mod
+from ..pdklib import user_models as user_models_mod
+from ..pdklib import verilog as verilog_mod
+from ..pdklib import xschem as xschem_mod
+from ..pdklib import xschem_sch as xschem_sch_mod
 from ..models import DesignRule, Layer
 from .cell_hub_view import CellHubView
 from .environment_view import EnvironmentView
@@ -142,6 +143,7 @@ from .pdk_wizard_view import PdkWizardView
 from .rules_view import RulesView
 from .settings_view import DEFAULT_PROJECT_NAME, SettingsView
 from .spice_models_view import SpiceModelsView
+from .text_dialog import show_text_dialog
 from .tools_view import ToolsView
 from .qucs_view import QucsView
 from .user_models_view import UserModelsView
@@ -204,19 +206,21 @@ class App(ttk.Frame):
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill="both", expand=True)
 
+        self._build_wizard_tab()
+        self._build_pdk_tab()
         self._build_overview_tab()
         self._build_technology_group()
         self._build_cells_group()
         self._build_library_manager_tab()
         self._build_simulation_group()
         self._build_settings_tab()
-        self._build_wizard_tab()
 
         self.status = tk.StringVar(value="Ready.")
         ttk.Label(self, textvariable=self.status, anchor="w").pack(fill="x", side="bottom")
 
         self.load()
         self.wizard_view.refresh()
+        self.pdk_notebook.select(0)
         self.notebook.select(0)
 
     def _update_title(self):
@@ -299,33 +303,256 @@ class App(ttk.Frame):
             for path, parsed in self.lef_cache.items()
         }
 
+    def _layers_by_lyp_path(self) -> dict[str, list[Layer]]:
+        """The current layer list, keyed by the real ``.lyp`` path it
+        belongs to -- only ``self.lyp_path`` (whichever one is
+        actually loaded) has anything to save; empty if none is."""
+
+        if self.lyp_path is None:
+            return {}
+        return {str(self.lyp_path.relative_to(self.pdk_root)): self.project.layers}
+
     # -- menu / persistence -------------------------------------------------
 
     def _build_menu(self):
         menubar = tk.Menu(self.root)
+
+        # File: project-level actions only -- save/reload this
+        # project's own edits, plus the two real, project-wide LibMan
+        # .projects import/export actions (ihp/libman_project.py) --
+        # moved here from being Library-Manager-tab-only, since they
+        # act across every real library at once, the same project-wide
+        # scope as Save Edits/Reload. Every individual, per-domain
+        # "Export Edited X (open_pdks format)" action now lives in its
+        # own **Export** menu instead (see below) -- this menu used to
+        # hold all of those too, which buried the two, real project-
+        # level actions among ten domain-specific ones.
         file_menu = tk.Menu(menubar, tearoff=False)
+        file_menu.add_command(label="Create a New PDK...", command=self._create_new_pdk)
+        file_menu.add_command(label="Create a Blank PDK...", command=self._create_blank_pdk)
+        file_menu.add_separator()
         file_menu.add_command(label="Save Edits", command=self._save_project, accelerator="Ctrl+S")
         file_menu.add_command(label="Reload from Real Files", command=self._reload_from_real_files)
         file_menu.add_separator()
-        file_menu.add_command(label="Export Edited LEF Files (open_pdks format)", command=self._export_lef_files)
-        file_menu.add_command(label="Export Edited DRC Rules (open_pdks format)", command=self._export_drc_rules)
-        file_menu.add_command(label="Export Edited Magic Types (open_pdks format)", command=self._export_magic_types)
-        file_menu.add_command(label="Export Edited CDL/SPICE Ports (open_pdks format)", command=self._export_netlist_files)
-        file_menu.add_command(label="Export Edited Verilog Ports (open_pdks format)", command=self._export_verilog_files)
-        file_menu.add_command(label="Export Edited Liberty Files (open_pdks format)", command=self._export_liberty_files)
-        file_menu.add_command(label="Export Edited Layers (open_pdks format)", command=self._export_layers)
-        file_menu.add_command(label="Export Edited xschem Symbols (open_pdks format)", command=self._export_xschem_symbols)
-        file_menu.add_command(label="Export Edited xschem Schematics (open_pdks format)", command=self._export_xschem_schematics)
-        file_menu.add_command(label="Export Edited Qucs-S Symbols (open_pdks format)", command=self._export_qucs_symbols)
-        file_menu.add_command(label="Export Edited Qucs-S Components (open_pdks format)", command=self._export_qucs_components)
+        file_menu.add_command(label="Import from LibMan Project...", command=self._import_libman_project)
+        file_menu.add_command(label="Export to LibMan Project...", command=self._export_libman_project)
         menubar.add_cascade(label="File", menu=file_menu)
+
+        # Export: every real, individual, per-domain open_pdks-format
+        # write-back action -- previously crowded into File alongside
+        # genuinely project-level actions; split out into its own menu
+        # now that File also carries the two LibMan project actions above.
+        export_menu = tk.Menu(menubar, tearoff=False)
+        export_menu.add_command(label="Export Edited LEF Files (open_pdks format)", command=self._export_lef_files)
+        export_menu.add_command(label="Export Edited DRC Rules (open_pdks format)", command=self._export_drc_rules)
+        export_menu.add_command(
+            label="Export Edited Magic Types (open_pdks format)", command=self._export_magic_types
+        )
+        export_menu.add_command(
+            label="Export Edited CDL/SPICE Ports (open_pdks format)", command=self._export_netlist_files
+        )
+        export_menu.add_command(
+            label="Export Edited Verilog Ports (open_pdks format)", command=self._export_verilog_files
+        )
+        export_menu.add_command(
+            label="Export Edited Liberty Files (open_pdks format)", command=self._export_liberty_files
+        )
+        export_menu.add_command(label="Export Edited Layers (open_pdks format)", command=self._export_layers)
+        export_menu.add_command(
+            label="Export Edited xschem Symbols (open_pdks format)", command=self._export_xschem_symbols
+        )
+        export_menu.add_command(
+            label="Export Edited xschem Schematics (open_pdks format)", command=self._export_xschem_schematics
+        )
+        export_menu.add_command(
+            label="Export Edited Qucs-S Symbols (open_pdks format)", command=self._export_qucs_symbols
+        )
+        export_menu.add_command(
+            label="Export Edited Qucs-S Components (open_pdks format)", command=self._export_qucs_components
+        )
+        menubar.add_cascade(label="Export", menu=export_menu)
+
+        help_menu = tk.Menu(menubar, tearoff=False)
+        help_menu.add_command(label="Help", command=self._show_help)
+        help_menu.add_command(label="Unit Representation", command=self._show_unit_reading)
+        help_menu.add_command(label="About openPDKcreator", command=self._show_about)
+        menubar.add_cascade(label="Help", menu=help_menu)
+
         self.root.config(menu=menubar)
         self.root.bind_all("<Control-s>", lambda _event: self._save_project())
+
+    def _create_new_pdk(self):
+        self._create_pdk(blank=False)
+
+    def _create_blank_pdk(self):
+        self._create_pdk(blank=True)
+
+    def _create_pdk(self, *, blank: bool):
+        """File > Create a New PDK.../Create a Blank PDK... -- points
+        this whole app at a genuinely new ``pdk_root``, either bare
+        (just ``libs.tech``/``libs.ref``, the same empty-project shape
+        ``pdklib/skeleton.py``'s own ``build_blank_pdk`` builds) or
+        seeded with one real, immediately-usable file per
+        create-from-scratch domain (Layers/Magic Tech/DRC Rules/LEF,
+        via that module's ``build_new_pdk_skeleton``).
+
+        ``self.pdk_root`` is cached directly at construction time in
+        nine separate view classes (unlike ``project_root``, which
+        ``change_project_directory`` above reassigns live everywhere)
+        -- so switching it can't reuse that live-reassignment approach;
+        instead this tears down and rebuilds the whole App fresh
+        against the new root, via ``_restart_with_pdk_root``."""
+
+        new_dir_str = filedialog.askdirectory(
+            title="Choose a Blank PDK Directory" if blank else "Choose a New PDK Directory", parent=self,
+        )
+        if not new_dir_str:
+            return
+        new_pdk_root = Path(new_dir_str).resolve()
+
+        name = None
+        if not blank:
+            name = simpledialog.askstring(
+                "Create a New PDK",
+                "Technology/library name (used for the .lyp/.tech/.lef skeleton files):",
+                parent=self,
+            )
+            if not name:
+                return
+
+        if new_pdk_root.is_dir() and any(new_pdk_root.iterdir()):
+            if not messagebox.askyesno(
+                "Create a PDK", f"{new_pdk_root} is not empty. Continue anyway?", parent=self,
+            ):
+                return
+
+        try:
+            if blank:
+                skeleton_mod.build_blank_pdk(new_pdk_root)
+            else:
+                skeleton_mod.build_new_pdk_skeleton(new_pdk_root, name)
+        except FileExistsError as exc:
+            messagebox.showerror("Create a PDK", str(exc), parent=self)
+            return
+
+        self._restart_with_pdk_root(new_pdk_root)
+
+    def _restart_with_pdk_root(self, new_pdk_root: Path):
+        """Tears down this whole App and rebuilds it fresh against
+        ``new_pdk_root`` -- see ``_create_pdk``'s own docstring for why
+        a full rebuild, not a live reassignment, is used here."""
+
+        root = self.root
+        self.destroy()
+        App(root, new_pdk_root)
+
+    def _import_libman_project(self):
+        self.goto("Library Manager")
+        self.library_manager_view._import_libman_project()
+
+    def _export_libman_project(self):
+        self.goto("Library Manager")
+        self.library_manager_view._export_libman_project()
+
+    def _show_about(self):
+        show_text_dialog(
+            self,
+            "About openPDKcreator",
+            "openPDKcreator\n"
+            "==============\n\n"
+            "A general PDK-authoring toolkit -- create/edit real PDK content (Layers, Magic "
+            "Tech, DRC Rules, LEF, GDS structural info, Liberty, CDL/SPICE, Verilog/Verilog-A, "
+            "xschem and Qucs-S symbols/schematics) through one GUI.\n\n"
+            "Final objective: a wizard to edit and create an open PDK, generally -- not "
+            "specific to any one process. IHP's real SG13G2 PDK "
+            "(github.com/IHP-GmbH/IHP-Open-PDK) is the current model this is being built and "
+            "verified against, not the permanent target.\n\n"
+            "Natively reads/writes IHP-GmbH's own LibMan project file format:\n"
+            "  github.com/IHP-GmbH/LibMan\n\n"
+            "Repository:\n"
+            "  github.com/rpicos-uib/openpdkcreator-toolkit\n\n"
+            "License: Apache-2.0",
+        )
+
+    def _show_help(self):
+        show_text_dialog(
+            self,
+            "Help",
+            "Getting started\n"
+            "---------------\n"
+            "Wizard -- a guided flowchart of every domain this tool knows how to read/edit. "
+            "Click a box for details; \"Go to Tab\" jumps straight there. Start here if you're "
+            "building a PDK from scratch.\n\n"
+            "PDK > Overview -- a real, per-tool file inventory of whichever PDK is loaded.\n"
+            "PDK > Technology -- Layers / Magic Tech / DRC Rules.\n"
+            "PDK > Cells -- LEF and By Cell (one real cell's views across every domain).\n"
+            "PDK > Simulation -- ngspice Models, xschem, Qucs-S, and your own User Models "
+            "(Verilog/Verilog-A).\n"
+            "Library Manager -- a Cadence-style Libraries | Cells | Views browser spanning "
+            "real and project-authored content; also where LibMan .projects import/export "
+            "lives (see the File menu).\n"
+            "Settings -- project name/directory, tool install status, generated shell-env "
+            "script.\n\n"
+            "Menus\n"
+            "-----\n"
+            "File -- create a new PDK (minimal skeleton files) or a blank one (no files), "
+            "save/reload your edits, import/export a LibMan .projects file.\n"
+            "Export -- write real, edited content back out in open_pdks format, one command "
+            "per domain.\n"
+            "Help -- this dialog, Unit Representation, and About.\n\n"
+            "Command line\n"
+            "------------\n"
+            "python3 main.py wizard --name \"My PDK\" --pdk-root DIR -- creates a new PDK "
+            "project (or --blank for no files) without opening this GUI, saves the project "
+            "name, and writes a ready-to-source shell-env script (shell_env/pdk_env.sh); add "
+            "--open-gui to open it here right after. Every other real, read/export command "
+            "this tool has -- fetch/inventory/lef/drc/export-.../gui/... -- is listed by "
+            "python3 main.py --help, and each one's own options by e.g. "
+            "python3 main.py wizard --help.\n\n"
+            "Full documentation lives in this project's own README.md:\n"
+            "  github.com/rpicos-uib/openpdkcreator-toolkit",
+        )
+
+    def _show_unit_reading(self):
+        show_text_dialog(
+            self,
+            "Unit Representation",
+            "Numeric fields you type into (DRC Rules' own Value/Window Size/Window Step, "
+            "Liberty pin Capacitance, Layers' own zoom bounds/GDS layer & datatype, Qucs-S "
+            "port x/y/angle, and every Magic Tech numeric *_text field) accept a real "
+            "international (SI) scale-factor suffix, not just a fully-expanded decimal -- "
+            "\"0.2u\" works exactly like \"0.0000002\".\n\n"
+            "This only applies to what you type into this GUI's own fields. It never changes "
+            "how a real, downloaded PDK file's own text is read -- those keep parsing plain "
+            "decimals exactly as before.\n\n"
+            "Suffix   Name    Factor\n"
+            "------   ----    ------\n"
+            "T        Tera    1e12\n"
+            "G        Giga    1e9\n"
+            "Meg      Mega    1e6\n"
+            "K        Kilo    1e3\n"
+            "mil      Mil     25.4e-6  (1/1000 inch)\n"
+            "m        milli   1e-3\n"
+            "u (or µ) micro   1e-6\n"
+            "n        nano    1e-9\n"
+            "p        pico    1e-12\n"
+            "f        femto   1e-15\n"
+            "a        atto    1e-18\n\n"
+            "Case doesn't matter, and any letters after a recognized suffix are ignored "
+            "(\"10Hz\" -> 10, \"5V\" -> 5) -- the same real convention ngspice itself uses.\n\n"
+            "The one trap worth knowing: a bare \"m\" or \"M\" always means milli, never "
+            "mega -- \"M\", \"MA\", \"MSec\", and \"MMhos\" all mean the exact same thing "
+            "(1e-3). Only \"Meg\" (any case: \"meg\"/\"Meg\"/\"MEG\") means mega. This isn't "
+            "this project's own invention -- it's ngspice's own real, documented convention "
+            "(see its own manual's \"Some Useful Conventions\" section), matched here exactly "
+            "so a value you already know how to type in a SPICE deck types the same way here.\n\n"
+            "See pdklib/numeric.py's own docstring for the full real reasoning and source.",
+        )
 
     def _export_lef_files(self):
         """Writes real, patched .lef text for every real file parsed
         this session (LEF tab or By Cell tab) to ``export/<pdk
-        name>/...`` -- see ``export.py``'s/``ihp/lef_writer.py``'s own
+        name>/...`` -- see ``export.py``'s/``pdklib/lef_writer.py``'s own
         docstrings for exactly what's patched and what's preserved
         verbatim. Never touches the real, downloaded ``data/`` copy."""
 
@@ -344,7 +571,7 @@ class App(ttk.Frame):
         resolvable provenance, and real, *generated* KLayout DRC Ruby
         (``custom_rules.drc``) for every hand-authored rule (New Rule)
         whose check_type/value/layers this project knows how to
-        generate -- see ``export.py``'s/``ihp/drc_writer.py``'s own
+        generate -- see ``export.py``'s/``pdklib/drc_writer.py``'s own
         docstrings. A rule that still can't be written back either way
         is reported in the status line, not silently dropped."""
 
@@ -366,7 +593,7 @@ class App(ttk.Frame):
 
     def _new_drc_deck(self):
         """A real, minimal, valid, empty DRC deck
-        (``ihp/drc.py``'s own ``create_new_drc_deck``) -- genuinely
+        (``pdklib/drc.py``'s own ``create_new_drc_deck``) -- genuinely
         usable immediately afterward: **New Rule** in the DRC Rules
         tab, and a real export, both work against it (see that
         function's own docstring)."""
@@ -401,7 +628,7 @@ class App(ttk.Frame):
     def _export_magic_types(self):
         """Writes real, patched .tech text for every real technology
         currently loaded, with any in-memory Types edits patched in --
-        see ``export.py``'s/``ihp/magic_tech_writer.py``'s own
+        see ``export.py``'s/``pdklib/magic_tech_writer.py``'s own
         docstrings."""
 
         self.magic_tech_view.commit_pending_edits()
@@ -415,7 +642,7 @@ class App(ttk.Frame):
         """Writes real, patched CDL/SPICE text for every real
         ``.cdl``/``.spice`` file parsed this session (By Cell tab's own
         Edit CDL/SPICE Ports dialogs) -- see ``export.py``'s/
-        ``ihp/netlist_writer.py``'s own docstrings."""
+        ``pdklib/netlist_writer.py``'s own docstrings."""
 
         written = export_mod.export_netlist_files(self.pdk_root, self.netlist_cache)
         if not written:
@@ -426,7 +653,7 @@ class App(ttk.Frame):
     def _export_verilog_files(self):
         """Writes real, patched Verilog text for every real ``.v`` file
         parsed this session (By Cell tab's own Edit Verilog Ports
-        dialog) -- see ``export.py``'s/``ihp/verilog_writer.py``'s own
+        dialog) -- see ``export.py``'s/``pdklib/verilog_writer.py``'s own
         docstrings."""
 
         written = export_mod.export_verilog_files(self.pdk_root, self.verilog_cache)
@@ -439,7 +666,7 @@ class App(ttk.Frame):
         """Writes real, patched Liberty pin/timing-arc text for every
         real ``.lib`` file parsed this session (By Cell tab's own Edit
         Pins/Timing dialog) -- see ``export.py``'s/
-        ``ihp/liberty_writer.py``'s own docstrings."""
+        ``pdklib/liberty_writer.py``'s own docstrings."""
 
         written = export_mod.export_liberty_files(self.pdk_root, self.liberty_cache)
         if not written:
@@ -450,7 +677,7 @@ class App(ttk.Frame):
     def _export_layers(self):
         """Writes real, patched ``.lyp`` text reflecting whatever's
         currently in ``self.project.layers`` -- see ``export.py``'s/
-        ``ihp/layers_writer.py``'s own docstrings. Unlike every other
+        ``pdklib/layers_writer.py``'s own docstrings. Unlike every other
         domain here, Layers has no per-file cache to check first: the
         Layers tab commits every field live (no pending-edit state),
         and there's only ever one real ``.lyp`` loaded per session."""
@@ -464,7 +691,7 @@ class App(ttk.Frame):
     def _export_xschem_symbols(self):
         """Writes real, patched xschem ``.sym`` text (pin name/direction
         only) for every real file parsed this session to ``export/<pdk
-        name>/...`` -- see ``export.py``'s/``ihp/xschem_writer.py``'s
+        name>/...`` -- see ``export.py``'s/``pdklib/xschem_writer.py``'s
         own docstrings. Never touches the real, downloaded ``data/``
         copy."""
 
@@ -479,7 +706,7 @@ class App(ttk.Frame):
         """Writes real, patched xschem ``.sch`` text (instance name/
         net-label, wire label, and deletion only) for every real file
         parsed this session to ``export/<pdk name>/...`` -- see
-        ``export.py``'s/``ihp/xschem_sch_writer.py``'s own docstrings,
+        ``export.py``'s/``pdklib/xschem_sch_writer.py``'s own docstrings,
         including the real, narrow class of entries/files that writer
         safely refuses to touch. Never touches the real, downloaded
         ``data/`` copy."""
@@ -495,7 +722,7 @@ class App(ttk.Frame):
         """Writes real, patched Qucs-S ``.sym`` text (real ``PortSym``
         x/y/type/angle/condition only) for every real file parsed this
         session to ``export/<pdk name>/...`` -- see ``export.py``'s/
-        ``ihp/qucs_sym_writer.py``'s own docstrings. Never touches the
+        ``pdklib/qucs_sym_writer.py``'s own docstrings. Never touches the
         real, downloaded ``data/`` copy."""
 
         self.qucs_view.commit_pending_edits()
@@ -509,7 +736,7 @@ class App(ttk.Frame):
         """Writes real, patched Qucs-S component ``.xml`` text (real
         Parameter default_value/equation only) for every real file
         parsed this session to ``export/<pdk name>/...`` -- see
-        ``export.py``'s/``ihp/qucs_component_writer.py``'s own
+        ``export.py``'s/``pdklib/qucs_component_writer.py``'s own
         docstrings. Never touches the real, downloaded ``data/`` copy."""
 
         self.qucs_view.commit_pending_edits()
@@ -538,6 +765,22 @@ class App(ttk.Frame):
             magic_planes=self.magic_tech_view.collect_planes_by_tech(),
             magic_contacts=self.magic_tech_view.collect_contacts_by_tech(),
             magic_aliases=self.magic_tech_view.collect_aliases_by_tech(),
+            magic_styles=self.magic_tech_view.collect_styles_by_tech(),
+            magic_compose=self.magic_tech_view.collect_compose_by_tech(),
+            magic_connect=self.magic_tech_view.collect_connect_by_tech(),
+            magic_cifinput_ignored_layers=self.magic_tech_view.collect_cifinput_ignored_layers_by_tech(),
+            magic_cifinput_layer_hints=self.magic_tech_view.collect_cifinput_layer_hints_by_tech(),
+            magic_cif_layers=self.magic_tech_view.collect_cif_layers_by_tech(),
+            magic_extract_misc=self.magic_tech_view.collect_extract_misc_by_tech(),
+            magic_extract_plane_order=self.magic_tech_view.collect_extract_plane_order_by_tech(),
+            magic_extract_resist=self.magic_tech_view.collect_extract_resist_by_tech(),
+            magic_extract_cap_coefficients=self.magic_tech_view.collect_extract_cap_coefficients_by_tech(),
+            magic_extract_devices=self.magic_tech_view.collect_extract_devices_by_tech(),
+            magic_drc_angle_checks=self.magic_tech_view.collect_drc_angle_checks_by_tech(),
+            magic_drc_checks=self.magic_tech_view.collect_drc_checks_by_tech(),
+            magic_drc_misc=self.magic_tech_view.collect_drc_misc_by_tech(),
+            magic_cifinput_recipes=self.magic_tech_view.collect_cifinput_recipes_by_tech(),
+            layers=self._layers_by_lyp_path(),
         )
         self.status.set(f"Saved edits to {path}")
 
@@ -568,19 +811,88 @@ class App(ttk.Frame):
         self.qucs_view.load()
         self.load()
 
+    def change_project_directory(self, new_dir: Path):
+        """Switches this session's own project-level state -- not the
+        real PDK data (``self.pdk_root`` is untouched) -- to a
+        different real directory: ``saves/``, ``library_index.yaml``,
+        ``libraries/``, ``user_models/`` all move with it.
+
+        Real, not cosmetic: reassigns the actual, shared module-level
+        constants every consumer already reads dynamically
+        (``export.PROJECT_ROOT``/``EXPORT_ROOT``, ``project_io.
+        SAVE_DIR``) rather than introducing a second, parallel notion of
+        "current project root" -- confirmed, before writing this, that
+        every real consumer accesses these as ``export_mod.PROJECT_ROOT``
+        (module-qualified, re-read on every call) rather than a name
+        frozen at import time, so reassigning here is enough almost
+        everywhere. The one real exception:
+        ``LibraryManagerView.__init__`` caches it once into
+        ``self.project_root`` at construction time, so that has to be
+        re-synced explicitly here too, or it would keep silently
+        pointing at the old directory.
+
+        A genuinely new, empty directory starts a fresh, empty project
+        there (created if it doesn't exist yet); an existing one
+        restores its own real saved state -- the same real, full
+        reload sequence ``_reload_from_real_files`` already uses for
+        "start over," since the new directory's own saved Magic Types/
+        LEF pin overrides must apply on top of a real, freshly
+        re-parsed baseline, not whatever the *previous* project's own
+        edits left in memory."""
+
+        new_dir = new_dir.resolve()
+        new_dir.mkdir(parents=True, exist_ok=True)
+        export_mod.PROJECT_ROOT = new_dir
+        export_mod.EXPORT_ROOT = new_dir / "export"
+        project_io.SAVE_DIR = new_dir / "saves"
+        self.library_manager_view.project_root = export_mod.PROJECT_ROOT
+
+        self.lef_cache.clear()
+        self.lef_pin_overrides = {}
+        self.netlist_cache.clear()
+        self.verilog_cache.clear()
+        self.liberty_cache.clear()
+        self.xschem_symbol_cache.clear()
+        self.xschem_schematic_cache.clear()
+        self.qucs_symbol_cache.clear()
+        self.qucs_component_cache.clear()
+        self.set_project_name(DEFAULT_PROJECT_NAME)
+
+        self.lef_view.load()
+        self.cell_hub_view.load()
+        self.magic_tech_view.load()
+        self.xschem_view.load()
+        self.qucs_view.load()
+        self.load()
+        self.library_manager_view.refresh_libraries()
+        self.settings_view.refresh()
+        self.status.set(f"Switched project directory to {new_dir}")
+
+    # -- PDK tab (wraps everything actually about the PDK's own content;
+    # Settings -- project naming/tool config -- and Library Manager --
+    # a Cadence-style browser spanning real+project-authored content,
+    # not just this one PDK's own real files -- both stay separate,
+    # top-level tabs, deliberately outside this one) --------------------
+
+    def _build_pdk_tab(self):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text="PDK")
+        self.pdk_notebook = ttk.Notebook(frame)
+        self.pdk_notebook.pack(fill="both", expand=True)
+
     # -- PDK Wizard tab -----------------------------------------------------
 
     def _build_wizard_tab(self):
         frame = ttk.Frame(self.notebook)
-        self.notebook.insert(0, frame, text="PDK Wizard")
+        self.notebook.add(frame, text="Wizard")
         self.wizard_view = PdkWizardView(frame, self)
         self.wizard_view.pack(fill="both", expand=True)
 
     # -- Overview tab -----------------------------------------------------
 
     def _build_overview_tab(self):
-        frame = ttk.Frame(self.notebook)
-        self.notebook.add(frame, text="Overview")
+        frame = ttk.Frame(self.pdk_notebook)
+        self.pdk_notebook.add(frame, text="Overview")
 
         columns = ("domain", "files", "size_mb", "top_extensions")
         self.inventory_tree = ttk.Treeview(frame, columns=columns, show="headings")
@@ -603,8 +915,8 @@ class App(ttk.Frame):
     # -- Technology group (Layers, Magic Tech, DRC Rules) --------------------
 
     def _build_technology_group(self):
-        frame = ttk.Frame(self.notebook)
-        self.notebook.add(frame, text="Technology")
+        frame = ttk.Frame(self.pdk_notebook)
+        self.pdk_notebook.add(frame, text="Technology")
 
         self.technology_notebook = ttk.Notebook(frame)
         self.technology_notebook.pack(fill="both", expand=True)
@@ -634,7 +946,7 @@ class App(ttk.Frame):
 
     def _new_lyp_file(self):
         """A real, minimal, valid, empty KLayout ``.lyp`` skeleton
-        (``ihp/layers.py``'s own ``create_new_lyp_file``) --
+        (``pdklib/layers.py``'s own ``create_new_lyp_file``) --
         genuinely usable immediately afterward: **New Layer** in the
         Layers tab, and a real export, both work against it the same
         as against a real, downloaded file (see that function's own
@@ -681,8 +993,8 @@ class App(ttk.Frame):
     # -- Cells group (LEF, By Cell) ------------------------------------------
 
     def _build_cells_group(self):
-        frame = ttk.Frame(self.notebook)
-        self.notebook.add(frame, text="Cells")
+        frame = ttk.Frame(self.pdk_notebook)
+        self.pdk_notebook.add(frame, text="Cells")
 
         self.cells_notebook = ttk.Notebook(frame)
         self.cells_notebook.pack(fill="both", expand=True)
@@ -697,7 +1009,12 @@ class App(ttk.Frame):
         self.cell_hub_view = CellHubView(cell_hub_frame, self)
         self.cell_hub_view.pack(fill="both", expand=True)
 
-    # -- Library Manager tab -----------------------------------------------
+    # -- Library Manager tab -- top-level, a sibling of PDK/Wizard/
+    # Settings, not nested under PDK: it spans real+project-authored
+    # content across every domain (not just this one PDK's own real
+    # files the way Overview/Technology/Cells do), so it doesn't
+    # belong buried a level down from tabs it's conceptually a peer
+    # of. ------------------------------------------------------------
 
     def _build_library_manager_tab(self):
         frame = ttk.Frame(self.notebook)
@@ -708,8 +1025,8 @@ class App(ttk.Frame):
     # -- Simulation group (ngspice) -------------------------------------------
 
     def _build_simulation_group(self):
-        frame = ttk.Frame(self.notebook)
-        self.notebook.add(frame, text="Simulation")
+        frame = ttk.Frame(self.pdk_notebook)
+        self.pdk_notebook.add(frame, text="Simulation")
 
         self.simulation_notebook = ttk.Notebook(frame)
         self.simulation_notebook.pack(fill="both", expand=True)
@@ -765,11 +1082,28 @@ class App(ttk.Frame):
         ``goto("Simulation", "xschem", "Symbols")`` -- walks down as
         many nested ``ttk.Notebook`` levels as *path* has segments,
         stopping early (silently) if a segment isn't found, so a
-        caller can pass a short path (just the top-level tab) too."""
+        caller can pass a short path (just the top-level tab) too.
+
+        Every real path except ``("Settings", ...)``/``("Library
+        Manager", ...)`` now lives one level deeper than *path* itself
+        says, nested under the top-level "PDK" tab
+        (``self.pdk_notebook``) -- this method inserts that real hop
+        itself, so callers (the PDK Wizard's own stage table) never
+        needed to change when that wrapping tab was added. "Library
+        Manager" itself is a top-level tab too (a sibling of PDK/
+        Wizard/Settings, not nested under PDK -- see
+        ``_build_library_manager_tab``'s own docstring for why), so it
+        gets the same direct-to-``self.notebook`` treatment as
+        "Settings"."""
 
         if not path:
             return
-        self._select_tab_by_text(self.notebook, path[0])
+        if path[0] in ("Settings", "Library Manager"):
+            top_notebook = self.notebook
+        else:
+            self._select_tab_by_text(self.notebook, "PDK")
+            top_notebook = self.pdk_notebook
+        self._select_tab_by_text(top_notebook, path[0])
         notebook = self._sub_notebook_for(path[:1])
         for depth in range(1, len(path)):
             if notebook is None:
@@ -815,7 +1149,7 @@ class App(ttk.Frame):
 
         lyp_path = layers_mod.find_lyp(self.pdk_root)
         if lyp_path is None:
-            self.status.set(f"No .lyp found under {self.pdk_root}/libs.tech/ -- has ihp/fetch.py been run?")
+            self.status.set(f"No .lyp found under {self.pdk_root}/libs.tech/ -- has pdklib/fetch.py been run?")
             return
         self.lyp_path = lyp_path
 
@@ -833,11 +1167,15 @@ class App(ttk.Frame):
         warning = f" (WARNING: {group_members} <group-members> block(s) found -- some layers may be missing)" if group_members else ""
         status = (
             f"Loaded {len(parsed)} layers from {lyp_path.name}{warning}; "
-            f"extracted {len(rules)} DRC rules ({len(skipped)} construct(s) not auto-extracted, see ihp/drc.py)"
+            f"extracted {len(rules)} DRC rules ({len(skipped)} construct(s) not auto-extracted, see pdklib/drc.py)"
         )
 
         saved = project_io.load_state(self.pdk_root)
         if saved is not None:
+            saved_layers = saved.layers.get(str(lyp_path.relative_to(self.pdk_root)))
+            if saved_layers is not None:
+                self.project.layers = saved_layers
+                self.layers_view.refresh()
             self.project.design_rules = saved.design_rules
             self.rules_view.refresh()
             for tech_name, types in saved.magic_types.items():
@@ -856,6 +1194,66 @@ class App(ttk.Frame):
                 tech = self.magic_tech_view.technologies.get(tech_name)
                 if tech is not None:
                     tech.aliases = aliases
+            for tech_name, styles in saved.magic_styles.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.styles = styles
+            for tech_name, statements in saved.magic_compose.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.compose = statements
+            for tech_name, rules in saved.magic_connect.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.connect = rules
+            for tech_name, ignored_layers in saved.magic_cifinput_ignored_layers.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.cifinput_ignored_layers = ignored_layers
+            for tech_name, hints in saved.magic_cifinput_layer_hints.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.cifinput_layer_hints = hints
+            for tech_name, mappings in saved.magic_cif_layers.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.cif_layers = mappings
+            for tech_name, statements in saved.magic_extract_misc.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.extract_misc = statements
+            for tech_name, orders in saved.magic_extract_plane_order.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.extract_plane_order = orders
+            for tech_name, entries in saved.magic_extract_resist.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.extract_resist = entries
+            for tech_name, coefficients in saved.magic_extract_cap_coefficients.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.extract_cap_coefficients = coefficients
+            for tech_name, devices in saved.magic_extract_devices.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.extract_devices = devices
+            for tech_name, checks in saved.magic_drc_angle_checks.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.drc_angle_checks = checks
+            for tech_name, checks in saved.magic_drc_checks.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.drc_checks = checks
+            for tech_name, statements in saved.magic_drc_misc.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.drc_misc = statements
+            for tech_name, blocks in saved.magic_cifinput_recipes.items():
+                tech = self.magic_tech_view.technologies.get(tech_name)
+                if tech is not None:
+                    tech.cifinput_recipes = blocks
             self.magic_tech_view._refresh_all()
             self.apply_saved_lef_pin_overrides(saved.lef_pins)
             self.lef_view._refresh_all()

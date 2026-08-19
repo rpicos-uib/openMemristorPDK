@@ -1,0 +1,2279 @@
+"""Real Magic ``.tech`` technology-file parsing.
+
+Magic's tech-file format has ~15 distinct sections (``tech``,
+``version``, ``planes``, ``types``, ``contact``, ``aliases``,
+``styles``, ``compose``, ``connect``, ``cifoutput``, ``cifinput``,
+``drc``, ``extract``, ``lef``, ``mzrouter``, ``wiring``, ``router``,
+``plowing``, ``plot``), each simply ``<keyword> ... end`` -- confirmed
+by hand-reading IHP's own real, downloaded
+``libs.tech/magic/ihp-sg13g2.tech`` (761 lines) and the four files it
+``include``s (``ihp-sg13g2-{cifout,cifin,drc,extract}.tech``, spliced
+in textually at the ``include`` line -- confirmed real: those four are
+*fragments* of one logical technology, not standalone ones; only
+``ihp-sg13g2-GDS.tech`` is a genuinely separate, second technology,
+confirmed by its own distinct ``tech``/``version`` header).
+
+Scoped like ``import_open_pdks.py``'s own DRC-rule extraction: parse
+what's reliably tabular and structured in full (``tech``, ``version``,
+``planes``, ``types``, ``contact``, ``aliases``, ``styles``,
+``compose``, ``connect``), and pull one real, valuable pattern out of
+each harder, mini-rule-language section rather than a full interpreter:
+
+- ``cifoutput``: real "recipes" ending in a ``calma <layer> <datatype>``
+  statement -- the Magic-type-name to real-GDS-layer/datatype mapping,
+  cross-referenceable against ``pdklib/layers.py``'s own KLayout ``.lyp``
+  layer list (``pdklib/reconcile.py``).
+- ``drc``: the three dominant, cleanly tabular real statement kinds --
+  ``width <layers> <value> "message"``,
+  ``spacing <layer1> <layer2> <value> ... "message"``, and
+  ``maxwidth <layer> <value> <mode> [exceptions] "message"`` (192 of
+  the real section's statements combined, confirmed against the real
+  file: 65/65 ``width``, 101/102 ``spacing``, and 26/26 ``maxwidth``
+  lines match -- the one real ``spacing`` exception is a genuine
+  defect in IHP's own file, a message string missing its closing
+  quote, confirmed by direct inspection, not a parser bug). All three
+  share the exact same real message-quoting shape, so ``maxwidth``
+  reuses ``width``'s own regex structure exactly (skip any filler
+  tokens -- ``mode``, an optional real exception-list like
+  ``glass,pillar,solder`` -- up to the quoted message, same as
+  ``width``/``spacing`` already do, rather than asserting what each
+  filler token means). ``value`` is raw file units; empirically
+  confirmed for ``width``/``spacing`` (cross-referenced against three
+  independent, already-extracted real KLayout DRC rules sharing the
+  same real rule ID -- Act.a, Gat.a, NW.b) that dividing by 1000 gives
+  the real micron value Magic itself reports -- not from Magic's own
+  documented unit spec, which this pass had no authoritative local
+  source to confirm against, but a real, repeatable, cross-checked
+  empirical fact; the same factor is applied to ``maxwidth`` too, on
+  the reasonable inference that one real file's one real section
+  shares one real internal unit scale, not a fresh independent
+  confirmation of that specific check kind.
+
+  A fourth real, cleanly tabular kind is extracted separately, into its
+  own ``MagicAngleCheck``, not folded into the above: real
+  ``angles <layer> <degrees> "message"`` statements (17/17 real lines
+  match, including one real line needing the section's own backslash-
+  continuation join). Same real message-quoting shape as
+  ``width``/``maxwidth``, so it reuses that same regex structure -- but
+  a real angle is a plain degree count (45/90), not a length, so the
+  real, empirically-confirmed ``/1000`` micron conversion is
+  deliberately *not* applied here; forcing it into ``MagicDrcCheck``'s
+  own ``value_um`` field would have been a real, silent unit lie.
+
+  ``surround``/``edge4way``/``variants``/``widespacing``/``cifwidth``/
+  ``cifspacing``/``cifmaxwidth``/... remain real, separate future work
+  -- their own real shapes are less uniform (variable argument counts,
+  nested real layer-boolean expressions like
+  ``~(alldiffhv,allpoly,*pdiff,*nsd,*ntap)/a``, or, for ``variants``, a
+  real conditional-scoping directive rather than a check at all), so
+  extending the ``width``-style pattern to them isn't a safe reuse.
+- ``extract``: real per-layer sheet-resistance values
+  (``resist <layer-spec> <value>``, milliohms/square per the file's own
+  comment -- 30 of 33 real lines; the other 3 are real non-numeric
+  config entries, ``blocktypes``/``obstypes``/``comment None``, not a
+  parsing gap) and real plane ordering (``planeorder <name> <int>``,
+  14/14). Also the real parasitic-capacitance-coefficient lines --
+  ``defaultoverlap``/``defaultsideoverlap``/``defaultareacap``/
+  ``defaultperimeter``/``defaultsidewall`` (506 real lines combined,
+  every real line for a given directive sharing the exact same real
+  token count -- confirmed directly, not assumed -- so leading args
+  and trailing numeric value(s) split at a fixed, real, per-directive
+  position; argument *semantics* deliberately not asserted, same
+  "don't guess" discipline ``ComposeStatement`` already uses) -- and
+  every real ``device <class> <model> <type> ...`` statement (50 real
+  entries, some wrapped across lines with a trailing '\\' and joined
+  via ``_join_backslash_continuations`` first, the same helper the
+  ``drc`` section's own wrapped statements use; class/model/type kept
+  as real, confirmed-positional fields, everything after kept raw).
+  ``contact``/``devresist``/``antenna``/``disconnect``/``substrate``
+  (41 real lines combined: 24/7/4/4/2) are also extracted, into one
+  shared, generic, raw ``ExtractMiscStatement`` rather than five
+  near-identical dataclasses -- each real, confirmed uniformly shaped
+  (every real line for a given directive shares the exact same real
+  token count), but too small and heterogeneous individually to
+  justify five separate types.
+
+- ``cifinput``: three real facts pulled out of the section in full.
+  Every real ``ignore LAYERNAME`` statement (23 real entries, a
+  simple, unambiguous "this GDS/CIF layer is ignored on read" fact),
+  and a real, standalone ``calma NAME L D`` table (133 real entries,
+  confirmed by reading the real file to sit together in one flat
+  block, *not* nested inside any preceding boolean recipe -- unlike
+  ``cifoutput``'s own per-recipe ``calma L D`` lines, which omit the
+  name and inherit it from the enclosing ``layer``/``templayer``
+  block, `cifinput`'s own real ``calma`` lines carry their own name
+  token directly, a genuinely different real shape requiring its own
+  regex, not a reuse of ``cifoutput``'s). Two of those 133 real
+  entries use a literal ``*`` as their datatype (``calma BOUND 189
+  *``) -- a real wildcard, confirmed by reading the file, kept as
+  ``None`` rather than silently dropped or coerced to a fake integer.
+  Third, the section's own real geometry-boolean recipe blocks
+  (``layer``/``templayer NAME <base> ...`` followed by real
+  ``and``/``and-not``/``or``/``grow``/``shrink``/``labels``/
+  ``copyup``/``not-square``/``mask-hints``/... op lines) are also now
+  extracted, into ``CifInputRecipe`` -- an honest, complete real
+  *record* of each recipe (name, real ``templayer``-vs-``layer``
+  distinction, base layer(s), every real op line in real order), not
+  a working boolean-geometry interpreter: the ops are recorded, never
+  evaluated or composed. **A real structural fact confirmed while
+  building this, not assumed**: a real Magic type's own recipe can be
+  built across more than one real, textually-separated block sharing
+  the same NAME (e.g. real ``nwell`` has two real, separate
+  ``layer nwell ...`` blocks with two different real base layers) --
+  the same real fact ``cifoutput``'s own ``CifLayer`` already merges
+  for its own real DNWELL; matched the same way here (188 real,
+  unique recipe names across 211 real block occurrences, every real
+  occurrence's own base layer and ops accumulated in real file order,
+  none silently overwritten or dropped).
+
+``lef``/``mzrouter``/``wiring``/``router``/``plowing``/``plot`` are
+still deliberately NOT parsed this pass. Every section name found
+(directly or via include) that this pass doesn't fully parse is
+reported in ``MagicTechnology.unparsed_sections``, never silently
+dropped.
+"""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from pathlib import Path
+
+from . import numeric
+
+_TABULAR_SECTIONS = ("tech", "version", "planes", "types", "contact", "aliases", "styles")
+_ALL_KNOWN_SECTIONS = _TABULAR_SECTIONS + (
+    "compose", "connect", "cifoutput", "cifinput", "drc", "extract",
+    "lef", "mzrouter", "wiring", "router", "plowing", "plot",
+)
+
+_SECTION_START_RE = re.compile(r"^(" + "|".join(_ALL_KNOWN_SECTIONS) + r")\s*$")
+_INCLUDE_RE = re.compile(r"^include\s+(\S+)\s*$")
+_LAYER_BLOCK_START_RE = re.compile(r"^\s*(?:layer|templayer)\s+(\S+)")
+_CALMA_RE = re.compile(r"^\s*calma\s+(\d+)\s+(\d+)")
+_CIFINPUT_IGNORE_RE = re.compile(r"^\s*ignore\s+(\S+)")
+_CIFINPUT_CALMA_RE = re.compile(r"^\s*calma\s+(\S+)\s+(\d+)\s+(\d+|\*)")
+_CIFINPUT_RECIPE_START_RE = re.compile(r"^\s*(layer|templayer)\s+(\S+)\s+(\S+)\s*$")
+_COMPOSE_VERBS = ("compose", "decompose", "paint")
+_WIDTH_RE = re.compile(r'^width\s+(\S+)\s+(-?\d+)\s+((?:\S+\s+)*)"([^"]*)"\s*$')
+_SPACING_RE = re.compile(r'^spacing\s+(\S+)\s+(\S+)\s+(-?\d+)\s+((?:\S+\s+)*)"([^"]*)"\s*$')
+_MAXWIDTH_RE = re.compile(r'^maxwidth\s+(\S+)\s+(-?\d+)\s+((?:\S+\s+)*)"([^"]*)"\s*$')
+_ANGLES_RE = re.compile(r'^angles\s+(\S+)\s+(\d+)\s+(?:\S+\s+)*"([^"]*)"\s*$')
+_TRAILING_PARENS_RE = re.compile(r"\(([^()]+)\)\s*$")
+_RESIST_RE = re.compile(r"^resist\s+(\S+)\s+(-?\d+)\s*$")
+_PLANEORDER_RE = re.compile(r"^planeorder\s+(\S+)\s+(\d+)\s*$")
+_EXTRACT_CAP_DIRECTIVES = {
+    # directive -> real, confirmed real leading-arg count (every real
+    # line for that directive has the exact same real token count --
+    # checked directly, not assumed; anything past the leading args is
+    # the line's own trailing numeric value(s)).
+    "defaultareacap": 2,
+    "defaultperimeter": 2,
+    "defaultsidewall": 2,
+    "defaultoverlap": 4,
+    "defaultsideoverlap": 4,
+}
+# Magic's own real value -> micron conversion for the drc section's
+# width/spacing statements -- empirically confirmed (not from a local
+# spec), see this module's own docstring.
+_DRC_VALUE_TO_MICRONS = 1000.0
+# Every real drc-section keyword recognized as a MagicDrcMiscStatement
+# (see that dataclass's own docstring for real per-directive counts
+# and why `variants`/`style`/`scalefactor`/`cifstyle` are deliberately
+# excluded).
+_DRC_MISC_DIRECTIVES = (
+    "surround", "edge4way", "widespacing", "cifmaxwidth", "cifwidth",
+    "cifspacing", "area", "exact_overlap", "overhang", "extend",
+    "rect_only", "cifarea", "no_overlap",
+)
+
+
+@dataclass
+class PlaneEntry:
+    name: str
+    short_code: str
+    line_no: int = 0
+    """This plane's own real, 1-indexed source line number, tracked the
+    same way ``TypeEntry.line_no`` is (see ``_safe_prefix_line_count``)
+    -- ``0`` for a plane added this session, or one whose section this
+    parser can't safely map back to real source line numbers. Used by
+    ``pdklib/magic_tech_writer.py`` for write-back."""
+
+
+@dataclass
+class TypeEntry:
+    plane: str
+    canonical_name: str
+    aliases: list[str] = field(default_factory=list)
+    obsolete: bool = False
+    """The leading '-' flag Magic uses for internal/no-longer-directly-
+    painted types (e.g. '-active hvnmosesd,...')."""
+    line_no: int = 0
+    """This type's own real, 1-indexed source line number in
+    ``MagicTechnology.source_path`` -- ``0`` for a type created this
+    session (New Type, no real source position) *or* one whose real
+    ``types`` section this parser can't safely map back to
+    ``source_path``'s own line numbers (see
+    ``_safe_prefix_line_count``'s own docstring). Used by
+    ``pdklib/magic_tech_writer.py`` to patch just this type's own real
+    line in place on export."""
+
+
+@dataclass
+class ContactEntry:
+    contact_type: str
+    layer1: str
+    layer2: str
+    line_no: int = 0
+    """Same real, source-mapped line tracking as ``PlaneEntry.line_no``."""
+
+
+@dataclass
+class AliasEntry:
+    name: str
+    members_raw: str
+    """Real, unresolved member-list text (comma-separated, may contain
+    '*name' wildcard-prefixed entries and references to other aliases)
+    -- resolving wildcard/alias-of-alias semantics is real, separate
+    future work; kept verbatim so nothing is silently lost."""
+    line_no: int = 0
+    """Same real, source-mapped line tracking as ``PlaneEntry.line_no``."""
+
+
+@dataclass
+class StyleEntry:
+    type_name: str
+    style_names: list[str] = field(default_factory=list)
+    line_no: int = 0
+    """Same real, source-mapped line tracking as ``PlaneEntry.line_no``
+    (see ``_safe_prefix_line_count``) -- used by ``pdklib/magic_tech_
+    writer.py`` to patch this entry's own real line in place."""
+
+    @property
+    def style_names_text(self) -> str:
+        """A plain, space-joined string view of ``style_names`` -- the
+        real GUI form field this dataclass's own list field can't be
+        edited through directly (``gui/simple_list_editor.py``'s
+        ``SimpleListEditor`` only knows plain string fields via
+        ``getattr``/``setattr``, the same reason ``AliasEntry`` keeps
+        its own real members as a single raw string rather than a real
+        list -- see that dataclass's own docstring). The list itself
+        stays the real, structured field every other consumer
+        (``pdklib/magic_tech_writer.py``'s own ``_render_style_line``)
+        reads and writes."""
+
+        return " ".join(self.style_names)
+
+    @style_names_text.setter
+    def style_names_text(self, value: str) -> None:
+        self.style_names = value.split()
+
+
+@dataclass
+class CifOutputLayerMapping:
+    """One real 'calma LAYER DATATYPE' line inside a real cifoutput
+    'layer'/'templayer' NAME ... block -- flattened to one row per
+    real GDS layer/datatype pair, not one row per Magic type name: a
+    real name can have more than one real block/pair (e.g. DNWELL,
+    built across two separate real 'layer DNWELL ...' blocks,
+    confirmed real), the same "flat, one real line per entry" shape
+    every other editable Magic Tech domain already uses, rather than
+    one row per name with an inner, merged list. ``name`` itself
+    (declared on the enclosing real ``layer``/``templayer`` line, not
+    this line) stays real, display-only context -- never written back
+    here.
+
+    **Deliberately editable in place only, no New/Delete** (unlike
+    every other editable Magic Tech domain): the real geometry recipe
+    (``shrink``/``or``/``bloat-all``/...) leading up to a real
+    ``calma`` line is deliberately never modeled anywhere in this
+    module (see this module's own docstring) -- a brand-new Magic type
+    needs a real geometry recipe before a new ``calma`` line would mean
+    anything, which this project has no way to author. Editing an
+    *existing* line's own real layer/datatype is still real, useful,
+    and safe, though -- exactly what's offered here."""
+
+    name: str
+    gds_layer: int
+    gds_datatype: int
+    line_no: int = 0
+    """Same real, source-mapped line tracking as ``PlaneEntry.line_no``
+    (see ``_safe_prefix_line_count``)."""
+
+    @property
+    def gds_layer_text(self) -> str:
+        return str(self.gds_layer)
+
+    @gds_layer_text.setter
+    def gds_layer_text(self, value: str) -> None:
+        parsed = numeric.parse_int(value)
+        if parsed is not None:
+            self.gds_layer = parsed
+
+    @property
+    def gds_datatype_text(self) -> str:
+        return str(self.gds_datatype)
+
+    @gds_datatype_text.setter
+    def gds_datatype_text(self, value: str) -> None:
+        parsed = numeric.parse_int(value)
+        if parsed is not None:
+            self.gds_datatype = parsed
+
+
+@dataclass
+class CifInputIgnoredLayer:
+    """One real 'ignore LAYERNAME' statement from the cifinput section
+    -- a real Magic-type-name to skip entirely on CIF/GDS read. Flat
+    and standalone the same real way ``CifInputLayerHint`` below is
+    (confirmed real: never nested inside a 'layer'/'templayer' recipe
+    block -- ``_parse_cifinput_recipes_with_lines``'s own docstring
+    already excludes real 'ignore' content from being swept into
+    whichever recipe happened to be open)."""
+
+    name: str
+    line_no: int = 0
+    """Same real, source-mapped line tracking as ``PlaneEntry.line_no``
+    (see ``_safe_prefix_line_count``)."""
+
+
+@dataclass
+class CifInputLayerHint:
+    """One real 'calma NAME L D' statement from the cifinput section --
+    unlike cifoutput's own per-recipe CifLayer, this real statement's
+    own NAME token is self-contained, not inherited from an enclosing
+    'layer'/'templayer' recipe block (confirmed real: all 133 real
+    entries sit together in one flat, standalone table, immediately
+    after the last real recipe block, not nested inside any of them).
+    A real Magic-type-name to real GDS-layer/datatype hint used for
+    CIF/GDS-read layer recognition -- the reverse direction of
+    cifoutput's own real mapping."""
+
+    name: str
+    gds_layer: int
+    gds_datatype: int | None
+    """``None`` for a real wildcard datatype (the file's own literal
+    ``*``, confirmed real -- e.g. ``calma BOUND 189 *`` -- meaning "any
+    datatype", not a parsing gap)."""
+    line_no: int = 0
+    """Same real, source-mapped line tracking as ``PlaneEntry.line_no``
+    (see ``_safe_prefix_line_count``)."""
+
+    @property
+    def gds_layer_text(self) -> str:
+        """A plain-string view of the real ``gds_layer`` int -- the
+        first real ``int``-typed editable field anywhere in this
+        module (every other ``SimpleListEditor``-backed domain so far
+        is all-string). ``SimpleListEditor`` only ever writes a plain
+        string via ``setattr`` -- without this property, editing this
+        field even once would silently replace the real int with a
+        string. A non-numeric mid-edit value is ignored (keeps the
+        last real, valid int) rather than raising out of a Tk trace
+        callback."""
+
+        return str(self.gds_layer)
+
+    @gds_layer_text.setter
+    def gds_layer_text(self, value: str) -> None:
+        parsed = numeric.parse_int(value)
+        if parsed is not None:
+            self.gds_layer = parsed
+
+    @property
+    def gds_datatype_text(self) -> str:
+        """Same real reasoning as ``gds_layer_text``, plus the real
+        wildcard convention: the file's own literal ``*`` round-trips
+        through this property as the literal string ``"*"``, matching
+        ``gds_datatype``'s own real ``None`` meaning exactly."""
+
+        return "*" if self.gds_datatype is None else str(self.gds_datatype)
+
+    @gds_datatype_text.setter
+    def gds_datatype_text(self, value: str) -> None:
+        stripped = value.strip()
+        if stripped == "*":
+            self.gds_datatype = None
+            return
+        parsed = numeric.parse_int(stripped)
+        if parsed is not None:
+            self.gds_datatype = parsed
+
+
+@dataclass
+class CifInputOp:
+    """One real op line inside a real cifinput recipe block (e.g.
+    ``and NWELL``, ``grow 1140``, ``not-square``) -- kept fully raw
+    (``verb`` + the line's own remaining raw text), same 'don't guess
+    semantics' discipline as ``ComposeStatement``. Real verbs are not
+    an enumerated, closed set (``and``/``and-not``/``or``/``grow``/
+    ``shrink``/``labels``/``copyup``/``not-square``/``mask-hints``/...
+    all confirmed real) -- whichever real word starts the real line."""
+
+    verb: str
+    args: str
+
+
+@dataclass
+class CifInputRecipeBlock:
+    """One real ``layer NAME <base>``/``templayer NAME <base>`` block
+    from the cifinput section, plus every real op line following it up
+    to the next recognized real boundary (another block, the section's
+    own real ``ignore``/standalone ``calma`` content, or the section's
+    own ``end``) -- an honest, complete real *record* of what this one
+    block says, not a working boolean-geometry interpreter: the ops
+    are never evaluated or composed here.
+
+    **Editable, real header fields only -- ``name``/``kind_text``/
+    ``base_layer``** (see this class's own ``line_no``-analogue,
+    ``start_line``/``end_line``, and ``pdklib/magic_tech_writer.py``'s
+    own docstring for exactly how an edit reconstructs just the
+    header). Real op content (``ops``) stays deliberately read-only,
+    same "don't guess further" scope discipline as everywhere else --
+    this module can't confirm it's safe to let a user *add* an
+    arbitrary real geometry-boolean op line without understanding
+    Magic's own op semantics (unlike a header rename, which is purely
+    positional text). **One entry per real block *occurrence*, not
+    merged by name** -- a real Magic type's own recipe can be built
+    across more than one real, textually-separated block sharing the
+    same NAME (confirmed real -- e.g. real ``nwell`` has two real,
+    separate ``layer nwell ...`` blocks at different points in the
+    file, each with its own real base layer: ``NWELL,WELLPIN`` and,
+    later, ``schottkyarea``) -- the same real structural fact
+    ``cifoutput``'s own ``CifOutputLayerMapping`` already flattens to
+    one row per real occurrence, rather than merging occurrences into
+    one entry with an inner list the way this class used to (as
+    ``CifInputRecipe``) before write-back needed a real, individually
+    addressable position per occurrence."""
+
+    name: str
+    is_templayer: bool
+    """A real ``templayer`` is Magic's own real, intermediate/working
+    layer (not directly emitted); a real ``layer`` is a real,
+    permanent one -- confirmed real distinction, not asserted
+    semantics beyond the keyword itself."""
+    base_layer: str = ""
+    """Raw, e.g. "NWELL,WELLPIN" -- this one real block occurrence's
+    own real base layer(s), not decomposed further."""
+    ops: list[CifInputOp] = field(default_factory=list)
+    """Every real op line belonging to this one real block occurrence,
+    in real file order -- read-only (see this class's own docstring)."""
+    start_line: int = 0
+    end_line: int = 0
+    """The real, 1-indexed line range this block's own real source
+    spans (both inclusive) -- the header line through its own last
+    real op line, same real range-tracking shape as
+    ``ExtractDevice.start_line``/``end_line``."""
+
+    @property
+    def kind_text(self) -> str:
+        """A plain-string view of ``is_templayer`` -- ``"templayer"``
+        or ``"layer"``, the real keyword itself -- same real reason
+        ``ExtractPlaneOrder.order_text`` exists for a non-string
+        field."""
+
+        return "templayer" if self.is_templayer else "layer"
+
+    @kind_text.setter
+    def kind_text(self, value: str) -> None:
+        self.is_templayer = value.strip() == "templayer"
+
+
+@dataclass
+class ComposeStatement:
+    """One real 'compose|decompose|paint <arg1> <arg2> <arg3>'
+    statement from the compose section. Argument *semantics* (which
+    slot means e.g. "result" vs. "under"/"over") are deliberately not
+    asserted -- no authoritative real source for Magic's own
+    compose-section argument order was available to confirm against
+    this pass; kept raw and positional, the same 'don't guess'
+    discipline ``AliasEntry.members_raw`` already uses."""
+
+    verb: str
+    args: tuple[str, str, str]
+    line_no: int = 0
+    """Same real, source-mapped line tracking as ``PlaneEntry.line_no``
+    (see ``_safe_prefix_line_count``)."""
+
+    @property
+    def arg1(self) -> str:
+        """A plain-string view of ``args[0]`` -- the real GUI form
+        field this dataclass's own fixed 3-tuple can't be edited
+        through directly (``gui/simple_list_editor.py``'s
+        ``SimpleListEditor`` only knows plain string fields via
+        ``getattr``/``setattr``, the same real reason ``StyleEntry``
+        exposes its own list field through ``style_names_text``
+        instead of editing it directly)."""
+
+        return self.args[0]
+
+    @arg1.setter
+    def arg1(self, value: str) -> None:
+        self.args = (value, self.args[1], self.args[2])
+
+    @property
+    def arg2(self) -> str:
+        return self.args[1]
+
+    @arg2.setter
+    def arg2(self, value: str) -> None:
+        self.args = (self.args[0], value, self.args[2])
+
+    @property
+    def arg3(self) -> str:
+        return self.args[2]
+
+    @arg3.setter
+    def arg3(self, value: str) -> None:
+        self.args = (self.args[0], self.args[1], value)
+
+
+@dataclass
+class ConnectRule:
+    """One real connectivity-equivalence line from the connect
+    section: two real, raw comma-separated Magic type-lists (wildcard
+    prefixes kept verbatim, not resolved) that this technology's
+    connectivity model treats as electrically connectable."""
+
+    types_a: str
+    types_b: str
+    line_no: int = 0
+    """Same real, source-mapped line tracking as ``PlaneEntry.line_no``
+    (see ``_safe_prefix_line_count``)."""
+
+
+@dataclass
+class MagicDrcCheck:
+    """One real 'width'/'spacing'/'maxwidth' statement from the drc
+    section -- see this module's own docstring for the real,
+    empirically-confirmed value -> micron conversion and real
+    match-rate numbers. **Editable, with a real prerequisite fixed
+    first**: a real, confirmed `mode`/exception-list filler token (or
+    tokens) routinely sits between the numeric value and the quoted
+    message (e.g. `touching_ok`/`touching_illegal`/`surround_ok`/
+    `bend_ok`/`both`, sometimes followed by a real comma-separated
+    exception layer list) -- previously matched by a non-capturing
+    regex group and silently discarded, never modeled anywhere. Making
+    this domain editable without capturing that content first would
+    have silently dropped it on any edit; ``filler_raw`` below closes
+    that gap."""
+
+    check_type: str
+    """"width", "spacing", or "maxwidth"."""
+    layer_args: list[list[str]]
+    """One raw, comma-split real Magic type-list for "width"/
+    "maxwidth"; two for "spacing" (layer1, layer2)."""
+    value_um: float
+    message: str
+    rule_ids_raw: str | None
+    """Raw text of a trailing '(...)' in the message, when present
+    (e.g. "NW.b", or a real compound case like "Sal.c + Sal.d") --
+    kept as one raw string, not split, since a compound case doesn't
+    cleanly separate into independent rule IDs without guessing.
+    Read-only derived from ``message`` (which already contains this
+    same text) -- editing ``message`` is the one real way to change a
+    rule ID, so this field is never separately written back."""
+    filler_raw: str = ""
+    """The real, raw `mode`/exception-list text between the numeric
+    value and the quoted message, stripped of trailing whitespace, or
+    ``""`` when a real line has none (some do, e.g. every real
+    `spacing dnwell dnwell ...` line goes straight to `touching_ok`
+    with no further exception list). Kept fully raw and positional,
+    same 'don't guess further semantics' discipline as
+    ``ComposeStatement``/``ExtractMiscStatement`` -- this project
+    doesn't assert what a given mode keyword means or which layers in
+    an exception list play which role."""
+    start_line: int = 0
+    end_line: int = 0
+    """The real, 1-indexed line range this entry's own real source
+    spans (both inclusive) -- real `width`/`spacing`/`maxwidth` lines
+    wrap across physical lines far more often than `device`/`angles`
+    do (confirmed real: a real backslash continuation can split
+    anywhere -- mid layer-list, before the filler, or right before the
+    quoted message), so every entry here is range-tracked the same way
+    regardless of whether a given real line happens to wrap. Same real
+    range-tracking shape as ``ExtractDevice.start_line``/``end_line``
+    (see that dataclass's own docstring for why a range, not a single
+    ``line_no``)."""
+
+    @property
+    def layers_text(self) -> str:
+        """A plain-string view of ``layer_args`` -- one comma-joined
+        real type-list per group, ` | `-separated between groups (one
+        group for width/maxwidth, two for spacing) -- the same real
+        shape the read-only Treeview already rendered this as before
+        this domain gained an editor."""
+
+        return " | ".join(",".join(group) for group in self.layer_args)
+
+    @layers_text.setter
+    def layers_text(self, value: str) -> None:
+        self.layer_args = [group.split(",") for group in value.split(" | ")]
+
+    @property
+    def value_text(self) -> str:
+        """A plain-string view of ``value_um`` -- same real reason
+        ``ExtractResist.milliohms_text`` exists. The real, empirically-
+        confirmed ``/1000`` file-unit-to-micron conversion (see this
+        module's own docstring) is reversed at write-back time, in
+        ``pdklib/magic_tech_writer.py``, not here."""
+
+        return f"{self.value_um:g}"
+
+    @value_text.setter
+    def value_text(self, value: str) -> None:
+        parsed = numeric.parse_number(value)
+        if parsed is not None:
+            self.value_um = parsed
+
+
+@dataclass
+class MagicAngleCheck:
+    """One real 'angles <layer> <degrees> "message"' statement from
+    the drc section -- a real permitted-angle constraint. Deliberately
+    a separate dataclass from ``MagicDrcCheck``, not folded into its
+    own ``value_um`` field: a real angle is a plain degree count
+    (45/90), not a length, so the real, empirically-confirmed
+    ``/1000`` micron conversion ``width``/``spacing``/``maxwidth`` use
+    would be a real, silent unit lie if applied here. **The only real
+    drc-section construct this parser makes editable** -- unlike
+    ``width``/``spacing``/``maxwidth``, a real ``angles`` line never
+    carries the real, currently-unmodeled ``mode``/exception-list
+    filler tokens those three do (confirmed real: every one of the 17
+    real ``angles`` lines goes straight from ``degrees`` to the quoted
+    message), so nothing real would be silently dropped on an edit --
+    editing those three safely needs that filler content captured
+    first, real separate future work (see this module's own
+    docstring)."""
+
+    layer: str
+    degrees: int
+    message: str
+    start_line: int = 0
+    end_line: int = 0
+    """The real, 1-indexed line range this entry's own real source
+    spans (both inclusive) -- a single-line real entry has
+    ``start_line == end_line``; one real entry (`allm7`) is confirmed
+    real to wrap across two real physical lines via a trailing ``\\``
+    continuation. Same real range-tracking shape as
+    ``ExtractDevice.start_line``/``end_line`` (see that dataclass's own
+    docstring for why a range, not a single ``line_no``)."""
+
+    @property
+    def degrees_text(self) -> str:
+        """A plain-string view of ``degrees`` -- same real reason
+        ``ExtractPlaneOrder.order_text`` exists."""
+
+        return str(self.degrees)
+
+    @degrees_text.setter
+    def degrees_text(self, value: str) -> None:
+        parsed = numeric.parse_int(value)
+        if parsed is not None:
+            self.degrees = parsed
+
+
+@dataclass
+class MagicDrcMiscStatement:
+    """One real drc-section statement whose own real keyword isn't
+    ``width``/``spacing``/``maxwidth``/``angles`` -- confirmed real,
+    directive-by-directive, not assumed uniform: ``surround`` (39 real
+    lines)/``edge4way`` (24)/``widespacing`` (21)/``cifmaxwidth`` (15)/
+    ``area`` (12)/``cifwidth`` (9)/``exact_overlap`` (8)/
+    ``cifspacing`` (6)/``overhang`` (5)/``extend`` (5)/``rect_only``
+    (2)/``cifarea`` (1)/``no_overlap`` (1), 148 real lines total, none
+    even close to dominant the way ``width``/``spacing``/``maxwidth``
+    already were -- the same real conclusion ``pdklib/drc.py``'s own
+    KLayout-deck extractor separately reached for its own remaining
+    skipped constructs (see that module's own docstring). Each real
+    directive carries a genuinely different real argument shape
+    (single vs. paired real layer-boolean expressions, one vs. two
+    real threshold values, an optional real trailing mode/exception-
+    list filler, ...) -- not uniform enough to justify a bespoke,
+    semantically-aware parser per directive the way ``width``/
+    ``spacing``/``maxwidth`` already have one shared shape. Kept fully
+    raw and positional instead -- ``directive`` plus its own remaining
+    ``args`` -- the same "don't guess further" discipline
+    ``ComposeStatement``/``ExtractMiscStatement`` already established,
+    not a working DRC-rule interpreter; a quoted trailing message (most
+    real lines carry one) is not treated specially either, just more
+    whitespace-split tokens in ``args``, since round-trip for an
+    *unedited* real entry always preserves its own original source
+    verbatim (see ``pdklib/magic_tech_writer.py``'s own
+    ``_render_drc_misc_range``) -- only a deliberate edit re-splits
+    ``args_text``, the same real tradeoff ``ExtractDevice.rest_text``
+    already accepts.
+
+    **Deliberately excludes** real ``variants (fast),(full)``/
+    ``style ...``/``scalefactor ...``/``cifstyle ...`` lines, despite
+    also being currently-unparsed real drc-section content: those are
+    real section-level directives (conditional PVT-corner scoping, or
+    one-time style/scale declarations that apply to the whole section,
+    not to one rule), a fundamentally different real *kind* of line,
+    not merely a differently-shaped one -- lumping them in here would
+    misrepresent what they are, the same real distinction this
+    project's own `extract`-section work already draws between a real
+    ``variants (...)`` block (scope, not a statement) and the real
+    statements repeating inside it."""
+
+    directive: str
+    args: tuple[str, ...] = ()
+    start_line: int = 0
+    end_line: int = 0
+    """Same real range-tracking shape as ``MagicDrcCheck.start_line``/
+    ``end_line`` -- confirmed real: the large majority of these 148
+    real *entries* (103 of them -- 100 real two-line, 3 real
+    three-line) wrap across more than one real physical line via a
+    trailing ``\\`` continuation, even more often than ``width``/
+    ``spacing``/``maxwidth`` do."""
+
+    @property
+    def args_text(self) -> str:
+        """A plain-string view of ``args`` -- same real reason
+        ``ExtractMiscStatement.args_text``/``ExtractDevice.rest_text``
+        exist."""
+
+        return " ".join(self.args)
+
+    @args_text.setter
+    def args_text(self, value: str) -> None:
+        self.args = tuple(value.split())
+
+
+@dataclass
+class ExtractResist:
+    """One real per-layer sheet-resistance value from the extract
+    section (milliohms/square, per the real file's own comment). Real
+    layers can repeat across different real PVT-corner ``variants``
+    blocks (confirmed: IHP's own hvndiffres/active appears three times
+    with three different real values) -- kept as a flat list, not a
+    name-keyed dict, so no real corner value is silently dropped."""
+
+    layer_spec: str
+    """Raw, e.g. "(allm1)/metal1" -- not decomposed further."""
+    milliohms_per_square: int
+    line_no: int = 0
+    """Same real, source-mapped line tracking as
+    ``ExtractPlaneOrder.line_no`` (see ``_safe_prefix_line_count``)."""
+
+    @property
+    def milliohms_text(self) -> str:
+        """A plain-string view of ``milliohms_per_square`` -- the real
+        GUI form field this dataclass's own ``int`` field can't be
+        edited through directly, same real reason
+        ``ExtractPlaneOrder.order_text`` exists. Invalid mid-edit text
+        is simply ignored (keeps the last real, valid value)."""
+
+        return str(self.milliohms_per_square)
+
+    @milliohms_text.setter
+    def milliohms_text(self, value: str) -> None:
+        parsed = numeric.parse_int(value)
+        if parsed is not None:
+            self.milliohms_per_square = parsed
+
+
+@dataclass
+class ExtractPlaneOrder:
+    """One real 'planeorder <name> <int>' line from the extract
+    section -- unlike ``ExtractResist``/``ExtractMiscStatement``'s own
+    ``contact`` entries, confirmed real to sit *before* the section's
+    first real ``variants (...)`` line (no real repeat-per-corner
+    wrinkle here), the same flat, single-occurrence-per-name shape
+    ``PlaneEntry`` already has."""
+
+    name: str
+    order: int
+    line_no: int = 0
+    """Same real, source-mapped line tracking as
+    ``ExtractMiscStatement.line_no`` (see ``_safe_prefix_line_count``)."""
+
+    @property
+    def order_text(self) -> str:
+        """A plain-string view of ``order`` -- the real GUI form field
+        this dataclass's own ``int`` field can't be edited through
+        directly, same real reason ``CifInputLayerHint`` exposes
+        ``gds_layer_text`` instead of its own ``int`` field. Invalid
+        mid-edit text is simply ignored (keeps the last real, valid
+        value), same discipline as that property."""
+
+        return str(self.order)
+
+    @order_text.setter
+    def order_text(self, value: str) -> None:
+        parsed = numeric.parse_int(value)
+        if parsed is not None:
+            self.order = parsed
+
+
+@dataclass
+class ExtractCapCoefficient:
+    """One real 'defaultoverlap'/'defaultsideoverlap'/'defaultareacap'/
+    'defaultperimeter'/'defaultsidewall' line from the extract
+    section -- a real parasitic-capacitance coefficient. Argument
+    *semantics* (which token means e.g. "over" vs "under", or which
+    physical quantity a trailing number is) are deliberately not
+    asserted -- no authoritative real source was available this pass
+    to cross-check against (unlike the ``drc`` section's own
+    empirically-confirmed ``/1000`` unit factor) -- kept raw and
+    positional, same 'don't guess further' discipline
+    ``ComposeStatement``/``AliasEntry`` already use. Every real line
+    for a given ``directive`` has the exact same real token count
+    (confirmed by direct inspection, not assumed), so ``args``/
+    ``values`` split at a fixed, real, per-directive position -- see
+    ``_EXTRACT_CAP_DIRECTIVES``. Real entries can repeat across
+    different real PVT-corner ``variants`` blocks, the same real fact
+    ``ExtractResist``/``ExtractMiscStatement``'s own ``contact`` rows
+    already document (confirmed real: IHP's own
+    ``defaultsidewall allpoly active`` appears three times with three
+    different real value pairs)."""
+
+    directive: str
+    args: tuple[str, ...]
+    values: tuple[float, ...]
+    line_no: int = 0
+    """Same real, source-mapped line tracking as
+    ``ExtractResist.line_no`` (see ``_safe_prefix_line_count``)."""
+
+    @property
+    def args_text(self) -> str:
+        """A plain-string view of ``args`` -- same real reason
+        ``ExtractMiscStatement.args_text`` exists."""
+
+        return " ".join(self.args)
+
+    @args_text.setter
+    def args_text(self, value: str) -> None:
+        self.args = tuple(value.split())
+
+    @property
+    def values_text(self) -> str:
+        """A plain-string view of ``values`` -- same real reason
+        ``ExtractPlaneOrder.order_text`` exists, generalized to more
+        than one real number. Comma-separated for readability, matching
+        the read-only rendering this domain already had before gaining
+        an editor."""
+
+        return ", ".join(f"{v:g}" for v in self.values)
+
+    @values_text.setter
+    def values_text(self, value: str) -> None:
+        tokens = value.replace(",", " ").split()
+        parsed = [numeric.parse_number(token) for token in tokens]
+        if all(v is not None for v in parsed):
+            self.values = tuple(parsed)
+
+
+@dataclass
+class ExtractDevice:
+    """One real 'device <class> <model> <type> ...' statement from the
+    extract section's own real transistor/resistor/capacitor-model
+    mini-language. ``devclass``/``model``/``type_name`` are real,
+    confirmed-positional fields (always tokens 2/3/4 across all 50 real
+    entries); everything after is kept raw and positional (a mix of
+    real terminal-layer references and 'key=value' parameter mappings)
+    -- same 'don't guess further semantics' discipline as
+    ``ExtractCapCoefficient``. **Real lines can wrap across multiple
+    physical lines with a trailing '\\'** (5 of the real 50 entries do,
+    confirmed real, not assumed -- every real MOSFET ``msubcircuit``
+    entry) -- a genuinely different real shape from every other
+    editable ``extract``-section domain, none of which ever wrap. Kept
+    as a real, source-mapped *range* (``start_line``/``end_line``),
+    not a single ``line_no`` the way every flat, one-physical-line
+    domain here uses, mirroring ``pdklib/lef.py``'s own
+    ``LefPin.start_line``/``LefMacro.all_parsed_pin_ranges`` real
+    range-tracking precedent rather than inventing a new shape."""
+
+    devclass: str
+    model: str
+    type_name: str
+    rest: tuple[str, ...]
+    start_line: int = 0
+    end_line: int = 0
+    """The real, 1-indexed line range this entry's own real source
+    spans (both inclusive) -- a single-line real entry has
+    ``start_line == end_line``; a real, backslash-wrapped one spans
+    more than one. ``0`` when not safely mappable back to real file
+    line numbers (see ``_safe_prefix_line_count``), same as every
+    other domain's own ``line_no``."""
+
+    @property
+    def rest_text(self) -> str:
+        """A plain-string view of ``rest`` -- same real reason
+        ``ExtractMiscStatement.args_text`` exists."""
+
+        return " ".join(self.rest)
+
+    @rest_text.setter
+    def rest_text(self, value: str) -> None:
+        self.rest = tuple(value.split())
+
+
+@dataclass
+class ExtractMiscStatement:
+    """One real 'contact'/'devresist'/'antenna'/'disconnect'/
+    'substrate' line from the extract section -- each real, small
+    (2-24 real lines) and uniformly shaped enough (every real line for
+    a given directive shares the exact same real token count, confirmed
+    directly, not assumed) that all five share one generic, raw,
+    positional shape rather than five near-identical dataclasses.
+    Argument semantics deliberately not asserted, same discipline as
+    ``ExtractCapCoefficient``/``ComposeStatement``.
+
+    **A real, confirmed wrinkle shared with ``ExtractResist``, not a
+    complication unique to it**: a real ``contact`` line also repeats
+    across the extract section's own real ``variants (...)``
+    PVT-corner blocks (confirmed real: IHP's own ``contact
+    alldiffcont`` appears three times, once per corner, with three
+    different real values) -- this domain's own real, flat,
+    line-number-keyed write-back (see ``pdklib/magic_tech_writer.py``)
+    handles that the same way ``CifOutputLayerMapping``'s own repeated
+    ``DNWELL`` rows already do: each real occurrence is its own real,
+    independently-editable row, with no attempt made here to resolve or
+    label *which* real corner a given row belongs to (that's the same
+    real ``variants`` semantic interpretation this project's own DRC-
+    deck work has deliberately deferred elsewhere -- see README's own
+    Future Work)."""
+
+    directive: str
+    args: tuple[str, ...]
+    line_no: int = 0
+    """Same real, source-mapped line tracking as
+    ``ComposeStatement.line_no``/``ConnectRule.line_no`` (see
+    ``_safe_prefix_line_count``)."""
+
+    @property
+    def args_text(self) -> str:
+        """A plain-string view of ``args`` -- the real GUI form field
+        this dataclass's own variable-length tuple can't be edited
+        through directly, same real reason ``StyleEntry`` exposes
+        ``style_names_text`` instead of its own list field."""
+
+        return " ".join(self.args)
+
+    @args_text.setter
+    def args_text(self, value: str) -> None:
+        self.args = tuple(value.split())
+
+
+@dataclass
+class MagicTechnology:
+    source_path: Path
+    included_files: list[str] = field(default_factory=list)
+    name: str = ""
+    format: int | None = None
+    version: str = ""
+    description: str = ""
+    requires: str = ""
+    planes: list[PlaneEntry] = field(default_factory=list)
+    types: list[TypeEntry] = field(default_factory=list)
+    contacts: list[ContactEntry] = field(default_factory=list)
+    aliases: list[AliasEntry] = field(default_factory=list)
+    styles: list[StyleEntry] = field(default_factory=list)
+    cif_layers: list[CifOutputLayerMapping] = field(default_factory=list)
+    cifinput_ignored_layers: list[CifInputIgnoredLayer] = field(default_factory=list)
+    """Real 'ignore LAYERNAME' statements from the cifinput section."""
+    cifinput_layer_hints: list[CifInputLayerHint] = field(default_factory=list)
+    """Real, standalone 'calma NAME L D' statements from the cifinput
+    section -- see ``CifInputLayerHint``'s own docstring."""
+    cifinput_recipes: list[CifInputRecipeBlock] = field(default_factory=list)
+    """Real 'layer'/'templayer' geometry-boolean recipe blocks, one
+    entry per real block occurrence -- see ``CifInputRecipeBlock``'s
+    own docstring."""
+    compose: list[ComposeStatement] = field(default_factory=list)
+    connect: list[ConnectRule] = field(default_factory=list)
+    drc_checks: list[MagicDrcCheck] = field(default_factory=list)
+    drc_angle_checks: list[MagicAngleCheck] = field(default_factory=list)
+    """Real 'angles' statements -- see ``MagicAngleCheck``'s own
+    docstring for why these are a separate list, not folded into
+    ``drc_checks``."""
+    drc_misc: list[MagicDrcMiscStatement] = field(default_factory=list)
+    """Every other real drc-section statement -- ``surround``/
+    ``edge4way``/``widespacing``/``cifmaxwidth``/... -- see
+    ``MagicDrcMiscStatement``'s own docstring."""
+    drc_skipped: list[str] = field(default_factory=list)
+    """Real 'width'/'spacing'/'maxwidth'/'angles' lines found but not
+    matched -- e.g. the one real, confirmed defect in IHP's own file
+    (a message string missing its closing quote). Every *other* real
+    drc-section construct (surround/edge4way/variants/...) was never
+    attempted and isn't listed here -- see this module's own
+    docstring."""
+    extract_resist: list[ExtractResist] = field(default_factory=list)
+    extract_plane_order: list[ExtractPlaneOrder] = field(default_factory=list)
+    extract_cap_coefficients: list[ExtractCapCoefficient] = field(default_factory=list)
+    """Real defaultoverlap/defaultsideoverlap/defaultareacap/
+    defaultperimeter/defaultsidewall lines -- see
+    ``ExtractCapCoefficient``'s own docstring."""
+    extract_devices: list[ExtractDevice] = field(default_factory=list)
+    """Real 'device ...' statements -- see ``ExtractDevice``'s own
+    docstring."""
+    extract_misc: list[ExtractMiscStatement] = field(default_factory=list)
+    """Real 'contact'/'devresist'/'antenna'/'disconnect'/'substrate'
+    statements -- see ``ExtractMiscStatement``'s own docstring."""
+    unparsed_sections: list[str] = field(default_factory=list)
+    """Real section names found (directly or via include) that this
+    pass deliberately does not parse -- see this module's own
+    docstring for why."""
+    all_parsed_type_line_nos: list[int] = field(default_factory=list)
+    """Every real type's own line number as originally parsed, in real
+    file order -- unlike ``types``, never mutated by editing (New/
+    Delete Type); mirrors ``pdklib/lef.py``'s ``LefMacro.
+    all_parsed_pin_ranges``, used by ``pdklib/magic_tech_writer.py`` to
+    tell a real deleted type apart from a comment/blank-line gap.
+    Excludes any real type line this parser couldn't safely map back
+    to ``source_path``'s own line numbers (see
+    ``_safe_prefix_line_count``)."""
+    types_section_start_line: int = 0
+    """The real, 1-indexed line number of the ``types`` keyword
+    itself, in ``source_path`` -- ``0`` if the real ``types`` section
+    wasn't found at a safely-mappable position (see
+    ``_safe_prefix_line_count``'s own docstring); write-back leaves the
+    whole file untouched in that case rather than guess."""
+    types_section_end_line: int = 0
+    """The real, 1-indexed line number of the ``types`` section's own
+    closing ``end``, in ``source_path``."""
+    all_parsed_plane_line_nos: list[int] = field(default_factory=list)
+    planes_section_start_line: int = 0
+    planes_section_end_line: int = 0
+    all_parsed_contact_line_nos: list[int] = field(default_factory=list)
+    contacts_section_start_line: int = 0
+    contacts_section_end_line: int = 0
+    all_parsed_alias_line_nos: list[int] = field(default_factory=list)
+    aliases_section_start_line: int = 0
+    aliases_section_end_line: int = 0
+    """Planes/Contacts/Aliases each get the exact same real
+    line-tracking bookkeeping as ``types`` above (see
+    ``all_parsed_type_line_nos``/``types_section_start_line``/
+    ``types_section_end_line``'s own docstrings) -- confirmed real,
+    not assumed: all three sections sit in ``ihp-sg13g2.tech`` well
+    before its first real ``include`` line, the same safely-mappable
+    real region ``types`` itself already relies on."""
+    all_parsed_style_line_nos: list[int] = field(default_factory=list)
+    styles_section_start_line: int = 0
+    styles_section_end_line: int = 0
+    """Same real bookkeeping, for ``styles`` -- also confirmed to sit
+    well before the first real ``include`` line in both real ``.tech``
+    files that have one (``ihp-sg13g2.tech`` and ``ihp-sg13g2-GDS.
+    tech``, the latter with no real ``include`` line at all). Unlike
+    Planes/Contacts/Aliases, a real ``styles`` section also carries one
+    real, non-entry ``styletype NAME`` header line right after its own
+    opening keyword -- handled for free by ``_scan_single_line_section``
+    's own generic "not a real entry, copy verbatim" gap logic (see
+    ``_parse_style_line`` below), not a special case."""
+    all_parsed_compose_line_nos: list[int] = field(default_factory=list)
+    compose_section_start_line: int = 0
+    compose_section_end_line: int = 0
+    all_parsed_connect_line_nos: list[int] = field(default_factory=list)
+    connect_section_start_line: int = 0
+    connect_section_end_line: int = 0
+    """Same real bookkeeping, for ``compose``/``connect`` -- confirmed
+    real, not assumed: both sections (535-591/597-621 in IHP's own real
+    ``ihp-sg13g2.tech``) also sit well before its first real ``include``
+    line, the same safely-mappable region every other editable domain
+    already relies on. Both are flat, one-real-line-per-entry sections
+    (``verb arg1 arg2 arg3`` / ``types_a types_b``) -- no special-case
+    gap logic needed the way ``styles`` needs for its own header line."""
+    all_parsed_cifinput_ignore_line_nos: list[int] = field(default_factory=list)
+    all_parsed_cifinput_hint_line_nos: list[int] = field(default_factory=list)
+    all_parsed_cifinput_recipe_ranges: list[tuple[int, int]] = field(default_factory=list)
+    """Every real recipe block's own ``(start_line, end_line)`` range
+    as originally parsed, in real file order -- the range-based
+    analogue of ``all_parsed_cifinput_ignore_line_nos``/etc. above (see
+    ``all_parsed_extract_device_ranges``'s own docstring for why a
+    range, not a single line number, for ``CifInputRecipeBlock``)."""
+    cifinput_section_start_line: int = 0
+    cifinput_section_end_line: int = 0
+    """Real bookkeeping for ``cifinput``'s own three sub-structures
+    (ignored layers, layer hints, and now recipe blocks' own header
+    fields -- ``CifInputRecipeBlock``) -- **a real structural difference
+    from every other editable domain above**: ``cifinput`` doesn't live
+    in ``ihp-sg13g2.tech`` itself, it's spliced in from a separate real
+    file, ``ihp-sg13g2-cifin.tech``, via ``include``. When parsed *as
+    part of* ``ihp-sg13g2.tech``'s own combined view, its real lines
+    sit well past that file's own ``safe_through`` boundary (the first
+    real ``include`` line), so ``line_no``/these section bounds
+    correctly come back ``0`` there -- refusing to guess, not a bug --
+    and write-back for that parse correctly leaves this domain
+    untouched. ``ihp-sg13g2-cifin.tech`` is also independently
+    parseable as its own real file, though (``find_tech_files`` globs
+    it too, same as every other real ``.tech`` file) -- confirmed to
+    have no real ``include`` line of its own, so *that* parse's own
+    ``cifinput`` content **is** safely, fully mappable, using the exact
+    same machinery. The only real gap this closes is visibility:
+    ``ihp-sg13g2-cifin.tech`` has no real ``tech``/``version`` header
+    of its own, so it used to be silently filtered out of the
+    Technology picker entirely; ``gui/magic_tech_view.py`` now falls
+    back to the real file's own stem as a display name so it (and
+    every other nameless fragment) shows up and can be selected,
+    without inventing a fake real ``tech.name``. All three
+    sub-structures share these same section bounds (one real
+    ``cifinput``...``end`` block, confirmed real: the ignored-layers/
+    layer-hints tables are not nested inside any ``layer``/
+    ``templayer`` recipe block) -- ``pdklib/magic_tech_writer.py``'s
+    own ``render_tech_file`` was generalized to combine multiple,
+    independently-tracked sub-structures into one real patch pass over
+    a shared section, not two separate, mutually-clobbering passes over
+    the same real lines; recipe blocks are a real *ranged* group in
+    that same combined pass (see ``_render_section_patch``'s own
+    docstring, generalized for ``ExtractDevice``), unlike the other
+    two, which are flat, single-line groups."""
+    all_parsed_cif_layer_line_nos: list[int] = field(default_factory=list)
+    cifoutput_section_start_line: int = 0
+    cifoutput_section_end_line: int = 0
+    """Same real bookkeeping, for ``cifoutput``'s own flat, editable-
+    in-place ``calma`` lines (``CifOutputLayerMapping``) -- structurally
+    the same real "spliced in from a separate real file" situation as
+    ``cifinput`` above (``ihp-sg13g2-cifout.tech`` this time), same real
+    resolution: safely, fully mappable when that real file is parsed
+    directly, correctly ``0`` when parsed as part of ``ihp-sg13g2.tech``
+    's own combined view."""
+    all_parsed_extract_misc_line_nos: list[int] = field(default_factory=list)
+    all_parsed_extract_plane_order_line_nos: list[int] = field(default_factory=list)
+    all_parsed_extract_resist_line_nos: list[int] = field(default_factory=list)
+    all_parsed_extract_cap_coefficient_line_nos: list[int] = field(default_factory=list)
+    all_parsed_extract_device_ranges: list[tuple[int, int]] = field(default_factory=list)
+    """Every real device's own ``(start_line, end_line)`` range as
+    originally parsed, in real file order -- the range-based analogue
+    of ``all_parsed_extract_misc_line_nos``/etc. above, mirroring
+    ``pdklib/lef.py``'s own ``LefMacro.all_parsed_pin_ranges``: used by
+    ``pdklib/magic_tech_writer.py`` to tell a real deleted device apart
+    from a comment/blank-line gap, the same way the flat domains' own
+    ``all_line_nos`` lists are, generalized from a single line to a
+    real, possibly multi-line span."""
+    extract_section_start_line: int = 0
+    extract_section_end_line: int = 0
+    """Real bookkeeping for the ``extract`` section's own five
+    editable sub-structures, ``ExtractMiscStatement`` (``contact``/
+    ``devresist``/``antenna``/``disconnect``/``substrate``),
+    ``ExtractPlaneOrder`` (``planeorder``), ``ExtractResist``
+    (``resist``), ``ExtractCapCoefficient`` (the four ``default*``
+    directives), and ``ExtractDevice`` (``device``) -- **structurally
+    the same real "spliced in from a separate real file" situation as
+    cifinput/cifoutput above**: the real ``extract`` section doesn't
+    live in ``ihp-sg13g2.tech`` itself, it's spliced in from
+    ``ihp-sg13g2-extract.tech`` via ``include`` (confirmed real: that
+    fragment file has no real ``include`` line of its own, so its own
+    content is safely, fully mappable when parsed directly -- same
+    resolution as cifinput/cifoutput, no new mechanism needed). All
+    five sub-structures share these same section bounds (one real
+    ``extract``...``end`` block) the same way cifinput's own
+    ignored-layers/layer-hints tables already share one section -- see
+    ``pdklib/magic_tech_writer.py``'s own docstring for how write-back
+    handles a section with more than one independently-tracked group,
+    now generalized further to also merge a real *ranged* group
+    (``ExtractDevice``) into that same combined pass. Every real
+    extract-section construct this parser recognizes is now editable
+    -- this section has no remaining read-only real content of its own
+    (see this module's own docstring for exactly what's extracted).
+    ``resist`` and ``ExtractCapCoefficient``'s own ``default*``
+    directives can each repeat once per real ``variants (...)`` corner
+    block with a different value each time (confirmed real: IHP's own
+    ``hvndiffres/active`` and ``defaultsidewall allpoly active`` both
+    appear three times) -- modeled the same way ``ExtractMiscStatement``'s
+    own repeated ``contact`` rows already are, as independent,
+    individually-tracked rows, no attempt to resolve which corner a
+    given row belongs to; ``planeorder`` alone is confirmed real to sit
+    before the section's own first real ``variants (...)`` line, so it
+    never repeats this way. ``device``'s own real ``type_name`` *can*
+    repeat too (confirmed real: e.g. ``pfet``/``nfet``/``hvpfet``/
+    ``hvnfet`` each appear as both a real ``msubcircuit`` and a real
+    ``mosfet`` entry) -- a different real reason than a PVT corner
+    (two distinct real device classes modeling the same real type),
+    handled the exact same way regardless: every real occurrence is
+    its own independent, individually-ranged entry, same as
+    ``CifOutputLayerMapping``'s own repeated ``DNWELL`` rows."""
+    all_parsed_drc_angle_ranges: list[tuple[int, int]] = field(default_factory=list)
+    all_parsed_drc_check_ranges: list[tuple[int, int]] = field(default_factory=list)
+    all_parsed_drc_misc_ranges: list[tuple[int, int]] = field(default_factory=list)
+    drc_section_start_line: int = 0
+    drc_section_end_line: int = 0
+    """Same real range-based bookkeeping as
+    ``all_parsed_extract_device_ranges``/``extract_section_start_line``/
+    ``extract_section_end_line`` above, for the real ``drc`` section's
+    own real ``angles`` statements (``MagicAngleCheck``) and
+    ``width``/``spacing``/``maxwidth`` statements (``MagicDrcCheck``,
+    now that ``filler_raw`` closes the real gap that kept it read-only
+    -- see that dataclass's own docstring) -- structurally the same
+    real "spliced in from a separate real file" situation
+    (``ihp-sg13g2-drc.tech``, confirmed real: no ``include`` line of
+    its own, spans lines 23-970 there). Both real sub-structures share
+    this same section, the same "one section, more than one
+    independently-tracked group" shape ``extract``'s own five
+    sub-structures already established. Every real drc-section
+    construct this parser recognizes is now editable -- this section
+    has no remaining read-only content of its own (real
+    `surround`/`edge4way`/`variants`/... constructs remain entirely
+    unparsed, not merely read-only -- see this module's own docstring
+    for why)."""
+
+
+def find_tech_files(pdk_root: Path) -> list[Path]:
+    return sorted((pdk_root / "libs.tech" / "magic").glob("*.tech"))
+
+
+_TECH_SKELETON_TEMPLATE = """tech
+  format 35
+  {name}
+end
+
+version
+ version 0.1.0
+ description "New technology -- edit this description"
+end
+
+planes
+end
+
+types
+end
+
+contact
+end
+
+aliases
+end
+"""
+
+
+def create_new_tech_file(path: Path) -> None:
+    """Writes a minimal, valid, real Magic ``.tech`` skeleton: real
+    ``tech``/``version`` header sections (so it parses as a real,
+    named technology, using *path*'s own stem as the real technology
+    name -- ``tech.name`` below) plus real, empty ``planes``/``types``/
+    ``contact``/``aliases`` sections. Genuinely usable from here, not
+    just a stub: ``_scan_single_line_section`` (below) sets a real
+    section's own start/end line correctly even with zero entries
+    inside, and ``magic_tech_writer.py``'s own ``_render_section_patch``
+    already anchors a brand-new entry just before its own section's
+    real closing ``end`` line -- so **New Type**/**New Plane**/
+    **New Contact**/**New Alias** in the Magic Tech tab, and a real
+    export afterward, work immediately against a file created this
+    way, no different from adding an entry to a real, downloaded one.
+    No real ``include`` line here at all, so ``_safe_prefix_line_count``
+    treats every real line as safely write-back-mappable."""
+
+    if path.exists():
+        raise FileExistsError(f"{path} already exists")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(_TECH_SKELETON_TEMPLATE.format(name=path.stem), encoding="utf-8")
+
+
+def _load_lines_with_includes(path: Path, included: list[str], _seen: set[Path] | None = None) -> list[str]:
+    """Real textual splicing: an 'include NAME' line's content is
+    replaced by NAME.tech's own real lines, read from the same
+    directory Magic itself resolves against -- so section parsing
+    below sees one combined, logically-complete technology, matching
+    what Magic itself actually loads."""
+
+    _seen = _seen or set()
+    if path in _seen:
+        return []
+    _seen.add(path)
+
+    lines: list[str] = []
+    for raw_line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        match = _INCLUDE_RE.match(raw_line.strip())
+        if match:
+            include_name = match.group(1)
+            included.append(include_name)
+            include_path = path.parent / f"{include_name}.tech"
+            if include_path.is_file():
+                lines.extend(_load_lines_with_includes(include_path, included, _seen))
+            else:
+                lines.append(f"# [unresolved include: {include_name}.tech not found]")
+            continue
+        lines.append(raw_line)
+    return lines
+
+
+def _safe_prefix_line_count(path: Path) -> int:
+    """How many of *path*'s own real leading lines are guaranteed to
+    appear at the exact same real line number in
+    ``_load_lines_with_includes``'s combined, spliced view -- every
+    line before *path*'s own first real ``include`` statement (all of
+    it, if there's none). Confirmed true for IHP's own real
+    ``ihp-sg13g2.tech``: its real ``types`` section (and everything
+    ``pdklib/magic_tech_writer.py`` needs to write back) sits well before
+    its first real ``include`` line. Not assumed true in general --
+    write-back for a real ``types`` line past this boundary is
+    deliberately refused (``TypeEntry.line_no`` stays ``0``) rather
+    than risk patching the wrong real position in the wrong real
+    file."""
+
+    text = path.read_text(encoding="utf-8", errors="replace")
+    line_no = 0
+    for line_no, raw_line in enumerate(text.splitlines(), start=1):
+        if _INCLUDE_RE.match(raw_line.strip()):
+            return line_no - 1
+    return line_no
+
+
+def _split_sections(lines: list[str]) -> dict[str, list[str]]:
+    """{section_name: [body lines]} -- everything between a bare
+    section-keyword line and the next bare 'end' line. A technology
+    can (and does, for cifoutput's real recipes) repeat some
+    structure across many 'layer NAME ...' sub-blocks inside one
+    section; those are handled by the section-specific parser, not
+    here."""
+
+    sections: dict[str, list[str]] = {}
+    current: str | None = None
+    body: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if current is None:
+            match = _SECTION_START_RE.match(stripped)
+            if match:
+                current = match.group(1)
+                body = []
+            continue
+        if stripped == "end":
+            sections.setdefault(current, []).extend(body)
+            current = None
+            continue
+        body.append(line)
+    return sections
+
+
+def _scan_single_line_section(lines, section_name, safe_through, parse_entry):
+    """Shared real line-tracking scan for a section whose every real
+    entry sits on exactly one real line (``planes``/``contact``/
+    ``aliases`` -- unlike ``types``, whose own real per-line shape is
+    distinct enough it keeps its own ``_parse_types_with_lines``).
+    Same real approach: scans the full, combined ``lines`` (not a
+    pre-sectioned body, unlike ``_split_sections``'s own real body
+    lists, which carry no line-number info at all), tracking each real
+    entry's own line number only when ``line_no <= safe_through`` (see
+    ``_safe_prefix_line_count``). *parse_entry(stripped_line)* returns
+    a real entry object (with its own ``line_no`` field, set here) or
+    ``None`` to skip a non-entry real line. Returns (entries,
+    all_line_nos, section_start_line, section_end_line)."""
+
+    entries = []
+    all_line_nos: list[int] = []
+    section_start = section_end = 0
+    in_section = False
+
+    for line_no, raw_line in enumerate(lines, start=1):
+        stripped = raw_line.strip()
+        if not in_section:
+            if stripped == section_name:
+                in_section = True
+                if section_start == 0 and line_no <= safe_through:
+                    section_start = line_no
+            continue
+        if stripped == "end":
+            in_section = False
+            if section_start and section_end == 0 and line_no <= safe_through:
+                section_end = line_no
+            continue
+        if not stripped or stripped.startswith("#"):
+            continue
+        entry = parse_entry(stripped)
+        if entry is None:
+            continue
+        safe_line_no = line_no if section_start and line_no <= safe_through else 0
+        if safe_line_no:
+            all_line_nos.append(safe_line_no)
+        entry.line_no = safe_line_no
+        entries.append(entry)
+
+    return entries, all_line_nos, section_start, section_end
+
+
+def _parse_plane_line(stripped: str) -> PlaneEntry | None:
+    if "," not in stripped:
+        return None
+    name, _, short = stripped.partition(",")
+    return PlaneEntry(name=name.strip(), short_code=short.strip())
+
+
+def _parse_planes_with_lines(lines: list[str], safe_through: int):
+    return _scan_single_line_section(lines, "planes", safe_through, _parse_plane_line)
+
+
+def _parse_types_with_lines(
+    lines: list[str], safe_through: int,
+) -> tuple[list[TypeEntry], list[int], int, int]:
+    """Unlike every other ``_parse_*`` function here, this one scans
+    the full, combined (include-spliced) ``lines`` list itself, not a
+    pre-sectioned body -- it needs each real type's own combined-space
+    line number to decide whether write-back can safely map it back to
+    *source_path*'s own real line numbers (``line_no <= safe_through``,
+    see ``_safe_prefix_line_count``). Returns (entries,
+    all_parsed_type_line_nos, section_start_line, section_end_line);
+    the last two are ``0`` if no safely-mappable real ``types`` section
+    was found at all."""
+
+    entries: list[TypeEntry] = []
+    all_line_nos: list[int] = []
+    section_start = section_end = 0
+    in_types = False
+
+    for line_no, raw_line in enumerate(lines, start=1):
+        stripped = raw_line.strip()
+        if not in_types:
+            if stripped == "types":
+                in_types = True
+                if section_start == 0 and line_no <= safe_through:
+                    section_start = line_no
+            continue
+        if stripped == "end":
+            in_types = False
+            if section_start and section_end == 0 and line_no <= safe_through:
+                section_end = line_no
+            continue
+        if not stripped or stripped.startswith("#"):
+            continue
+        obsolete = stripped.startswith("-")
+        body = stripped[1:] if obsolete else stripped
+        parts = body.split(None, 1)
+        if len(parts) != 2:
+            continue
+        plane, names_raw = parts
+        names = [n.strip() for n in names_raw.split(",") if n.strip()]
+        if not names:
+            continue
+        safe_line_no = line_no if section_start and line_no <= safe_through else 0
+        if safe_line_no:
+            all_line_nos.append(safe_line_no)
+        entries.append(TypeEntry(
+            plane=plane, canonical_name=names[0], aliases=names[1:], obsolete=obsolete,
+            line_no=safe_line_no,
+        ))
+
+    return entries, all_line_nos, section_start, section_end
+
+
+def _parse_contact_line(stripped: str) -> ContactEntry | None:
+    if stripped == "stackable":
+        return None
+    parts = stripped.split()
+    if len(parts) != 3:
+        return None
+    return ContactEntry(contact_type=parts[0], layer1=parts[1], layer2=parts[2])
+
+
+def _parse_contacts_with_lines(lines: list[str], safe_through: int):
+    return _scan_single_line_section(lines, "contact", safe_through, _parse_contact_line)
+
+
+def _parse_alias_line(stripped: str) -> AliasEntry | None:
+    parts = stripped.split(None, 1)
+    if len(parts) != 2:
+        return None
+    return AliasEntry(name=parts[0], members_raw=parts[1].strip())
+
+
+def _parse_aliases_with_lines(lines: list[str], safe_through: int):
+    return _scan_single_line_section(lines, "aliases", safe_through, _parse_alias_line)
+
+
+def _parse_style_line(stripped: str) -> StyleEntry | None:
+    if stripped.startswith("styletype"):
+        return None  # a real section-level header, not an entry -- left as a verbatim gap.
+    parts = stripped.split()
+    if len(parts) < 2:
+        return None
+    return StyleEntry(type_name=parts[0], style_names=parts[1:])
+
+
+def _parse_styles_with_lines(lines: list[str], safe_through: int):
+    return _scan_single_line_section(lines, "styles", safe_through, _parse_style_line)
+
+
+def _parse_cifoutput_layers_with_lines(lines: list[str], safe_through: int):
+    """Every real 'layer NAME ... calma L D' line, one real
+    ``CifOutputLayerMapping`` per real ``calma`` line (not merged by
+    name -- see that dataclass's own docstring for why). A real block
+    starts at a ``layer``/``templayer`` line and runs until the next
+    such line (or the section end); every real ``calma`` line found
+    inside it is attributed to that block's own real NAME. Mirrors
+    ``_scan_single_line_section``'s own real line-tracking/
+    ``safe_through`` discipline, but needs its own real scan (not a
+    reuse) since a ``calma`` line's own real NAME comes from a
+    *different*, preceding real line, not the ``calma`` line itself --
+    genuinely stateful in a way no other single-line-section domain
+    here needs to be. Returns ``(entries, all_line_nos, section_start,
+    section_end)``, the same real shape ``_scan_single_line_section``
+    returns."""
+
+    entries: list[CifOutputLayerMapping] = []
+    all_line_nos: list[int] = []
+    section_start = section_end = 0
+    in_section = False
+    current_name: str | None = None
+
+    for line_no, raw_line in enumerate(lines, start=1):
+        stripped = raw_line.strip()
+        if not in_section:
+            if stripped == "cifoutput":
+                in_section = True
+                if section_start == 0 and line_no <= safe_through:
+                    section_start = line_no
+            continue
+        if stripped == "end":
+            in_section = False
+            if section_start and section_end == 0 and line_no <= safe_through:
+                section_end = line_no
+            continue
+        if not stripped or stripped.startswith("#"):
+            continue
+        start_match = _LAYER_BLOCK_START_RE.match(stripped)
+        if start_match:
+            current_name = start_match.group(1)
+            continue
+        if current_name is None:
+            continue
+        calma_match = _CALMA_RE.match(stripped)
+        if calma_match is None:
+            continue
+        safe_line_no = line_no if section_start and line_no <= safe_through else 0
+        if safe_line_no:
+            all_line_nos.append(safe_line_no)
+        entries.append(
+            CifOutputLayerMapping(
+                name=current_name, gds_layer=int(calma_match.group(1)), gds_datatype=int(calma_match.group(2)),
+                line_no=safe_line_no,
+            )
+        )
+
+    return entries, all_line_nos, section_start, section_end
+
+
+def _parse_cifinput_ignore_line(stripped: str) -> CifInputIgnoredLayer | None:
+    match = _CIFINPUT_IGNORE_RE.match(stripped)
+    if not match:
+        return None
+    return CifInputIgnoredLayer(name=match.group(1))
+
+
+def _parse_cifinput_ignored_layers_with_lines(lines: list[str], safe_through: int):
+    return _scan_single_line_section(lines, "cifinput", safe_through, _parse_cifinput_ignore_line)
+
+
+def _parse_cifinput_hint_line(stripped: str) -> CifInputLayerHint | None:
+    match = _CIFINPUT_CALMA_RE.match(stripped)
+    if not match:
+        return None
+    datatype_raw = match.group(3)
+    return CifInputLayerHint(
+        name=match.group(1), gds_layer=int(match.group(2)),
+        gds_datatype=None if datatype_raw == "*" else int(datatype_raw),
+    )
+
+
+def _parse_cifinput_hints_with_lines(lines: list[str], safe_through: int):
+    return _scan_single_line_section(lines, "cifinput", safe_through, _parse_cifinput_hint_line)
+
+
+def _parse_cifinput_recipes_with_lines(lines: list[str], safe_through: int):
+    """Real, range-tracked scan for cifinput's own ``layer``/
+    ``templayer`` recipe blocks -- one real entry per real block
+    *occurrence*, not merged by name (see ``CifInputRecipeBlock``'s own
+    docstring for why). Unlike every other ranged domain in this
+    module, a real block's own end isn't marked by a keyword or a
+    trailing ``\\`` -- it's implicitly delimited by whichever real
+    boundary comes next (another real block, the section's own real
+    ``ignore``/standalone ``calma`` content, or the section's own
+    ``end``), so this scanner closes the currently-pending block the
+    moment any of those is seen, the same real exclusion
+    ``ignore``/``calma`` content already needed before this domain had
+    any real line-tracking at all. Returns (entries, all_ranges,
+    section_start, section_end)."""
+
+    entries: list[CifInputRecipeBlock] = []
+    all_ranges: list[tuple[int, int]] = []
+    section_start = section_end = 0
+    in_section = False
+    pending: dict | None = None  # {"start": line_no, "block": CifInputRecipeBlock}
+
+    def close_pending(end_line: int) -> None:
+        nonlocal pending
+        if pending is not None:
+            if pending["start"]:
+                pending["block"].start_line = pending["start"]
+                pending["block"].end_line = end_line
+                all_ranges.append((pending["start"], end_line))
+            entries.append(pending["block"])
+            pending = None
+
+    for line_no, raw_line in enumerate(lines, start=1):
+        stripped = raw_line.strip()
+
+        if not in_section:
+            if stripped == "cifinput":
+                in_section = True
+                if section_start == 0 and line_no <= safe_through:
+                    section_start = line_no
+            continue
+        if stripped == "end":
+            close_pending(line_no - 1)
+            in_section = False
+            if section_start and section_end == 0 and line_no <= safe_through:
+                section_end = line_no
+            continue
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        block_match = _CIFINPUT_RECIPE_START_RE.match(raw_line)
+        if block_match:
+            close_pending(line_no - 1)
+            kind, name, base = block_match.groups()
+            safe_start = line_no if section_start and line_no <= safe_through else 0
+            pending = {
+                "start": safe_start,
+                "block": CifInputRecipeBlock(name=name, is_templayer=(kind == "templayer"), base_layer=base),
+            }
+            continue
+
+        if pending is None:
+            # Real preamble (style/scalefactor/gridlimit/options) or
+            # the section's own real standalone ignore/calma table --
+            # neither belongs to any recipe block.
+            continue
+
+        # The section's own real 'ignore'/standalone 'calma' content
+        # is not part of any recipe (see this module's own docstring)
+        # -- closes whichever block was open, rather than being swept
+        # in as bogus 'ops'.
+        if _CIFINPUT_IGNORE_RE.match(stripped) or _CIFINPUT_CALMA_RE.match(stripped):
+            close_pending(line_no - 1)
+            continue
+
+        parts = stripped.split(None, 1)
+        pending["block"].ops.append(CifInputOp(verb=parts[0], args=parts[1] if len(parts) > 1 else ""))
+
+    return entries, all_ranges, section_start, section_end
+    return [by_name[name] for name in order]
+
+
+def _parse_compose_line(stripped: str) -> ComposeStatement | None:
+    parts = stripped.split()
+    if len(parts) != 4 or parts[0] not in _COMPOSE_VERBS:
+        return None
+    return ComposeStatement(verb=parts[0], args=(parts[1], parts[2], parts[3]))
+
+
+def _parse_compose_with_lines(lines: list[str], safe_through: int):
+    return _scan_single_line_section(lines, "compose", safe_through, _parse_compose_line)
+
+
+def _parse_connect_line(stripped: str) -> ConnectRule | None:
+    parts = stripped.split()
+    if len(parts) != 2:
+        return None
+    return ConnectRule(types_a=parts[0], types_b=parts[1])
+
+
+def _parse_connect_with_lines(lines: list[str], safe_through: int):
+    return _scan_single_line_section(lines, "connect", safe_through, _parse_connect_line)
+
+
+def _join_backslash_continuations(lines: list[str]) -> list[str]:
+    """Magic's real drc/extract sections wrap long statements across
+    lines with a trailing '\\' -- collapse those before line-by-line
+    parsing so a wrapped statement isn't silently mis-tokenized as two
+    separate, incomplete lines."""
+
+    joined: list[str] = []
+    pending = ""
+    for line in lines:
+        if pending:
+            line = pending + " " + line.strip()
+            pending = ""
+        if line.rstrip().endswith("\\"):
+            pending = line.rstrip()[:-1].rstrip()
+            continue
+        joined.append(line)
+    return joined
+
+
+def _parse_drc_checks(lines: list[str]) -> tuple[list[MagicDrcCheck], list[MagicAngleCheck], list[str]]:
+    checks: list[MagicDrcCheck] = []
+    angle_checks: list[MagicAngleCheck] = []
+    skipped: list[str] = []
+    for line in _join_backslash_continuations(lines):
+        stripped = line.strip()
+        if stripped.startswith("width "):
+            match = _WIDTH_RE.match(stripped)
+            if match is None:
+                skipped.append(stripped)
+                continue
+            layers_raw, value, filler, message = match.groups()
+            id_match = _TRAILING_PARENS_RE.search(message)
+            checks.append(MagicDrcCheck(
+                check_type="width", layer_args=[layers_raw.split(",")],
+                value_um=int(value) / _DRC_VALUE_TO_MICRONS, message=message,
+                rule_ids_raw=id_match.group(1) if id_match else None, filler_raw=filler.strip(),
+            ))
+        elif stripped.startswith("spacing "):
+            match = _SPACING_RE.match(stripped)
+            if match is None:
+                skipped.append(stripped)
+                continue
+            layer1, layer2, value, filler, message = match.groups()
+            id_match = _TRAILING_PARENS_RE.search(message)
+            checks.append(MagicDrcCheck(
+                check_type="spacing", layer_args=[layer1.split(","), layer2.split(",")],
+                value_um=int(value) / _DRC_VALUE_TO_MICRONS, message=message,
+                rule_ids_raw=id_match.group(1) if id_match else None, filler_raw=filler.strip(),
+            ))
+        elif stripped.startswith("maxwidth "):
+            match = _MAXWIDTH_RE.match(stripped)
+            if match is None:
+                skipped.append(stripped)
+                continue
+            layers_raw, value, filler, message = match.groups()
+            id_match = _TRAILING_PARENS_RE.search(message)
+            checks.append(MagicDrcCheck(
+                check_type="maxwidth", layer_args=[layers_raw.split(",")],
+                value_um=int(value) / _DRC_VALUE_TO_MICRONS, message=message,
+                rule_ids_raw=id_match.group(1) if id_match else None, filler_raw=filler.strip(),
+            ))
+        elif stripped.startswith("angles "):
+            match = _ANGLES_RE.match(stripped)
+            if match is None:
+                skipped.append(stripped)
+                continue
+            layer, degrees, message = match.groups()
+            angle_checks.append(MagicAngleCheck(layer=layer, degrees=int(degrees), message=message))
+    return checks, angle_checks, skipped
+
+
+def _parse_drc_check_text(joined: str) -> MagicDrcCheck | None:
+    if joined.startswith("width "):
+        match = _WIDTH_RE.match(joined)
+        if match is None:
+            return None
+        layers_raw, value, filler, message = match.groups()
+        id_match = _TRAILING_PARENS_RE.search(message)
+        return MagicDrcCheck(
+            check_type="width", layer_args=[layers_raw.split(",")],
+            value_um=int(value) / _DRC_VALUE_TO_MICRONS, message=message,
+            rule_ids_raw=id_match.group(1) if id_match else None, filler_raw=filler.strip(),
+        )
+    if joined.startswith("spacing "):
+        match = _SPACING_RE.match(joined)
+        if match is None:
+            return None
+        layer1, layer2, value, filler, message = match.groups()
+        id_match = _TRAILING_PARENS_RE.search(message)
+        return MagicDrcCheck(
+            check_type="spacing", layer_args=[layer1.split(","), layer2.split(",")],
+            value_um=int(value) / _DRC_VALUE_TO_MICRONS, message=message,
+            rule_ids_raw=id_match.group(1) if id_match else None, filler_raw=filler.strip(),
+        )
+    if joined.startswith("maxwidth "):
+        match = _MAXWIDTH_RE.match(joined)
+        if match is None:
+            return None
+        layers_raw, value, filler, message = match.groups()
+        id_match = _TRAILING_PARENS_RE.search(message)
+        return MagicDrcCheck(
+            check_type="maxwidth", layer_args=[layers_raw.split(",")],
+            value_um=int(value) / _DRC_VALUE_TO_MICRONS, message=message,
+            rule_ids_raw=id_match.group(1) if id_match else None, filler_raw=filler.strip(),
+        )
+    return None
+
+
+def _parse_drc_checks_with_lines(lines: list[str], safe_through: int):
+    """Real, range-tracked scan for ``width``/``spacing``/``maxwidth``
+    -- the same real accumulator shape
+    ``_parse_drc_angles_with_lines``/``_parse_extract_devices_with_lines``
+    use, generalized to try all three real keywords (rather than one)
+    per pending accumulation, since **a real backslash continuation
+    here can split anywhere** -- mid layer-list, before the real
+    `mode`/exception-list filler, or right before the quoted message
+    (confirmed real, not assumed: e.g. a real
+    `spacing difffill ndc,pdc,...,hvpsc \\` line wraps *inside* its own
+    second real layer-list, not at a fixed position the way
+    `device`/`angles` always wrap right before their own trailing
+    content). Every other real drc-section line (`surround`/
+    `edge4way`/`variants`/... and their own real continuations,
+    comments) simply isn't one of these three keywords and is never
+    touched here, real read-only content copied verbatim at write-back
+    time via ``_render_section_patch``'s existing gap logic. Returns
+    (entries, all_ranges, section_start, section_end)."""
+
+    entries: list[MagicDrcCheck] = []
+    all_ranges: list[tuple[int, int]] = []
+    section_start = section_end = 0
+    in_section = False
+    pending: dict | None = None  # {"start": line_no, "text": str}
+
+    for line_no, raw_line in enumerate(lines, start=1):
+        stripped = raw_line.strip()
+
+        if pending is not None:
+            piece = stripped[:-1].rstrip() if stripped.endswith("\\") else stripped
+            pending["text"] += " " + piece
+            if not stripped.endswith("\\"):
+                entry = _parse_drc_check_text(pending["text"])
+                safe_start = pending["start"] if pending["start"] and line_no <= safe_through else 0
+                if entry is not None:
+                    if safe_start:
+                        entry.start_line = safe_start
+                        entry.end_line = line_no
+                        all_ranges.append((safe_start, line_no))
+                    entries.append(entry)
+                pending = None
+            continue
+
+        if not in_section:
+            if stripped == "drc":
+                in_section = True
+                if section_start == 0 and line_no <= safe_through:
+                    section_start = line_no
+            continue
+        if stripped == "end":
+            in_section = False
+            if section_start and section_end == 0 and line_no <= safe_through:
+                section_end = line_no
+            continue
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped.startswith(("width ", "spacing ", "maxwidth ")):
+            safe_start = line_no if section_start and line_no <= safe_through else 0
+            if stripped.endswith("\\"):
+                pending = {"start": safe_start, "text": stripped[:-1].rstrip()}
+            else:
+                entry = _parse_drc_check_text(stripped)
+                if entry is not None:
+                    if safe_start:
+                        entry.start_line = safe_start
+                        entry.end_line = line_no
+                        all_ranges.append((safe_start, line_no))
+                    entries.append(entry)
+
+    return entries, all_ranges, section_start, section_end
+
+
+def _parse_angle_text(joined: str) -> MagicAngleCheck | None:
+    match = _ANGLES_RE.match(joined)
+    if match is None:
+        return None
+    layer, degrees, message = match.groups()
+    return MagicAngleCheck(layer=layer, degrees=int(degrees), message=message)
+
+
+def _parse_drc_angles_with_lines(lines: list[str], safe_through: int):
+    """Real, range-tracked scan for ``angles`` -- the one real
+    drc-section construct made editable (see ``MagicAngleCheck``'s own
+    docstring for why the other three, ``width``/``spacing``/
+    ``maxwidth``, aren't yet). Same real accumulator shape
+    ``_parse_extract_devices_with_lines`` uses for ``device``'s own
+    backslash-continued lines (confirmed real: one of the 17 real
+    ``angles`` lines, ``allm7``, wraps this way too) -- every other
+    real drc-section line (``width``/``spacing``/``maxwidth``/
+    ``surround``/``edge4way``/... and their own real continuations,
+    comments, ``variants`` lines) simply isn't ``angles`` and is never
+    touched here, real read-only content copied verbatim at write-back
+    time via ``_render_section_patch``'s existing gap logic. Returns
+    (entries, all_ranges, section_start, section_end)."""
+
+    entries: list[MagicAngleCheck] = []
+    all_ranges: list[tuple[int, int]] = []
+    section_start = section_end = 0
+    in_section = False
+    pending: dict | None = None  # {"start": line_no, "text": str}
+
+    for line_no, raw_line in enumerate(lines, start=1):
+        stripped = raw_line.strip()
+
+        if pending is not None:
+            piece = stripped[:-1].rstrip() if stripped.endswith("\\") else stripped
+            pending["text"] += " " + piece
+            if not stripped.endswith("\\"):
+                entry = _parse_angle_text(pending["text"])
+                safe_start = pending["start"] if pending["start"] and line_no <= safe_through else 0
+                if entry is not None:
+                    if safe_start:
+                        entry.start_line = safe_start
+                        entry.end_line = line_no
+                        all_ranges.append((safe_start, line_no))
+                    entries.append(entry)
+                pending = None
+            continue
+
+        if not in_section:
+            if stripped == "drc":
+                in_section = True
+                if section_start == 0 and line_no <= safe_through:
+                    section_start = line_no
+            continue
+        if stripped == "end":
+            in_section = False
+            if section_start and section_end == 0 and line_no <= safe_through:
+                section_end = line_no
+            continue
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped.startswith("angles "):
+            safe_start = line_no if section_start and line_no <= safe_through else 0
+            if stripped.endswith("\\"):
+                pending = {"start": safe_start, "text": stripped[:-1].rstrip()}
+            else:
+                entry = _parse_angle_text(stripped)
+                if entry is not None:
+                    if safe_start:
+                        entry.start_line = safe_start
+                        entry.end_line = line_no
+                        all_ranges.append((safe_start, line_no))
+                    entries.append(entry)
+
+    return entries, all_ranges, section_start, section_end
+
+
+def _parse_drc_misc_text(joined: str) -> MagicDrcMiscStatement | None:
+    parts = joined.split()
+    if not parts or parts[0] not in _DRC_MISC_DIRECTIVES:
+        return None
+    return MagicDrcMiscStatement(directive=parts[0], args=tuple(parts[1:]))
+
+
+def _parse_drc_misc_with_lines(lines: list[str], safe_through: int):
+    """Real, range-tracked scan for every real drc-section keyword
+    that isn't ``width``/``spacing``/``maxwidth``/``angles`` -- same
+    real accumulator shape ``_parse_drc_checks_with_lines``/
+    ``_parse_drc_angles_with_lines`` use (see
+    ``MagicDrcMiscStatement``'s own docstring for exactly which real
+    keywords and why ``variants``/``style``/``scalefactor``/
+    ``cifstyle`` are deliberately excluded). Every other real
+    drc-section line simply isn't one of these and is never touched
+    here, real read-only content copied verbatim at write-back time
+    via ``_render_section_patch``'s existing gap logic. Returns
+    (entries, all_ranges, section_start, section_end)."""
+
+    entries: list[MagicDrcMiscStatement] = []
+    all_ranges: list[tuple[int, int]] = []
+    section_start = section_end = 0
+    in_section = False
+    pending: dict | None = None  # {"start": line_no, "text": str}
+
+    for line_no, raw_line in enumerate(lines, start=1):
+        stripped = raw_line.strip()
+
+        if pending is not None:
+            piece = stripped[:-1].rstrip() if stripped.endswith("\\") else stripped
+            pending["text"] += " " + piece
+            if not stripped.endswith("\\"):
+                entry = _parse_drc_misc_text(pending["text"])
+                safe_start = pending["start"] if pending["start"] and line_no <= safe_through else 0
+                if entry is not None:
+                    if safe_start:
+                        entry.start_line = safe_start
+                        entry.end_line = line_no
+                        all_ranges.append((safe_start, line_no))
+                    entries.append(entry)
+                pending = None
+            continue
+
+        if not in_section:
+            if stripped == "drc":
+                in_section = True
+                if section_start == 0 and line_no <= safe_through:
+                    section_start = line_no
+            continue
+        if stripped == "end":
+            in_section = False
+            if section_start and section_end == 0 and line_no <= safe_through:
+                section_end = line_no
+            continue
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        first_token = stripped.split(None, 1)[0] if stripped.split() else ""
+        if first_token in _DRC_MISC_DIRECTIVES:
+            safe_start = line_no if section_start and line_no <= safe_through else 0
+            if stripped.endswith("\\"):
+                pending = {"start": safe_start, "text": stripped[:-1].rstrip()}
+            else:
+                entry = _parse_drc_misc_text(stripped)
+                if entry is not None:
+                    if safe_start:
+                        entry.start_line = safe_start
+                        entry.end_line = line_no
+                        all_ranges.append((safe_start, line_no))
+                    entries.append(entry)
+
+    return entries, all_ranges, section_start, section_end
+
+
+def _parse_resist_line(stripped: str) -> ExtractResist | None:
+    match = _RESIST_RE.match(stripped)
+    if match is None:
+        return None
+    return ExtractResist(layer_spec=match.group(1), milliohms_per_square=int(match.group(2)))
+
+
+def _parse_extract_resist_with_lines(lines: list[str], safe_through: int):
+    """Same real ``_scan_single_line_section`` machinery
+    ``_parse_extract_misc_with_lines``/``_parse_extract_plane_order_
+    with_lines`` use on this same shared ``extract`` section -- every
+    real line that isn't a ``resist`` statement (``planeorder``/cap-
+    coefficient/``device``/``contact``/... lines, ``variants`` lines,
+    comments) simply doesn't match ``_parse_resist_line`` and falls
+    through as an untracked, verbatim gap at write-back time."""
+
+    return _scan_single_line_section(lines, "extract", safe_through, _parse_resist_line)
+
+
+def _parse_plane_order_line(stripped: str) -> ExtractPlaneOrder | None:
+    match = _PLANEORDER_RE.match(stripped)
+    if match is None:
+        return None
+    return ExtractPlaneOrder(name=match.group(1), order=int(match.group(2)))
+
+
+def _parse_extract_plane_order_with_lines(lines: list[str], safe_through: int):
+    """Same real ``_scan_single_line_section`` machinery
+    ``_parse_extract_misc_with_lines`` uses on this same shared
+    ``extract`` section -- every real line that isn't a ``planeorder``
+    statement (``resist``/cap-coefficient/``device``/``contact``/...
+    lines, ``variants`` lines, comments) simply doesn't match
+    ``_parse_plane_order_line`` and falls through as an untracked,
+    verbatim gap at write-back time."""
+
+    return _scan_single_line_section(lines, "extract", safe_through, _parse_plane_order_line)
+
+
+def _parse_cap_coefficient_line(stripped: str) -> ExtractCapCoefficient | None:
+    parts = stripped.split()
+    if not parts:
+        return None
+    arg_count = _EXTRACT_CAP_DIRECTIVES.get(parts[0])
+    if arg_count is None or len(parts) <= arg_count:
+        return None
+    args = tuple(parts[1 : 1 + arg_count])
+    value_tokens = parts[1 + arg_count :]
+    parsed_values = [numeric.parse_number(token) for token in value_tokens]
+    if any(v is None for v in parsed_values):
+        return None
+    return ExtractCapCoefficient(directive=parts[0], args=args, values=tuple(parsed_values))
+
+
+def _parse_extract_cap_coefficients_with_lines(lines: list[str], safe_through: int):
+    """Same real ``_scan_single_line_section`` machinery
+    ``_parse_extract_misc_with_lines``/``_parse_extract_plane_order_
+    with_lines``/``_parse_extract_resist_with_lines`` use on this same
+    shared ``extract`` section -- every real line that isn't one of the
+    four ``default*`` cap-coefficient directives (``planeorder``/
+    ``resist``/``device``/``contact``/... lines, ``variants`` lines,
+    comments) simply doesn't match ``_parse_cap_coefficient_line`` and
+    falls through as an untracked, verbatim gap at write-back time."""
+
+    return _scan_single_line_section(lines, "extract", safe_through, _parse_cap_coefficient_line)
+
+
+def _parse_device_text(joined: str) -> ExtractDevice | None:
+    parts = joined.split()
+    if len(parts) < 4 or parts[0] != "device":
+        return None
+    return ExtractDevice(devclass=parts[1], model=parts[2], type_name=parts[3], rest=tuple(parts[4:]))
+
+
+def _parse_extract_devices_with_lines(lines: list[str], safe_through: int):
+    """Real, range-tracked scan for ``device`` -- the one real
+    extract-section construct that spans more than one real physical
+    line (a trailing ``\\`` continuation), so it can't reuse
+    ``_scan_single_line_section``'s own one-line-per-entry assumption.
+    Accumulates a pending real device's own text across however many
+    real physical lines it spans (the same real ``pending`` accumulator
+    shape ``find_cells`` uses for Liberty's own multi-line ``values (
+    ...)`` construct), tracking the real ``(start_line, end_line)``
+    range instead of a single ``line_no``. Returns (entries,
+    all_ranges, section_start, section_end) -- the range-based analogue
+    of ``_scan_single_line_section``'s own return shape."""
+
+    entries: list[ExtractDevice] = []
+    all_ranges: list[tuple[int, int]] = []
+    section_start = section_end = 0
+    in_section = False
+    pending: dict | None = None  # {"start": line_no, "text": str}
+
+    for line_no, raw_line in enumerate(lines, start=1):
+        stripped = raw_line.strip()
+
+        if pending is not None:
+            piece = stripped[:-1].rstrip() if stripped.endswith("\\") else stripped
+            pending["text"] += " " + piece
+            if not stripped.endswith("\\"):
+                entry = _parse_device_text(pending["text"])
+                safe_start = pending["start"] if pending["start"] and line_no <= safe_through else 0
+                if entry is not None:
+                    if safe_start:
+                        entry.start_line = safe_start
+                        entry.end_line = line_no
+                        all_ranges.append((safe_start, line_no))
+                    entries.append(entry)
+                pending = None
+            continue
+
+        if not in_section:
+            if stripped == "extract":
+                in_section = True
+                if section_start == 0 and line_no <= safe_through:
+                    section_start = line_no
+            continue
+        if stripped == "end":
+            in_section = False
+            if section_start and section_end == 0 and line_no <= safe_through:
+                section_end = line_no
+            continue
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped.startswith("device "):
+            safe_start = line_no if section_start and line_no <= safe_through else 0
+            if stripped.endswith("\\"):
+                pending = {"start": safe_start, "text": stripped[:-1].rstrip()}
+            else:
+                entry = _parse_device_text(stripped)
+                if entry is not None:
+                    if safe_start:
+                        entry.start_line = safe_start
+                        entry.end_line = line_no
+                        all_ranges.append((safe_start, line_no))
+                    entries.append(entry)
+
+    return entries, all_ranges, section_start, section_end
+
+
+_EXTRACT_MISC_KEYWORDS = ("contact", "devresist", "antenna", "disconnect", "substrate")
+
+
+def _parse_extract_misc_line(stripped: str) -> ExtractMiscStatement | None:
+    parts = stripped.split()
+    if not parts or parts[0] not in _EXTRACT_MISC_KEYWORDS:
+        return None
+    return ExtractMiscStatement(directive=parts[0], args=tuple(parts[1:]))
+
+
+def _parse_extract_misc_with_lines(lines: list[str], safe_through: int):
+    """Same real ``_scan_single_line_section`` machinery every other
+    flat, editable domain uses, applied to the ``extract`` section --
+    every real line this section carries that *isn't* a
+    'contact'/'devresist'/'antenna'/'disconnect'/'substrate' statement
+    (``resist``/``order``/cap-coefficient/``device``/``variants``
+    lines, comments) simply doesn't match ``_parse_extract_misc_line``
+    and falls through as an untracked, verbatim gap at write-back time
+    -- the same way cifinput's own still-read-only recipe blocks do
+    alongside its two editable sub-structures."""
+
+    return _scan_single_line_section(lines, "extract", safe_through, _parse_extract_misc_line)
+
+
+def parse_tech_file(path: Path) -> MagicTechnology:
+    included: list[str] = []
+    lines = _load_lines_with_includes(path, included)
+    sections = _split_sections(lines)
+
+    tech = MagicTechnology(source_path=path, included_files=included)
+
+    for line in sections.get("tech", []):
+        stripped = line.strip()
+        if stripped.startswith("format"):
+            parts = stripped.split()
+            if len(parts) == 2 and parts[1].isdigit():
+                tech.format = int(parts[1])
+        elif stripped and not stripped.startswith("#"):
+            tech.name = stripped
+
+    for line in sections.get("version", []):
+        stripped = line.strip()
+        if stripped.startswith("version"):
+            tech.version = stripped.split(None, 1)[1].strip() if " " in stripped else ""
+        elif stripped.startswith("description"):
+            tech.description = stripped.split(None, 1)[1].strip().strip('"')
+        elif stripped.startswith("requires"):
+            tech.requires = stripped.split(None, 1)[1].strip()
+
+    safe_through = _safe_prefix_line_count(path)
+    tech.types, tech.all_parsed_type_line_nos, tech.types_section_start_line, tech.types_section_end_line = (
+        _parse_types_with_lines(lines, safe_through)
+    )
+
+    tech.planes, tech.all_parsed_plane_line_nos, tech.planes_section_start_line, tech.planes_section_end_line = (
+        _parse_planes_with_lines(lines, safe_through)
+    )
+    tech.contacts, tech.all_parsed_contact_line_nos, tech.contacts_section_start_line, tech.contacts_section_end_line = (
+        _parse_contacts_with_lines(lines, safe_through)
+    )
+    tech.aliases, tech.all_parsed_alias_line_nos, tech.aliases_section_start_line, tech.aliases_section_end_line = (
+        _parse_aliases_with_lines(lines, safe_through)
+    )
+    tech.styles, tech.all_parsed_style_line_nos, tech.styles_section_start_line, tech.styles_section_end_line = (
+        _parse_styles_with_lines(lines, safe_through)
+    )
+    tech.cif_layers, tech.all_parsed_cif_layer_line_nos, tech.cifoutput_section_start_line, tech.cifoutput_section_end_line = (
+        _parse_cifoutput_layers_with_lines(lines, safe_through)
+    )
+    (
+        tech.cifinput_ignored_layers, tech.all_parsed_cifinput_ignore_line_nos,
+        tech.cifinput_section_start_line, tech.cifinput_section_end_line,
+    ) = _parse_cifinput_ignored_layers_with_lines(lines, safe_through)
+    tech.cifinput_layer_hints, tech.all_parsed_cifinput_hint_line_nos, _cifinput_start2, _cifinput_end2 = (
+        _parse_cifinput_hints_with_lines(lines, safe_through)
+    )
+    tech.cifinput_recipes, tech.all_parsed_cifinput_recipe_ranges, _cifinput_start3, _cifinput_end3 = (
+        _parse_cifinput_recipes_with_lines(lines, safe_through)
+    )
+    # _cifinput_start2/_cifinput_end2/_cifinput_start3/_cifinput_end3
+    # are the exact same real section bounds as above (one shared
+    # cifinput...end block) -- discarded, not asserted equal, matching
+    # this module's own "don't guess, but don't over-verify either"
+    # discipline elsewhere.
+    tech.compose, tech.all_parsed_compose_line_nos, tech.compose_section_start_line, tech.compose_section_end_line = (
+        _parse_compose_with_lines(lines, safe_through)
+    )
+    tech.connect, tech.all_parsed_connect_line_nos, tech.connect_section_start_line, tech.connect_section_end_line = (
+        _parse_connect_with_lines(lines, safe_through)
+    )
+    _discarded_checks, _discarded_angle_checks, tech.drc_skipped = _parse_drc_checks(sections.get("drc", []))
+    tech.drc_angle_checks, tech.all_parsed_drc_angle_ranges, tech.drc_section_start_line, tech.drc_section_end_line = (
+        _parse_drc_angles_with_lines(lines, safe_through)
+    )
+    tech.drc_checks, tech.all_parsed_drc_check_ranges, _drc_start2, _drc_end2 = (
+        _parse_drc_checks_with_lines(lines, safe_through)
+    )
+    tech.drc_misc, tech.all_parsed_drc_misc_ranges, _drc_start3, _drc_end3 = (
+        _parse_drc_misc_with_lines(lines, safe_through)
+    )
+    # _discarded_checks/_discarded_angle_checks: _parse_drc_checks's
+    # own return values are superseded here by the real, range-tracked
+    # _parse_drc_checks_with_lines/_parse_drc_angles_with_lines above --
+    # kept for its own width/spacing/maxwidth/angles statistics
+    # (drc_skipped) only, same "don't guess, but don't over-verify
+    # either" discipline elsewhere. _drc_start2/_drc_end2/_drc_start3/
+    # _drc_end3 are the exact same real section bounds already captured
+    # above -- discarded, not asserted equal, same reasoning as
+    # extract's own repeated groups.
+    (
+        tech.extract_misc, tech.all_parsed_extract_misc_line_nos,
+        tech.extract_section_start_line, tech.extract_section_end_line,
+    ) = _parse_extract_misc_with_lines(lines, safe_through)
+    tech.extract_plane_order, tech.all_parsed_extract_plane_order_line_nos, _extract_start2, _extract_end2 = (
+        _parse_extract_plane_order_with_lines(lines, safe_through)
+    )
+    tech.extract_resist, tech.all_parsed_extract_resist_line_nos, _extract_start3, _extract_end3 = (
+        _parse_extract_resist_with_lines(lines, safe_through)
+    )
+    tech.extract_cap_coefficients, tech.all_parsed_extract_cap_coefficient_line_nos, _extract_start4, _extract_end4 = (
+        _parse_extract_cap_coefficients_with_lines(lines, safe_through)
+    )
+    tech.extract_devices, tech.all_parsed_extract_device_ranges, _extract_start5, _extract_end5 = (
+        _parse_extract_devices_with_lines(lines, safe_through)
+    )
+    # _extract_start2/_extract_end2/.../_extract_start5/_extract_end5
+    # are the exact same real section bounds as above (one shared
+    # extract...end block) -- discarded, not asserted equal, same
+    # "don't guess, but don't over-verify either" discipline cifinput's
+    # own two sub-structures already use.
+
+    parsed = set(_TABULAR_SECTIONS) | {"cifoutput", "cifinput", "compose", "connect", "drc", "extract"}
+    tech.unparsed_sections = sorted(set(sections) - parsed)
+
+    return tech

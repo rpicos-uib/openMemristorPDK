@@ -52,7 +52,7 @@ device symbol that has one) is parsed one level deeper into
 ``drc``/...) varies field-by-field per device kind (confirmed real:
 `cap_cmim.sym` and `sg13g2_a21o_1.sym` share almost no field names) --
 kept raw and positional in ``raw_fields``, the same "don't guess
-further semantics" discipline ``ihp/magic_tech.py``'s own
+further semantics" discipline ``pdklib/magic_tech.py``'s own
 ``ComposeStatement``/``ExtractCapCoefficient`` already use.
 """
 
@@ -61,6 +61,8 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+
+from . import numeric
 
 _K_BLOCK_RE = re.compile(r"(?m)^K\s*\{")
 _B_RE = re.compile(r"(?m)^B\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*\{")
@@ -72,10 +74,8 @@ _KV_RE = re.compile(r'(\w+)=("(?:[^"\\]|\\.)*"|\S+)')
 
 
 def _to_float(token: str) -> float:
-    try:
-        return float(token)
-    except ValueError:
-        return 0.0  # a real, unexpected non-numeric coordinate -- never seen in practice; kept defensive, not fatal.
+    parsed = numeric.parse_number(token)
+    return 0.0 if parsed is None else parsed  # a real, unexpected non-numeric coordinate -- never seen in practice; kept defensive, not fatal.
 
 
 def _unquote(text: str) -> str:
@@ -209,8 +209,8 @@ class XschemSymbol:
     all_parsed_pin_ranges: list[tuple[int, int]] = field(default_factory=list)
     """Every real pin's own (start_line, end_line) as originally
     parsed, in real file order -- unlike ``pins``, never mutated by
-    editing (New/Delete Pin); mirrors ``ihp/lef.py``'s ``LefMacro.
-    all_parsed_pin_ranges``, used by ``ihp/xschem_writer.py`` to tell a
+    editing (New/Delete Pin); mirrors ``pdklib/lef.py``'s ``LefMacro.
+    all_parsed_pin_ranges``, used by ``pdklib/xschem_writer.py`` to tell a
     real deleted pin apart from a decorative-box/comment gap."""
     lines: list[XschemLine] = field(default_factory=list)
     all_parsed_line_ranges: list[tuple[int, int]] = field(default_factory=list)
@@ -225,7 +225,7 @@ class XschemSymbol:
     ``0`` -> added this session" / "``all_parsed_*`` tracks deletions"
     discipline ``pins``/``all_parsed_pin_ranges`` already use, so
     ``gui/geometry_canvas.py``'s own graphical editor and
-    ``ihp/xschem_writer.py``'s own write-back can add/move/delete any
+    ``pdklib/xschem_writer.py``'s own write-back can add/move/delete any
     of them."""
 
 

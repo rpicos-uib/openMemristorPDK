@@ -15,10 +15,10 @@ project is free to extend either as real, non-memristor PDK complexity
 demands, without touching the other project's own, ADR-gated schema.
 
 ``Layer.start_line``/``end_line`` are this project's own addition (not
-present upstream), added for ``ihp/layers_writer.py``'s own real
+present upstream), added for ``pdklib/layers_writer.py``'s own real
 write-back -- the same "track a real source position on the dataclass
 itself" pattern every other editable domain here already uses (e.g.
-``ihp/lef.py``'s ``LefPin``).
+``pdklib/lef.py``'s ``LefPin``).
 """
 
 from __future__ import annotations
@@ -47,10 +47,10 @@ class Layer:
     status: str = STATUS_PLACEHOLDER
     start_line: int = 0
     """Real, 1-indexed source line of this layer's own real
-    ``<properties>`` block in a real ``.lyp`` file (``ihp/layers.py``'s
+    ``<properties>`` block in a real ``.lyp`` file (``pdklib/layers.py``'s
     own ``import_layers``) -- ``0`` for a layer with no real source
     position (created this session, or not from a ``.lyp`` at all).
-    Used by ``ihp/layers_writer.py`` to patch just this layer's own
+    Used by ``pdklib/layers_writer.py`` to patch just this layer's own
     real text back in place on export."""
     end_line: int = 0
     """Real, 1-indexed, inclusive closing line of the same block."""
@@ -76,6 +76,15 @@ class DesignRule:
     ``applies_to_override`` lets a rule target something that is not a
     layer at all; when set it is used verbatim in place of a
     layers-derived "applies to" string.
+
+    ``window_size_um``/``window_step_um`` are only meaningful for a
+    ``density_window`` rule requesting real, windowed/tiled Ruby
+    generation -- see ``pdklib/drc_writer.py``'s own
+    ``render_new_rule_block`` docstring for the real, confirmed
+    KLayout ``with_density``/``tile_size``/``tile_step`` shapes these
+    map to, and why they needed a real, dedicated home here rather
+    than being crammed into an existing field. Every other check_type
+    leaves both ``None``.
     """
 
     rule_id: str
@@ -93,6 +102,8 @@ class DesignRule:
     source_provenance: str = ""
     why: str = ""
     status: str = STATUS_PLACEHOLDER
+    window_size_um: float | None = None
+    window_step_um: float | None = None
 
     def is_placeholder(self) -> bool:
         return self.status == STATUS_PLACEHOLDER or self.value is None

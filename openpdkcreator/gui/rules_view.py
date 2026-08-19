@@ -11,28 +11,38 @@ tracks ``layers``/``design_rules``) -- auto-naming here always falls
 back to plain layer-name joining.
 
 Rules start real, not blank: loaded from a real, extracted KLayout DRC
-deck (``ihp/drc.py``) at startup, editable afterward the same way any
+deck (``pdklib/drc.py``) at startup, editable afterward the same way any
 hand-authored rule would be -- New/Delete/every field, exactly what
 OpenPDKCreator's own tab already offers, just against a real,
 pre-populated starting set instead of an empty one.
 
 **New DRC Deck...** creates a real, minimal, valid, empty deck when
-none exists yet (``ihp/drc.py``'s own ``create_new_drc_deck``) -- a
+none exists yet (``pdklib/drc.py``'s own ``create_new_drc_deck``) -- a
 from-scratch project's real starting point. A hand-authored **New
-Rule** is genuinely exportable too, not just metadata, for the three
-``check_type``s with a real, single-method KLayout DRC shape this
-project knows how to generate (``min_width``/``min_spacing``/
-``min_enclosure``, the exact three ``ihp/drc.py``'s own extractor
-already recognizes the other way): **File > Export Edited DRC Rules**
-generates real, runnable Ruby into a separate, tool-owned
+Rule** is genuinely exportable too, not just metadata, for the seven
+``check_type``s with a real KLayout DRC shape this project knows how
+to generate (``min_width``/``min_spacing``/``min_enclosure``/
+``min_area``/``min_overlap``/``max_length``/``density_window`` -- see
+``pdklib/drc_writer.py``'s own ``render_new_rule_block`` docstring for
+exactly which real KLayout idiom each maps to): **File > Export Edited
+DRC Rules** generates real, runnable Ruby into a separate, tool-owned
 ``custom_rules.drc`` (each rule defines its own layer(s) inline via
 ``input(gds_layer, gds_datatype)``, resolved from the **Layer N**
 pickers above against ``app.project.layers`` -- pick a real layer with
 a real GDS layer/datatype, not just any name). Every other
 ``check_type``, or a layer picker with no matching real ``Layer``,
 still can't be written back -- reported in the status line, not
-silently dropped; see ``ihp/drc_writer.py``'s own docstring.
-"""
+silently dropped; see ``pdklib/drc_writer.py``'s own docstring.
+``density_window`` additionally needs **Condition** set to exactly
+``min``/``max`` (which side of **Value** is a violation -- this
+check_type has no separate min/max variant the way ``min_width``/
+``max_length`` do) and, only for a real windowed/tiled check rather
+than a whole-chip one, **Window Size (um)**/**Window Step (um)** (real
+KLayout ``tile_size``/``tile_step``; leaving **Window Size (um)**
+blank generates a simpler, real, whole-chip ratio check instead -- see
+``render_new_rule_block``'s own docstring for the real, confirmed
+KLayout ``with_density`` shape and why two real, independent PDKs'
+own decks justify supporting both)."""
 
 from __future__ import annotations
 
@@ -41,6 +51,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from ..models import DesignRule
+from ..pdklib import numeric
 from ..schema import CHECK_TYPES, CHECK_TYPE_ORDER
 from . import rule_canvas
 from .list_filter import build_filter_row, matches
@@ -183,6 +194,8 @@ class RulesView(ttk.Frame):
         add_combo("net_qualifier", "Net qualifier", NET_QUALIFIERS)
         add_entry("classification", "Classification")
         add_entry("condition", "Condition")
+        add_entry("window_size_um", "Window Size (um)")
+        add_entry("window_step_um", "Window Step (um)")
         add_entry("process_revision", "Process revision")
         add_entry("owner", "Owner")
         add_entry("source_provenance", "Source / provenance")
@@ -274,6 +287,8 @@ class RulesView(ttk.Frame):
             self.vars["net_qualifier"].set(rule.net_qualifier)
             self.vars["classification"].set(rule.classification)
             self.vars["condition"].set(rule.condition)
+            self.vars["window_size_um"].set("" if rule.window_size_um is None else str(rule.window_size_um))
+            self.vars["window_step_um"].set("" if rule.window_step_um is None else str(rule.window_step_um))
             self.vars["process_revision"].set(rule.process_revision)
             self.vars["owner"].set(rule.owner)
             self.vars["source_provenance"].set(rule.source_provenance)
@@ -295,14 +310,30 @@ class RulesView(ttk.Frame):
         rule.layers = [name for name in layers if name]
         rule.applies_to_override = self.vars["applies_to_override"].get().strip() or None
         raw_value = self.vars["value"].get().strip()
-        try:
-            rule.value = float(raw_value) if raw_value else None
-        except ValueError:
-            pass
+        if not raw_value:
+            rule.value = None
+        else:
+            parsed_value = numeric.parse_number(raw_value)
+            if parsed_value is not None:
+                rule.value = parsed_value
         rule.units = self.vars["units"].get()
         rule.net_qualifier = self.vars["net_qualifier"].get() or "not_applicable"
         rule.classification = self.vars["classification"].get()
         rule.condition = self.vars["condition"].get()
+        raw_window_size = self.vars["window_size_um"].get().strip()
+        if not raw_window_size:
+            rule.window_size_um = None
+        else:
+            parsed_window_size = numeric.parse_number(raw_window_size)
+            if parsed_window_size is not None:
+                rule.window_size_um = parsed_window_size
+        raw_window_step = self.vars["window_step_um"].get().strip()
+        if not raw_window_step:
+            rule.window_step_um = None
+        else:
+            parsed_window_step = numeric.parse_number(raw_window_step)
+            if parsed_window_step is not None:
+                rule.window_step_um = parsed_window_step
         rule.process_revision = self.vars["process_revision"].get()
         rule.owner = self.vars["owner"].get()
         rule.source_provenance = self.vars["source_provenance"].get()
@@ -402,10 +433,7 @@ class RulesView(ttk.Frame):
             return
         layers = [self.vars[f"layer{i}"].get() for i in range(MAX_LAYER_PICKERS) if self.vars[f"layer{i}"].get()]
         raw_value = self.vars["value"].get().strip()
-        try:
-            value = float(raw_value) if raw_value else None
-        except ValueError:
-            value = None
+        value = numeric.parse_number(raw_value)
         units = self.vars["units"].get()
         rule_canvas.render(self.canvas, spec.renderer, layers, self.app.layer_colors(), value, units)
 
@@ -438,7 +466,7 @@ class RulesView(ttk.Frame):
     def _view_source(self):
         """Opens the real .drc file the selected rule was extracted
         from (DesignRule.source_provenance's own "path:line (...)"
-        text -- real for anything from ihp/drc.py, blank for a rule
+        text -- real for anything from pdklib/drc.py, blank for a rule
         added by hand via New Rule)."""
 
         if self.current_rule is not None:

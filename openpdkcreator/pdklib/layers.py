@@ -10,7 +10,7 @@ project.
 original ``ElementTree`` implementation so each real ``<properties>``
 block's own real, 1-indexed source line range could be tracked
 (stdlib ``ElementTree`` doesn't expose source line numbers; only
-``lxml`` does), needed by ``ihp/layers_writer.py``'s own real,
+``lxml`` does), needed by ``pdklib/layers_writer.py``'s own real,
 surgical write-back. Confirmed real and fully uniform before switching,
 not assumed: all 377 real ``<properties>`` blocks in IHP's own
 ``sg13g2.lyp`` are exactly 16 real lines each, same 14-tag field order
@@ -42,6 +42,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from ..models import Layer
+from . import numeric
 
 _TAG_LINE_RE = re.compile(r"^\s*<([\w-]+)>(.*)</\1>\s*$")
 
@@ -71,17 +72,17 @@ def _parse_source(source: str) -> tuple[int | None, int | None]:
     parts = source.split("/")
     if len(parts) != 2:
         return None, None
-    try:
-        return int(parts[0]), int(parts[1])
-    except ValueError:
+    layer, datatype = numeric.parse_int(parts[0]), numeric.parse_int(parts[1])
+    if layer is None or datatype is None:
         return None, None
+    return layer, datatype
 
 
 def find_layer_blocks(lyp_path: Path) -> list[tuple[int, int, dict[str, str]]]:
     """Every real top-level ``<properties>`` block's own real,
     1-indexed, inclusive ``(start_line, end_line)`` line range plus its
     flat tag->text field dict -- the shared real-position scan both
-    ``import_layers`` (below) and ``ihp/layers_writer.py`` use, so the
+    ``import_layers`` (below) and ``pdklib/layers_writer.py`` use, so the
     two never independently re-derive (and risk disagreeing about)
     the same real block boundaries."""
 
@@ -110,14 +111,28 @@ def find_layer_blocks(lyp_path: Path) -> list[tuple[int, int, dict[str, str]]]:
     return blocks
 
 
+def purpose_from_name(name: str) -> str:
+    """The real "purpose" component of a real layer name -- the
+    segment after its last real ``.``, e.g. ``"pin"`` for
+    ``"Activ.pin"``, or the ``Layer`` dataclass's own ``"drawing"``
+    default for a name with no dot at all (matching a brand-new,
+    not-yet-renamed layer's own default). A real foundry ``.lyp``'s
+    own ``<name>`` values are already KLayout's own unique
+    identifiers with far more distinct trailing segments (51, for the
+    real IHP deck) than the project's old, small, fixed "purpose" enum
+    ever held -- so the GUI's own Purpose selector is now generated
+    per-project from whatever real values are actually present,
+    rather than trying to force real data into a fixed, static list."""
+
+    if "." not in name:
+        return "drawing"
+    return name.rsplit(".", 1)[1]
+
+
 def import_layers(pdk_root: Path, lyp_path: Path) -> list[Layer]:
     """Every real top-level `<properties>` block's name/source/
-    frame-color/fill-color -- the reliable subset every real entry has.
-    Deliberately does NOT try to split `<name>` into a "layer name" +
-    "purpose": a real foundry .lyp's own `<name>` values (e.g.
-    "Substrate.drawing") are already KLayout's own unique identifiers,
-    with far more distinct trailing segments than a small, fixed
-    "purpose" enum could ever enumerate."""
+    frame-color/fill-color -- the reliable subset every real entry has
+    -- plus a real, derived ``purpose`` (``purpose_from_name``, above)."""
 
     layers: list[Layer] = []
     today = datetime.date.today().isoformat()
@@ -133,13 +148,16 @@ def import_layers(pdk_root: Path, lyp_path: Path) -> list[Layer]:
                 name=name,
                 gds_layer=gds_layer,
                 gds_datatype=gds_datatype,
-                purpose="drawing",
+                purpose=purpose_from_name(name),
                 frame_color=fields.get("frame-color", "").strip() or "#7f7f7f",
                 fill_color=fields.get("fill-color", "").strip() or "#d9d9d9",
                 status="placeholder",
+                stack_order=len(layers),
                 notes=f"Imported from {rel} on {today}. Real GDS layer/datatype/color; "
-                      f"plane/stack_order/streamout_allowed not derivable from a .lyp "
-                      f"and still need a human decision.",
+                      f"stack_order defaults to this .lyp file's own real block order "
+                      f"(a reasonable starting point, not a verified physical stack -- "
+                      f"reorder with Move Up/Down if it's wrong); plane/streamout_allowed "
+                      f"are not derivable from a .lyp at all and still need a human decision.",
                 start_line=start_line,
                 end_line=end_line,
             )

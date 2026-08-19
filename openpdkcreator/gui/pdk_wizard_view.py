@@ -22,11 +22,11 @@ means for a 2-terminal device with no IHP precedent to copy from.
 node**: Layers, Magic Tech, DRC Rules, LEF, xschem Symbols/Schematics,
 and Qucs-S Symbols/Components all support creating a brand-new file
 from inside this GUI today (their own "New..."/**Create File**
-actions -- see ``ihp/layers.py``'s ``create_new_lyp_file``,
-``ihp/magic_tech.py``'s ``create_new_tech_file``, ``ihp/drc.py``'s
-``create_new_drc_deck``, ``ihp/lef.py``'s ``create_new_lef_file``,
-``ihp/xschem.py``'s ``create_new_sym_file``, ``ihp/xschem_sch.py``'s
-``create_new_sch_file``, ``ihp/qucs_sym.py``'s
+actions -- see ``pdklib/layers.py``'s ``create_new_lyp_file``,
+``pdklib/magic_tech.py``'s ``create_new_tech_file``, ``pdklib/drc.py``'s
+``create_new_drc_deck``, ``pdklib/lef.py``'s ``create_new_lef_file``,
+``pdklib/xschem.py``'s ``create_new_sym_file``, ``pdklib/xschem_sch.py``'s
+``create_new_sch_file``, ``pdklib/qucs_sym.py``'s
 ``create_new_symbol_geometry_file``/``create_new_component_file``).
 LEF's and DRC Rules' own versions are each deliberately partial,
 though (see ``_status_lef``/the ``drc_rules`` stage's own description
@@ -34,13 +34,24 @@ below): a new LEF unblocks a valid, empty *library*, not a whole new
 **MACRO** (``lef_writer.py`` refuses to write one back with no real
 source position, and there's no **New Macro** action); a hand-authored
 DRC **New Rule** is genuinely exportable -- real, generated KLayout
-Ruby, not just metadata -- only for the three ``check_type``s with a
+Ruby, not just metadata -- only for the six ``check_type``s with a
 real, single-method shape this project knows how to emit
-(``min_width``/``min_spacing``/``min_enclosure`` -- see
-``ihp/drc_writer.py``'s own docstring); every other check type still
-can't be written back. Every remaining domain (Verilog, Liberty,
-CDL/SPICE, ngspice Models, and User Models' own ``.va``/``.v`` files)
-requires a real file to already exist on disk -- hand-place one
+(``min_width``/``min_spacing``/``min_enclosure``/``min_area``/
+``min_overlap``/``max_length`` -- see ``pdklib/drc_writer.py``'s own
+docstring); every other check type still can't be written back. Liberty
+and CDL/SPICE also gained real create-from-scratch support
+(``pdklib/liberty.py``'s ``create_new_liberty_file``, ``pdklib/
+netlist.py``'s ``create_new_cdl_file``/``create_new_spice_file``) --
+unlike every domain listed above, though, neither has a dedicated
+top-level tab of its own; **Create** for these three (Verilog/Liberty/
+CDL-SPICE) lives in the **Library Manager** tab instead (select a
+library/cell, then **Create** next to the missing view), pre-populated
+with that cell's own already-known real pins when another view
+(LEF/xschem symbol/an existing Verilog module) already has them --
+this stage's own gap note below still points here specifically, not
+just "no in-GUI way." Every remaining domain (ngspice Models, and User
+Models' own ``.va``/``.v`` files) requires a real file to already
+exist on disk -- hand-place one
 (copied from a template/reference PDK, or written in an external
 editor) under the matching real path, and this tool can load and edit
 it from there. This is not glossed over: a from-scratch memristor PDK
@@ -65,17 +76,18 @@ from tkinter import ttk
 from typing import Callable
 
 from .. import export as export_mod
-from ..ihp import cells as cells_mod
-from ..ihp import drc as drc_mod
-from ..ihp import layers as layers_mod
-from ..ihp import lef as lef_mod
-from ..ihp import magic_tech as magic_tech_mod
-from ..ihp import qucs_sym as qucs_sym_mod
-from ..ihp import spice_models as spice_models_mod
-from ..ihp import user_models as user_models_mod
-from ..ihp import xschem as xschem_mod
-from ..ihp import xschem_sch as xschem_sch_mod
+from ..pdklib import cells as cells_mod
+from ..pdklib import drc as drc_mod
+from ..pdklib import layers as layers_mod
+from ..pdklib import lef as lef_mod
+from ..pdklib import magic_tech as magic_tech_mod
+from ..pdklib import qucs_sym as qucs_sym_mod
+from ..pdklib import spice_models as spice_models_mod
+from ..pdklib import user_models as user_models_mod
+from ..pdklib import xschem as xschem_mod
+from ..pdklib import xschem_sch as xschem_sch_mod
 from .settings_view import DEFAULT_PROJECT_NAME
+from .tooltip import CanvasItemTooltip
 
 _COLOR_DONE = "#2e7d32"
 _COLOR_TODO = "#616161"
@@ -106,7 +118,7 @@ def _glob_count(app, pattern: str) -> int:
 
 
 def _status_overview(app):
-    from ..ihp import inventory as inventory_mod
+    from ..pdklib import inventory as inventory_mod
 
     count = len(inventory_mod.scan_all(app.pdk_root))
     return True, f"{count} real tool director(y/ies) inventoried under {app.pdk_root.name}/.", None
@@ -172,8 +184,9 @@ def _status_liberty(app):
         return (
             False,
             "No real Liberty (.lib) file found under libs.ref/.",
-            "No in-GUI way to author one from scratch -- hand-write a "
-            ".lib file (or adapt a template) under libs.ref/<family>/lib/.",
+            "No New... action in this stage's own By Cell tab -- Create a "
+            "Liberty view for a cell in the Library Manager tab instead "
+            "(select a library/cell, then Create next to Liberty).",
         )
     return True, f"{n} real .lib file(s) found across libs.ref/*/lib/.", None
 
@@ -184,8 +197,9 @@ def _status_cdl_spice(app):
         return (
             False,
             "No real CDL/SPICE netlist found under libs.ref/.",
-            "No in-GUI way to author one from scratch -- hand-write a "
-            ".cdl/.spice file under libs.ref/<family>/{cdl,spice}/.",
+            "No New... action in this stage's own By Cell tab -- Create a "
+            "CDL or SPICE view for a cell in the Library Manager tab "
+            "instead (select a library/cell, then Create next to CDL/SPICE).",
         )
     return True, f"{n} real .cdl/.spice file(s) found across libs.ref/*/.", None
 
@@ -248,7 +262,7 @@ def _status_gds(app):
             False,
             "No real .gds file found under libs.ref/.",
             "There's no in-GUI GDS editor at all (view-only, via "
-            "ihp/gds.py's KLayout API) -- draw the physical layout in "
+            "pdklib/gds.py's KLayout API) -- draw the physical layout in "
             "KLayout or Magic directly and place the .gds under "
             "libs.ref/<family>/gds/.",
         )
@@ -471,6 +485,7 @@ class PdkWizardView(ttk.Frame):
         self._stage_by_id = {stage.stage_id: stage for stage in _STAGES}
         self._box_ids: dict[str, int] = {}
         self._label_ids: dict[str, int] = {}
+        self._stage_tooltips: dict[str, CanvasItemTooltip] = {}
         self._selected: str | None = None
         self._build()
 
@@ -571,6 +586,7 @@ class PdkWizardView(ttk.Frame):
         self._label_ids[stage.stage_id] = label_id
         for item_id in (box_id, label_id):
             self.canvas.tag_bind(item_id, "<Button-1>", lambda _e, sid=stage.stage_id: self._select(sid))
+        self._stage_tooltips[stage.stage_id] = CanvasItemTooltip(self.canvas, (box_id, label_id), stage.description)
 
     def refresh(self):
         for stage in _STAGES:

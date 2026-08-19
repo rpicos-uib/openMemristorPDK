@@ -9,7 +9,7 @@ already inconsistent across this PDK's own real tool domains --
 ``libs.ref/`` uses ``sg13g2_stdcell`` (singular); ``libs.tech/xschem/``
 uses ``sg13g2_stdcells`` (plural, and has no ``_io``/``_sram`` dir at
 all); ``libs.tech/qucs-s/symbols/`` is flat, no per-family split
-whatsoever (see ``ihp/cells.py``'s own docstring for exactly how
+whatsoever (see ``pdklib/cells.py``'s own docstring for exactly how
 ``build_cell_index`` already works around this by matching real
 xschem/Qucs-S files to a cell by *name*, not by directory). Forcing
 new, project-authored content into a directory layout modeled on
@@ -25,7 +25,7 @@ other the wrong way**:
   *pdk_root* itself (never persisted -- it's just a live reflection of
   the real, downloaded PDK's own current state, same "cheap glob,
   recomputed live" discipline as everywhere else in this project).
-  Built by flattening ``ihp/cells.py``'s own ``build_cell_index``
+  Built by flattening ``pdklib/cells.py``'s own ``build_cell_index``
   output -- reused, not duplicated; this module owns no parsing logic
   of its own.
 - ``source="registered"`` -- user-added via the Library Manager's own
@@ -50,6 +50,7 @@ import yaml
 
 from . import cells as cells_mod
 from . import lef as lef_mod
+from . import mag as mag_mod
 from . import verilog as verilog_mod
 from . import xschem as xschem_mod
 
@@ -75,20 +76,45 @@ VIEW_KIND_LABELS: dict[str, str] = {
     "verilog": "Verilog",
     "veriloga": "Verilog-A",
     "liberty": "Liberty",
+    "mag": "Magic Layout",
     "gds": "GDS/Layout",
+    "libman_core": "LibMan CORE View",
 }
 VIEW_KIND_ORDER: tuple[str, ...] = tuple(VIEW_KIND_LABELS.keys())
 """Real create-from-scratch support exists (this session, verified)
-only for these six -- ``ihp/cells.py``'s own docstring/every other
+only for these ten -- ``pdklib/cells.py``'s own docstring/every other
 writer's own real ``start_line == 0`` skip explains why the rest
 don't yet. Verilog/Verilog-A were added later than the original four
 xschem/Qucs-S ones -- see ``create_new_verilog_file``/
-``create_new_veriloga_file`` in ``ihp/verilog.py`` and
+``create_new_veriloga_file`` in ``pdklib/verilog.py`` and
 ``infer_ports_for_cell`` below for how a newly-created one gets a
 real cell's own already-known pins pre-populated, not an empty
-template."""
+template. ``mag`` (Magic Layout) was added later still -- see
+``pdklib/mag.py``'s own ``create_new_mag_file``; unlike every other real
+view here, a newly-created one is *not* meant to be edited in this
+Python GUI at all, only opened in real Magic to actually draw real
+geometry (the same "Create an empty skeleton, do the real work in the
+real external tool" pattern xschem/Qucs-S Symbol/Schematic already
+established). ``cdl``/``spice``/``liberty`` (added later still --
+``create_new_cdl_file``/``create_new_spice_file`` in ``pdklib/
+netlist.py``, ``create_new_liberty_file`` in ``pdklib/liberty.py``)
+close the last real "no create path" gaps the PDK Wizard's own legend
+used to flag -- same real pin-inference precedent as Verilog/
+Verilog-A, no dedicated top-level tab of their own either (still only
+surfaced per-cell, through By Cell and here). ``libman_core`` (added
+still later, ``pdklib/libman_project.py``'s own real **Import from
+LibMan Project...**) is different again: a real view whose real file
+this project can neither create *nor open* -- it's LibMan's own real,
+proprietary Cap'n Proto "CORE" binary format (``*.layout.core``/
+``*.schematic.core``/...), which needs LibMan's own real converter
+toolchain to read at all. Tracked by real location only, the same
+"Add..." precedent every other un-openable view kind already has,
+never silently dropped just because this project can't view it."""
 CREATABLE_VIEW_KINDS: frozenset[str] = frozenset(
-    {"xschem_symbol", "xschem_schematic", "qucs_symbol", "qucs_component", "verilog", "veriloga"}
+    {
+        "xschem_symbol", "xschem_schematic", "qucs_symbol", "qucs_component", "verilog", "veriloga", "mag",
+        "cdl", "spice", "liberty",
+    }
 )
 
 
@@ -104,7 +130,7 @@ class ViewEntry:
 
 
 def discover_real_entries_for_family(pdk_root: Path, family: str) -> list[ViewEntry]:
-    """Every real view for *family* alone (``ihp/cells.py``'s own
+    """Every real view for *family* alone (``pdklib/cells.py``'s own
     ``build_cell_index``, reused not duplicated) -- deliberately
     scoped to one real family at a time, not the whole deck, matching
     ``gui/cell_hub_view.py``'s own lazy, per-family loading
@@ -143,8 +169,19 @@ def discover_real_entries_for_family(pdk_root: Path, family: str) -> list[ViewEn
             entries.append(ViewEntry(family, cell_name, "gds", cv.gds_source, "real"))
         # cv.gds_present without cv.gds_source (a real, combined
         # multi-cell GDS with no confirmed per-cell membership -- see
-        # ihp/cells.py's own docstring) is deliberately not indexed:
+        # pdklib/cells.py's own docstring) is deliberately not indexed:
         # pointing every cell at the same shared file would mislead.
+
+    # Magic .mag layouts: matched by real cell name (file stem), same
+    # "enrich an already-known cell, never introduce a new one" real
+    # boundary xschem/Qucs-S already have -- pdklib/cells.py's own
+    # CellViews has no mag_source field (this is a Library-Manager-
+    # only view kind), so this can't reuse build_cell_index's own
+    # output the way every other real view kind above does.
+    for mag_path in mag_mod.find_mag_files(pdk_root):
+        if mag_path.parent.parent.name == family and mag_path.stem in index:
+            entries.append(ViewEntry(family, mag_path.stem, "mag", mag_path, "real"))
+
     return entries
 
 
@@ -290,10 +327,13 @@ def _normalize_direction(raw: str) -> str:
 def infer_ports_for_cell(pdk_root: Path, project_root: Path, library: str, cell: str) -> list[tuple[str, str]]:
     """Best-effort real port list (``[(name, direction), ...]``,
     direction one of ``"input"``/``"output"``/``"inout"``/``""``) for
-    *cell*, used to pre-populate a newly **Create**d Verilog/Verilog-A
-    view with that cell's own already-known real pins instead of an
-    empty template -- see ``ihp/verilog.py``'s own
-    ``create_new_verilog_file``/``create_new_veriloga_file``.
+    *cell*, used to pre-populate a newly **Create**d Verilog/Verilog-A/
+    CDL/SPICE/Liberty view with that cell's own already-known real
+    pins instead of an empty template -- see ``pdklib/verilog.py``'s
+    own ``create_new_verilog_file``/``create_new_veriloga_file``,
+    ``pdklib/netlist.py``'s own ``create_new_cdl_file``/
+    ``create_new_spice_file``, and ``pdklib/liberty.py``'s own
+    ``create_new_liberty_file``.
 
     Tries each of this cell's own already-known real/registered views,
     in priority order, stopping at the first one with a real, non-empty
@@ -345,6 +385,7 @@ _EXT_TO_UNAMBIGUOUS_VIEW_KIND: dict[str, str] = {
     ".spice": "spice",
     ".v": "verilog",
     ".lib": "liberty",
+    ".mag": "mag",
     ".gds": "gds",
 }
 

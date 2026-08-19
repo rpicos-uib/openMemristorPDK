@@ -1,5 +1,5 @@
 """Library Manager tab -- a Cadence-style Libraries | Cells | Views
-browser over ``ihp/library_index.py``'s own merged real+registered
+browser over ``pdklib/library_index.py``'s own merged real+registered
 index (no separate logic here; this view only calls that module and
 ``eda_tools.py``'s own launch mechanism -- see both modules' own
 docstrings for the real design decisions and the real, source-verified
@@ -19,55 +19,101 @@ real file, via ``eda_tools.resolve_launch``'s new ``extra_argv``
   ``--print`` mode). Said plainly to the user before launching, not
   glossed over.
 - GDS/Layout -> **two** real, verified options: **Open in KLayout**
-  (``klayout -l <real .lyp> <real .gds>`` -- KLayout's own existing
-  static ``LaunchGuidance`` already supplies ``-l``; ``extra_argv`` just
-  adds the real, per-cell GDS path on top) and **Open in Magic**
-  (a real, freshly-written 2-line Tcl script -- ``gds read <path>`` then
-  ``load <cell>`` -- passed as ``extra_argv`` on top of Magic's own
-  existing tech-loading ``LaunchGuidance``; verified live, for real, in
-  this project's own container: ``gds read`` against a real IHP GDS
-  printed every real cell name inside it. No CLI flag exists for
-  KLayout to jump to one specific cell in a multi-cell GDS -- a real,
-  accepted limit, not solved here).
+  (``klayout -l <real .lyp> <real .gds> -rr <script.rb>`` -- KLayout's
+  own existing static ``LaunchGuidance`` already supplies ``-l``;
+  ``extra_argv`` adds the real, per-cell GDS path plus a real,
+  freshly-written one-line Ruby script,
+  ``RBA::CellView::active.cell_name = "<cell>"``, run via ``-rr``
+  (confirmed real, from KLayout's own local ``-h`` text: ``-r`` "after
+  having loaded files" but exits afterward; ``-rm`` runs *before*
+  files load, too early for ``CellView::active`` to have anything yet;
+  ``-rr`` is "like -r, but does not exit" -- the one that actually
+  works here, verified live in noVNC: the window title and canvas both
+  correctly jump straight to the requested real cell inside a real,
+  combined multi-macro GDS, closing what was a real, previously
+  accepted CLI limit) and **Open in Magic** (a real, freshly-written
+  2-line Tcl script -- ``gds read <path>`` then ``load <cell>`` --
+  passed as ``extra_argv`` on top of Magic's own existing tech-loading
+  ``LaunchGuidance``; verified live, for real, in this project's own
+  container: ``gds read`` against a real IHP GDS printed every real
+  cell name inside it).
+- Magic Layout (``.mag``) -> **Open in Magic**, a real, freshly-written
+  1-line Tcl script (``cd <dir>; load <cell>``) -- unlike GDS, a
+  ``.mag`` file is already Magic's own real, native format, so no
+  ``gds read`` two-step is needed.
 - LEF/CDL/SPICE/Verilog/Liberty -> ``file_view_dialog`` (in-app text
   view) -- no real external-tool identity for these, matching
   ``cell_hub_view.py``'s own existing precedent.
 
-**Create** only appears for the six view kinds with real
-create-from-scratch support (``ihp/library_index.py``'s own
+**Create** only appears for the ten view kinds with real
+create-from-scratch support (``pdklib/library_index.py``'s own
 ``CREATABLE_VIEW_KINDS`` -- xschem Symbol/Schematic, Qucs-S
-Symbol/Component, Verilog, Verilog-A); every other kind still gets a
-real **Add...** button. A created xschem/Qucs-S view's real file
-defaults to ``<project_root>/libraries/<library>/<cell>.<ext>`` (a
-real, tracked, but entirely optional convention -- nothing elsewhere
-requires it). A created **Verilog**/**Verilog-A** view instead defaults
-into the already-established ``user_models/{verilog,veriloga}/``
-convention (``ihp/user_models.py``) -- real, project-authored model
-content, giving it free integration with By Cell's own "User Models"
-column and OSDI-snippet generation. Either way, if the cell being
-created for already has another real/registered view with known real
-pins (LEF, then an xschem symbol, then an existing Verilog/Verilog-A
-module of the same name -- ``ihp/library_index.py``'s own
-``infer_ports_for_cell``), the new module/port declaration is
-pre-populated with those real pins instead of an empty template.
+Symbol/Component, Verilog, Verilog-A, Magic Layout, CDL, SPICE,
+Liberty); every other kind still gets a real **Add...** button. A
+created Magic Layout is deliberately *not* meant to be edited in this
+Python GUI -- it writes a real, minimal, empty ``.mag`` skeleton
+(``pdklib/mag.py``'s own ``create_new_mag_file``, grounded in Magic's
+own official file-format manual and verified live against the real
+installed Magic binary), then **Open in Magic** is where the real
+drawing happens; Magic's own real ``gds write`` is the real path from
+there to an actual, real GDS. A created xschem/Qucs-S/CDL/SPICE/
+Liberty view's real file defaults to
+``<project_root>/libraries/<library>/<cell>.<ext>`` (a real, tracked,
+but entirely optional convention -- nothing elsewhere requires it). A
+created **Verilog**/**Verilog-A** view instead defaults into the
+already-established ``user_models/{verilog,veriloga}/`` convention
+(``pdklib/user_models.py``) -- real, project-authored model content,
+giving it free integration with By Cell's own "User Models" column and
+OSDI-snippet generation. Either way, if the cell being created for
+already has another real/registered view with known real pins (LEF,
+then an xschem symbol, then an existing Verilog/Verilog-A module of
+the same name -- ``pdklib/library_index.py``'s own
+``infer_ports_for_cell``), the new file's own port/pin declarations
+are pre-populated with those real pins instead of an empty template
+(a real ``*.PININFO`` comment too, for a newly created **CDL** view --
+see ``pdklib/netlist.py``'s own ``create_new_cdl_file``; **SPICE**
+deliberately gets none, matching the real, confirmed convention that
+no real, downloaded SPICE file carries one either).
 
 **Add...** registers a real, *existing* file for any view kind at all
 -- including the six with no real create-from-scratch support -- and
 the file can live anywhere on disk, not just under ``libraries/``.
 This is the whole reason this tab tracks real file *locations*
-(``ihp/library_index.py``) instead of enforcing a fixed directory
+(``pdklib/library_index.py``) instead of enforcing a fixed directory
 convention: a hand-authored LEF, or a file some other tool already
 wrote elsewhere, is just as trackable as something this app created
 itself.
 
 **Automatic tracking**: every real refresh of the Cells pane also
 scans that library's own default ``libraries/<library>/`` directory
-for real files this app didn't itself register yet (``ihp/
+for real files this app didn't itself register yet (``pdklib/
 library_index.py``'s own ``auto_register_new_files``, content-sniffed
 to disambiguate xschem vs. Qucs-S ``.sym`` files -- both share the same
 real extension) and registers them immediately -- so a file some other
 tool wrote there directly (e.g. a real "Save As" in xschem) shows up
 here without an explicit **Add...** click.
+
+**Import from LibMan Project.../Export to LibMan Project...**: real,
+native, bidirectional support for IHP-GmbH's own real LibMan tool's
+own real ``.projects`` file format (``pdklib/libman_project.py`` -- a
+real, bounded parser/writer verified against LibMan's own real,
+fetched C++ source and a real, committed ground-truth fixture for this
+same SG13G2 PDK; see that module's own docstring for the exact
+real grammar and which real commit it's pinned to, and the real risk
+that an actively-developed, unversioned external file format could
+still drift). Export writes one real ``define("library", "path");``
+line per real view whose kind LibMan's own real Import feature
+actually understands (GDS/Xschem/Qucs); every other real kind here has
+no LibMan counterpart and is silently skipped (counted, not hidden, in
+the real status-bar summary afterward). Import registers every real
+``define()`` whose own real path resolves to a real, existing file on
+this machine -- as a normal, openable view kind when this project
+already understands the real file's own extension (``pdklib/
+library_index.py``'s own ``infer_view_kind``, the same real,
+content-sniffed function **Automatic tracking** above already uses),
+or as the new, honestly tracked-but-unopenable **LibMan CORE View**
+kind otherwise (LibMan's own real, proprietary Cap'n Proto binary
+format -- needs LibMan's own converter toolchain, not embedded here).
 """
 
 from __future__ import annotations
@@ -80,13 +126,19 @@ from tkinter import filedialog, messagebox, simpledialog, ttk
 
 from .. import eda_tools
 from .. import export as export_mod
-from ..ihp import library_index as li_mod
-from ..ihp import qucs_sym as qucs_sym_mod
-from ..ihp import user_models as user_models_mod
-from ..ihp import verilog as verilog_mod
-from ..ihp import xschem as xschem_mod
-from ..ihp import xschem_sch as xschem_sch_mod
+from ..pdklib import liberty as liberty_mod
+from ..pdklib import libman_project as libman_mod
+from ..pdklib import library_index as li_mod
+from ..pdklib import mag as mag_mod
+from ..pdklib import magic_tech as magic_tech_mod
+from ..pdklib import netlist as netlist_mod
+from ..pdklib import qucs_sym as qucs_sym_mod
+from ..pdklib import user_models as user_models_mod
+from ..pdklib import verilog as verilog_mod
+from ..pdklib import xschem as xschem_mod
+from ..pdklib import xschem_sch as xschem_sch_mod
 from .file_view_dialog import view_file_dialog
+from .tooltip import add_help_icon
 
 LIBRARIES_DIRNAME = li_mod.LIBRARIES_DIRNAME
 
@@ -111,23 +163,59 @@ _EXT_FOR_VIEW_KIND: dict[str, str] = {
     "verilog": ".v",
     "veriloga": ".va",
     "liberty": ".lib",
+    "mag": ".mag",
     "gds": ".gds",
 }
 """Every real view kind's own extension -- used by **Create** (the
-six ``li_mod.CREATABLE_VIEW_KINDS`` only) and by **Add...**'s own
-file-dialog filter (all eleven, so browsing for an existing LEF/GDS/...
+ten ``li_mod.CREATABLE_VIEW_KINDS`` only) and by **Add...**'s own
+file-dialog filter (all twelve, so browsing for an existing LEF/GDS/...
 file to register starts pre-filtered too)."""
+
+VIEW_KIND_HELP: dict[str, str] = {
+    "xschem_schematic": "The real, editable circuit -- device instances and wires, drawn in xschem. "
+                         "What you'd hand-draw or simulate from.",
+    "xschem_symbol": "The real, editable device icon xschem shows when this cell is instantiated "
+                      "inside another schematic -- pins, shape, no internal circuitry.",
+    "qucs_symbol": "Qucs-S's own drawn-geometry symbol for this cell (ports only, no port names) -- "
+                   "a separate real format from xschem's own .sym, sharing the same .sym extension.",
+    "qucs_component": "Qucs-S's own real device/model definition (parameters, netlist templates) for "
+                       "this cell -- what Qucs-S actually simulates.",
+    "lef": "The real, physical abstract: pin locations/directions and the cell's own footprint, used "
+           "for placement and routing -- no internal geometry, just the outside-facing contract.",
+    "cdl": "A real SPICE-family netlist (CDL dialect) describing this cell's own transistor-level "
+           "circuit -- used for LVS (layout-vs-schematic) comparison.",
+    "spice": "A real, plain SPICE netlist for this cell -- similar role to CDL, a different real "
+             "dialect/toolchain expects this one instead.",
+    "verilog": "A real, plain digital Verilog module for this cell -- structural/behavioral, for "
+               "digital simulation or synthesis.",
+    "veriloga": "A real Verilog-A compact model for this cell -- analog/mixed-signal behavior, "
+                "compiled with OpenVAF then loaded into ngspice via its own real 'osdi' command.",
+    "liberty": "Real timing/power data (.lib) for this cell -- what a digital synthesis/STA tool "
+               "reads to know delays, setup/hold, and power per real PVT corner.",
+    "mag": "The real, editable Magic layout source for this cell -- draw real geometry here in "
+           "Magic itself; Magic's own 'gds write' then produces a real, exportable GDS from it.",
+    "gds": "The real, final physical layout (polygons on real mask layers) -- what actually gets "
+           "fabricated, or the read-only result of exporting a drawn Magic layout.",
+    "libman_core": "A real view from IHP-GmbH's own LibMan tool, tracked by location only -- its "
+                    "'.layout.core'/'.schematic.core' files are LibMan's own proprietary Cap'n Proto "
+                    "format and need LibMan's own converter tools to open; this app can't view it.",
+}
+"""One real sentence per view kind, shown as a hover tooltip next to
+its own row label -- what the file *is*, not how to use this tab."""
 
 
 def _create_view_file(
     view_kind: str, path: Path, cell_name: str, ports: list[tuple[str, str]] | None = None,
+    tech_name: str = "",
 ) -> None:
     """Dispatches to the one real ``create_new_*`` function for
     *view_kind* -- only ever called for a key in
     ``li_mod.CREATABLE_VIEW_KINDS``. *ports* (real ``(name,
     direction)`` pairs, from ``li_mod.infer_ports_for_cell``) only
-    matters for Verilog/Verilog-A -- every other real create-from-
-    scratch view here has no real per-cell pin data to seed from."""
+    matters for Verilog/Verilog-A/CDL/SPICE/Liberty -- every other real
+    create-from-scratch view here has no real per-cell pin data to
+    seed from. *tech_name* only matters for ``mag`` -- the real Magic technology
+    name written into its own ``tech <name>`` header line."""
 
     path.parent.mkdir(parents=True, exist_ok=True)
     if view_kind == "xschem_symbol":
@@ -142,6 +230,14 @@ def _create_view_file(
         verilog_mod.create_new_verilog_file(path, cell_name, ports)
     elif view_kind == "veriloga":
         verilog_mod.create_new_veriloga_file(path, cell_name, ports)
+    elif view_kind == "mag":
+        mag_mod.create_new_mag_file(path, tech_name)
+    elif view_kind == "cdl":
+        netlist_mod.create_new_cdl_file(path, cell_name, ports)
+    elif view_kind == "spice":
+        netlist_mod.create_new_spice_file(path, cell_name, ports)
+    elif view_kind == "liberty":
+        liberty_mod.create_new_liberty_file(path, cell_name, ports)
     else:
         raise ValueError(f"{view_kind!r} has no real create-from-scratch support")
 
@@ -164,6 +260,24 @@ class LibraryManagerView(ttk.Frame):
     # -- layout -------------------------------------------------------------
 
     def _build(self):
+        libman_row = ttk.Frame(self)
+        libman_row.pack(fill="x", padx=8, pady=(8, 0))
+        ttk.Label(libman_row, text="IHP LibMan project file:").pack(side="left")
+        ttk.Button(
+            libman_row, text="Import from LibMan Project...", command=self._import_libman_project,
+        ).pack(side="left", padx=(6, 0))
+        ttk.Button(
+            libman_row, text="Export to LibMan Project...", command=self._export_libman_project,
+        ).pack(side="left", padx=(6, 0))
+        add_help_icon(
+            libman_row,
+            "Real, native support for IHP-GmbH/LibMan's own real '.projects' file format "
+            "(define(\"lib\",\"path\"); lines) -- NOT its separate, much heavier Cap'n Proto "
+            "'CORE' binary geometry format, which needs LibMan's own converter tools to read. "
+            "LibMan is under active development with no version marker in its own file format; "
+            "this is pinned to a specific, real, fetched commit -- see pdklib/libman_project.py.",
+        ).pack(side="left", padx=(4, 0))
+
         body = ttk.PanedWindow(self, orient="horizontal")
         body.pack(fill="both", expand=True, padx=8, pady=8)
 
@@ -365,6 +479,9 @@ class LibraryManagerView(ttk.Frame):
         self.views_rows_frame.columnconfigure(0, weight=1)
 
         ttk.Label(row_frame, text=label, width=16, anchor="w").pack(side="left")
+        help_text = VIEW_KIND_HELP.get(view_kind, "")
+        if help_text:
+            add_help_icon(row_frame, help_text).pack(side="left", padx=(0, 4))
 
         if entry is None:
             ttk.Label(row_frame, text="(absent)", foreground="#9e9e9e").pack(side="left", padx=(4, 8))
@@ -399,6 +516,18 @@ class LibraryManagerView(ttk.Frame):
             ttk.Button(row_frame, text="Open in Magic", command=lambda e=entry: self._open_magic_gds(e)).pack(
                 side="left"
             )
+        elif view_kind == "mag":
+            ttk.Button(row_frame, text="Open in Magic", command=lambda e=entry: self._open_magic_mag(e)).pack(
+                side="left"
+            )
+        elif view_kind == "libman_core":
+            # A real, proprietary LibMan Cap'n Proto binary -- offering
+            # a "View" button here would open it through the generic
+            # text-preview dialog and show garbled binary, actively
+            # misleading rather than honestly absent. No button at all.
+            ttk.Label(
+                row_frame, text="  LibMan's own format -- open in LibMan itself", foreground="#e65100",
+            ).pack(side="left")
         else:
             ttk.Button(row_frame, text="View", command=lambda e=entry: view_file_dialog(self, e.path)).pack(
                 side="left"
@@ -433,7 +562,7 @@ class LibraryManagerView(ttk.Frame):
         ext = _EXT_FOR_VIEW_KIND[view_kind]
         # Verilog/Verilog-A views created here default into the
         # already-established ``user_models/`` convention
-        # (``ihp/user_models.py``), not ``libraries/<library>/`` --
+        # (``pdklib/user_models.py``), not ``libraries/<library>/`` --
         # this is real, project-authored model content, and landing it
         # there gives it free integration with By Cell's own "User
         # Models" column and the OSDI-snippet generation, both of which
@@ -441,7 +570,7 @@ class LibraryManagerView(ttk.Frame):
         # ``register_entry`` below still tags it with the current
         # library regardless -- registration is just a grouping label,
         # decoupled from physical file location, matching this whole
-        # index's own real design (see ``ihp/library_index.py``'s own
+        # index's own real design (see ``pdklib/library_index.py``'s own
         # docstring).
         if view_kind == "verilog":
             root = user_models_mod.user_models_root(self.project_root) / user_models_mod.VERILOG_DIRNAME
@@ -451,6 +580,26 @@ class LibraryManagerView(ttk.Frame):
             root = self.project_root / LIBRARIES_DIRNAME / self.current_library
         return root / f"{self.current_cell}{ext}"
 
+    def _default_tech_name(self) -> str:
+        """The real Magic technology name a newly-created ``.mag``
+        file's own ``tech`` line should declare. Real IHP data (found
+        empirically: ``libs.tech/magic/*.tech``) has one complete,
+        loadable tech file (``ihp-sg13g2.tech``, the one the real
+        ``.magicrc``'s own ``tech load`` line references) plus several
+        per-domain *fragments* meant to be ``include``d by it
+        (``ihp-sg13g2-GDS.tech``, ``-cifin``, ``-cifout``, ``-drc``,
+        ``-extract``) -- each fragment's stem is the main file's own
+        stem plus a ``-suffix``, so the shortest stem among every real
+        ``.tech`` file found is always the main, real, active
+        technology's name. Falls back to the pdk_root's own directory
+        name if no ``.tech`` file exists yet (a genuinely from-scratch
+        project)."""
+
+        tech_files = magic_tech_mod.find_tech_files(self.app.pdk_root)
+        if tech_files:
+            return min(tech_files, key=lambda p: (len(p.stem), p.stem)).stem
+        return self.app.pdk_root.name
+
     def _create_view(self, view_kind: str):
         if self.current_library is None or self.current_cell is None:
             return
@@ -459,12 +608,13 @@ class LibraryManagerView(ttk.Frame):
             messagebox.showerror("Create", f"{default_path} already exists.", parent=self)
             return
         ports: list[tuple[str, str]] | None = None
-        if view_kind in ("verilog", "veriloga"):
+        if view_kind in ("verilog", "veriloga", "cdl", "spice", "liberty"):
             ports = li_mod.infer_ports_for_cell(
                 self.app.pdk_root, self.project_root, self.current_library, self.current_cell,
             )
+        tech_name = self._default_tech_name() if view_kind == "mag" else ""
         try:
-            _create_view_file(view_kind, default_path, self.current_cell, ports)
+            _create_view_file(view_kind, default_path, self.current_cell, ports, tech_name)
         except (FileExistsError, OSError, ValueError) as exc:
             messagebox.showerror("Create", str(exc), parent=self)
             return
@@ -485,7 +635,7 @@ class LibraryManagerView(ttk.Frame):
         with no real create-from-scratch support), and the file can
         live anywhere on disk, not just under ``libraries/``. This is
         the whole point of tracking real file *locations* rather than
-        enforcing a fixed directory convention -- see ``ihp/
+        enforcing a fixed directory convention -- see ``pdklib/
         library_index.py``'s own docstring."""
 
         if self.current_library is None or self.current_cell is None:
@@ -534,7 +684,13 @@ class LibraryManagerView(ttk.Frame):
         self._launch("qucs-s")
 
     def _open_klayout(self, entry: li_mod.ViewEntry):
-        self._launch("klayout", extra_argv=(str(entry.path),))
+        handle = tempfile.NamedTemporaryFile(
+            mode="w", suffix=".rb", prefix="openpdkcreator_klayout_cell_", delete=False, encoding="utf-8",
+        )
+        cell_name = self.current_cell.replace('"', '\\"') if self.current_cell else ""
+        with handle:
+            handle.write(f'RBA::CellView::active.cell_name = "{cell_name}"\n')
+        self._launch("klayout", extra_argv=(str(entry.path), "-rr", handle.name))
 
     def _open_magic_gds(self, entry: li_mod.ViewEntry):
         handle = tempfile.NamedTemporaryFile(
@@ -543,3 +699,89 @@ class LibraryManagerView(ttk.Frame):
         with handle:
             handle.write(f"gds read {entry.path}\nload {self.current_cell}\n")
         self._launch("magic", extra_argv=(handle.name,))
+
+    def _open_magic_mag(self, entry: li_mod.ViewEntry):
+        """Unlike GDS (which needs the real ``gds read`` + ``load``
+        two-step -- see ``_open_magic_gds`` above), a ``.mag`` file is
+        already Magic's own real, native format: a real, freshly-
+        written 1-line Tcl script (``cd <dir>; load <cell>``, self-
+        contained rather than relying on Magic's own cwd) is enough to
+        open it directly, ready for real drawing."""
+
+        handle = tempfile.NamedTemporaryFile(
+            mode="w", suffix=".tcl", prefix="openpdkcreator_magic_mag_", delete=False, encoding="utf-8",
+        )
+        with handle:
+            handle.write(f"cd {entry.path.parent}\nload {entry.path.stem}\n")
+        self._launch("magic", extra_argv=(handle.name,))
+
+    # -- IHP LibMan project-file import/export ---------------------------------
+
+    _LIBMAN_EXPORTABLE_KINDS = ("gds", "xschem_symbol", "xschem_schematic", "qucs_symbol", "qucs_component")
+    """Real view kinds LibMan's own real Import doc lists as real,
+    convertible source formats (GDS/Xschem/Qucs -- see ``pdklib/
+    libman_project.py``'s own docstring for the real, fetched source).
+    Every other real kind here (LEF/CDL/SPICE/Verilog/Liberty/Magic
+    Layout) has no real LibMan counterpart, so exporting them would
+    just be a dead ``define()`` LibMan itself can't do anything with."""
+
+    def _export_libman_project(self):
+        path_str = filedialog.asksaveasfilename(
+            title="Export to LibMan Project", defaultextension=".projects",
+            filetypes=[("LibMan project file", "*.projects"), ("All files", "*")], parent=self,
+        )
+        if not path_str:
+            return
+        defines: list[libman_mod.LibManDefine] = []
+        skipped = 0
+        for library, _is_real in li_mod.merged_libraries(self.app.pdk_root, self.project_root):
+            entries = li_mod.merged_entries(self.app.pdk_root, self.project_root, library)
+            for (_cell, view_kind), entry in entries.items():
+                if view_kind not in self._LIBMAN_EXPORTABLE_KINDS:
+                    skipped += 1
+                    continue
+                defines.append(libman_mod.LibManDefine(name=library, path=str(entry.path)))
+        Path(path_str).write_text(libman_mod.render_project_file(defines))
+        self.status_var.set(
+            f"Exported {len(defines)} real view(s) to {path_str} "
+            f"({skipped} real view(s) skipped -- no real LibMan-understood format for them)."
+        )
+
+    def _import_libman_project(self):
+        path_str = filedialog.askopenfilename(
+            title="Import from LibMan Project",
+            filetypes=[("LibMan project file", "*.projects *.lib"), ("All files", "*")], parent=self,
+        )
+        if not path_str:
+            return
+        try:
+            project = libman_mod.parse_project_file(Path(path_str))
+        except libman_mod.LibManParseError as exc:
+            messagebox.showerror("Import from LibMan Project", str(exc), parent=self)
+            return
+        registered = 0
+        opaque = 0
+        skipped = 0
+        for define in project.defines:
+            resolved = libman_mod.resolve_path(define)
+            if not resolved.is_file():
+                # A real, honest LibMan gap, not a bug: a define() path
+                # can be a bare, non-file reference (its own real
+                # "analogLib" self-reference is exactly this), or point
+                # at a real file simply not present on this machine.
+                skipped += 1
+                continue
+            view_kind = li_mod.infer_view_kind(resolved)
+            if view_kind is None:
+                view_kind = "libman_core"
+                opaque += 1
+            else:
+                registered += 1
+            cell = libman_mod.infer_library_name(str(resolved))
+            li_mod.register_entry(self.project_root, define.name, cell, view_kind, resolved)
+        self.refresh_libraries()
+        self.status_var.set(
+            f"Imported from {path_str}: {registered} real, viewable view(s) + {opaque} real LibMan "
+            f"CORE view(s) (tracked, not openable) registered; {skipped} real define(s) skipped "
+            f"(no real file found at their own real path)."
+        )

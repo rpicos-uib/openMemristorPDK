@@ -1,13 +1,13 @@
 """Simulation tab: real, parsed Qucs-S data
-(``openpdkcreator/ihp/qucs_sym.py``) -- two major sub-tabs, mirroring
+(``openpdkcreator/pdklib/qucs_sym.py``) -- two major sub-tabs, mirroring
 ``xschem_view.py``'s own Symbols/Schematics split, since this real
 directory genuinely holds two different real formats (see
-``ihp/qucs_sym.py``'s own docstring):
+``pdklib/qucs_sym.py``'s own docstring):
 
 **Components** (34 real ``.xml`` device definitions): library/
 description/models (read-only), real **Parameters** (name/unit/show,
 read-only, plus a real default value or equation -- **editable**, via
-``ihp/qucs_component_writer.py``'s own surgical text patch, position-
+``pdklib/qucs_component_writer.py``'s own surgical text patch, position-
 matched to the real file's own ``<Parameter ...>`` tags since a real
 Parameter has no other stable identity), and real **Netlists** (the
 raw Ngspice/CDL/[Xyce] template strings, read-only).
@@ -24,7 +24,7 @@ own Symbols/Schematics use, see ``gui/xschem_view.py``'s own
 docstring) rendering every real ``Line``/``Arc``/``Text``/``PortSym``
 primitive to real scale, with Select (click/drag/Delete)/Line/Arc/Text
 tools. Real write-back for both sub-tabs (they edit the exact same
-real, live ``QucsSymbolGeometry``) via ``ihp/qucs_sym_writer.py``.
+real, live ``QucsSymbolGeometry``) via ``pdklib/qucs_sym_writer.py``.
 
 Both share the parent ``App``'s own per-file cache
 (``App.get_parsed_qucs_symbol``/``get_parsed_qucs_component``), the
@@ -35,7 +35,7 @@ Each file picker's own combobox is now editable, not a closed real-
 file list: typing a real, existing relative path and its own button
 reads **Edit File** (opens ``file_view_dialog.view_file_dialog``);
 typing one that doesn't exist yet reads **Create File** (writes a
-real, minimal, valid starting file via ``ihp/qucs_sym.py``'s own
+real, minimal, valid starting file via ``pdklib/qucs_sym.py``'s own
 ``create_new_symbol_geometry_file``/``create_new_component_file``,
 then reloads and selects it) -- see ``gui/file_picker_utils.py``'s own
 docstring. A newly created Component's own real Description/Models/
@@ -50,7 +50,8 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import ttk
 
-from ..ihp import qucs_sym as qucs_mod
+from ..pdklib import numeric
+from ..pdklib import qucs_sym as qucs_mod
 from . import geometry_adapters
 from .file_picker_utils import handle_action, update_action_button
 from .geometry_canvas import GeometryCanvas
@@ -200,7 +201,7 @@ class _ComponentsPane(ttk.Frame):
 
         path = self.files.get(self.file_var.get())
         if path is None:
-            self.summary_var.set("No Qucs-S component data loaded -- has ihp/fetch.py been run?")
+            self.summary_var.set("No Qucs-S component data loaded -- has pdklib/fetch.py been run?")
             self.current = None
             self._load_param_into_form(None)
             return
@@ -440,7 +441,7 @@ class _SymbolsPane(ttk.Frame):
 
         path = self.files.get(self.file_var.get())
         if path is None:
-            self.summary_var.set("No Qucs-S symbol data loaded -- has ihp/fetch.py been run?")
+            self.summary_var.set("No Qucs-S symbol data loaded -- has pdklib/fetch.py been run?")
             self.current = None
             self._load_port_into_form(None)
             self.canvas_view.set_scene(geometry_adapters.Scene())
@@ -484,19 +485,16 @@ class _SymbolsPane(ttk.Frame):
         port = self.current_port
         if port is None:
             return
-        try:
-            port.x = int(self.port_vars["x"].get())
-        except ValueError:
-            pass
-        try:
-            port.y = int(self.port_vars["y"].get())
-        except ValueError:
-            pass
+        parsed_x = numeric.parse_int(self.port_vars["x"].get())
+        if parsed_x is not None:
+            port.x = parsed_x
+        parsed_y = numeric.parse_int(self.port_vars["y"].get())
+        if parsed_y is not None:
+            port.y = parsed_y
         port.port_type = self.port_vars["port_type"].get()
-        try:
-            port.angle = int(self.port_vars["angle"].get())
-        except ValueError:
-            pass
+        parsed_angle = numeric.parse_int(self.port_vars["angle"].get())
+        if parsed_angle is not None:
+            port.angle = parsed_angle
         port.condition = self.port_vars["condition"].get()
 
     def _on_port_field_changed(self, *_args):
