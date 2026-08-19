@@ -21,3 +21,11 @@ entries:
   cell: memristor_hfo2_al
   view_kind: veriloga
   path: /foss/designs/openMemristorPDK/user_models/veriloga/memristor_hfo2_al.va
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au
+  view_kind: xschem_symbol
+  path: /foss/designs/openMemristorPDK/export/openmemristorpdk/libs.tech/xschem/openmemristorpdk_pr/memristor_tio2_au.sym
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au
+  view_kind: xschem_schematic
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.sch
