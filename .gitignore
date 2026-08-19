@@ -22,7 +22,7 @@ __pycache__/
 docs/simulation/.spiceinit
 docs/simulation/memristor_tran.csv
 docs/simulation/*/.spiceinit
-docs/simulation/*/memristor_tran.csv
+docs/simulation/*/*.csv
 
 # LaTeX build byproducts.
 docs/presentation/*.aux

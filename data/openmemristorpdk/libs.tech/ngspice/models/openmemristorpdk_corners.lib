@@ -1,0 +1,51 @@
+* openMemristorPDK -- real process/PVT corner blocks for the three
+* real memristor device variants (memristor_tio2_au, memristor_tio2_ti,
+* memristor_hfo2_al -- see user_models/veriloga/*.va and
+* libraries/openmemristorpdk_pr's own real xschem symbols/schematic).
+*
+* Bare-minimum, illustrative process spread (+/-20% on every real
+* Ron/Roff, the two parameters that set a memristor's own real
+* resistance window) around each device's own real, default parameter
+* set -- there is no real fabricated silicon behind this from-scratch
+* teaching PDK to calibrate a real corner spread against, so the same
+* "illustrative, not measured" note this PDK's own Verilog-A models
+* already carry applies here too. A real testbench selects one with
+* ``.lib openmemristorpdk_corners.lib TT`` (etc.), then uses the real
+* ``{ron_tio2_au}``-style parameters as instance overrides on its own
+* ``.model ... memristor_tio2_au ron={ron_tio2_au} roff={roff_tio2_au} ...``
+* line -- the same real, standard ngspice corner-file convention IHP's
+* own real corner*.lib files use (see pdklib/spice_models.py's own
+* docstring).
+
+.LIB TT
+.param ron_tio2_au = 100
+.param roff_tio2_au = 16k
+.param ron_tio2_ti = 250
+.param roff_tio2_ti = 20k
+.param ron_hfo2_al = 500
+.param roff_hfo2_al = 50k
+.ENDL TT
+
+.LIB FF
+* "Fast" -- a real, uniformly lower resistance window (both Ron and
+* Roff shifted down 20%): a faster real RC time constant when this
+* device drives a real load, and a lower real SET/RESET switching
+* energy.
+.param ron_tio2_au = 80
+.param roff_tio2_au = 12.8k
+.param ron_tio2_ti = 200
+.param roff_tio2_ti = 16k
+.param ron_hfo2_al = 400
+.param roff_hfo2_al = 40k
+.ENDL FF
+
+.LIB SS
+* "Slow" -- a real, uniformly higher resistance window (both Ron and
+* Roff shifted up 20%): the real, opposite corner from FF above.
+.param ron_tio2_au = 120
+.param roff_tio2_au = 19.2k
+.param ron_tio2_ti = 300
+.param roff_tio2_ti = 24k
+.param ron_hfo2_al = 600
+.param roff_hfo2_al = 60k
+.ENDL SS
