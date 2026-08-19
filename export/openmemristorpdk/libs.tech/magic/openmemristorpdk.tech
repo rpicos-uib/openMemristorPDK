@@ -9,8 +9,8 @@ version
 end
 
 planes
-metal, mtl
-oxide, oxd
+metal,mtl
+oxide,oxd
 end
 
 types
@@ -26,4 +26,42 @@ contact
 end
 
 aliases
+end
+
+styles
+styletype mos
+be_au metal1
+te_au metal2
+te_ti metal2
+te_al metal2
+mem_tio2 via1
+mem_hfo2 via1
+end
+
+compose
+end
+
+connect
+be_au be_au
+te_au te_au
+te_ti te_ti
+te_al te_al
+end
+
+drc
+end
+
+extract
+style ngspice
+    cscale 1
+    lambda 1.0
+    units microns
+    step 7
+    sidehalo 8
+    planeorder metal 0
+    planeorder oxide 1
+    resist be_au/metal 1
+    resist te_au/metal 1
+    resist te_ti/metal 1
+    resist te_al/metal 1
 end
