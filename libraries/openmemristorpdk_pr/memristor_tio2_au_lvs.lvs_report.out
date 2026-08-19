@@ -1,0 +1,16 @@
+
+Cell memristor_tio2_au (0) disconnected node: BE
+Cell memristor_tio2_au (0) disconnected node: TE
+Cell memristor_tio2_au (1) disconnected node: BE
+Cell memristor_tio2_au (1) disconnected node: TE
+
+Subcircuit pins:
+Circuit 1: memristor_tio2_au               |Circuit 2: memristor_tio2_au               
+-------------------------------------------|-------------------------------------------
+BE                                         |BE                                         
+TE                                         |TE                                         
+---------------------------------------------------------------------------------------
+Cell pin lists are equivalent.
+Device classes memristor_tio2_au and memristor_tio2_au are equivalent.
+
+Final result: Verify:  cell /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.cdl has no elements and/or nodes.  Not checked.

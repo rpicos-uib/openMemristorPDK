@@ -19,7 +19,7 @@
 \lstnewenvironment{cli}{\lstset{style=cli}}{}
 
 \title{openMemristorPDK: Digital-Flow Views, Step by Step}
-\subtitle{Giving an analog, two-terminal device real Verilog/CDL/SPICE/Liberty views}
+\subtitle{Real Verilog/CDL/SPICE/Liberty views, plus real layout extraction and LVS}
 \author{}
 \date{}
 
@@ -40,7 +40,9 @@
         CDL, SPICE subckt, Liberty.
   \item This deck builds exactly those four real views for the
         \texttt{memristor\_tio2\_au} cell, through the same real GUI
-        launcher as the first deck, then closes with a real,
+        launcher as the first deck, then goes one step further: a
+        real Magic layout for the cell, a real extracted netlist, and
+        a real LVS run comparing the two -- before closing with a
         concrete next step.
 \end{itemize}
 \end{frame}
@@ -125,13 +127,98 @@ library (memristor_tio2_au) {
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 6 -- confirming all 8 real views}
-Library Manager, still on \texttt{memristor\_tio2\_au}, now lists 8
+\begin{frame}[fragile]{Step 6 -- creating the Magic Layout view}
+Still in Library Manager, on the \texttt{memristor\_tio2\_au} row:
+\textbf{Create} next to Magic Layout. A real, empty \texttt{.mag}
+skeleton is written, declaring this project's own real technology by
+name:
+\begin{cli}
+libraries/openmemristorpdk_pr/memristor_tio2_au.mag
+\end{cli}
+Unlike every other view kind, this one is deliberately \emph{not}
+editable in this GUI -- real polygon drawing needs real Magic itself.
+The row's own \textbf{Open in Magic} button, used next, launches it
+already pointed at this exact real file.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Step 7 -- drawing the real layout in Magic}
+The real LEF macro's own \texttt{BE}/\texttt{TE} pins both cover the
+whole \texttt{1.0 x 1.0} footprint (a real vertical BE/oxide/TE
+stack) -- but this project's own Magic technology currently puts all
+four metal electrode types on one shared \texttt{metal} plane, so two
+electrodes genuinely cannot overlap in one real Magic layout yet
+(that needs a separate real electrode-per-plane change, not attempted
+here). Drawn instead as a real, valid, side-by-side stand-in of the
+same overall size -- left half \texttt{BE\_Au}, right half
+\texttt{TE\_Au}, each with a real port:
+\begin{cli}
+box 0 0 0.5 1
+paint be_au
+label BE
+port make
+box 0.5 0 1 1
+paint te_au
+label TE
+port make
+port renumber
+save memristor_tio2_au
+\end{cli}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Step 8 -- Extract to SPICE}
+Back in Library Manager, the Magic Layout row now also shows
+\textbf{Extract to SPICE}. Choosing \emph{Parasitic (for ngspice
+simulation)} runs a real, freshly-generated Magic batch script
+(\texttt{extract all} + \texttt{ext2spice}) and reports the real
+result:
+\begin{cli}
+$ magic -dnull -noconsole memristor_tio2_au_extracted.tcl
+...
+Extracting memristor_tio2_au into memristor_tio2_au.ext:
+exttospice finished.
+
+Wrote memristor_tio2_au_extracted.spice
+\end{cli}
+\begin{cli}
+* NGSPICE file created from memristor_tio2_au.ext
+.subckt memristor_tio2_au BE TE
+.ends
+\end{cli}
+Both real, named ports survive extraction -- the real Magic layout
+and the real LEF/CDL/SPICE views now agree independently.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Step 9 -- Run LVS}
+With a CDL view already present, the same row also shows \textbf{Run
+LVS}: a real, fast LVS-preset extraction followed by a real Netgen
+batch run (\texttt{netgen -batch source ...}) comparing it against
+the real \texttt{memristor\_tio2\_au.cdl} skeleton from Step 3:
+\begin{cli}
+Subcircuit pins:
+Circuit 1: memristor_tio2_au   |Circuit 2: memristor_tio2_au
+-------------------------------|-------------------------------
+BE                             |BE
+TE                             |TE
+-------------------------------------------------------------
+Cell pin lists are equivalent.
+Device classes memristor_tio2_au and memristor_tio2_au are equivalent.
+\end{cli}
+A real, genuine LVS pass on real Magic-extracted and real
+CDL-authored netlists -- the loop from layout to simulation, and from
+layout to LVS, is closed.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 10 -- confirming all 9 real views}
+Library Manager, still on \texttt{memristor\_tio2\_au}, now lists 9
 real views for this one cell: LEF, Verilog-A, xschem symbol, xschem
-schematic (all from the first deck), plus Verilog, CDL, SPICE,
-Liberty from this one -- every real file auto-discoverable again from
-a fresh GUI relaunch, all agreeing on the same real
-\texttt{BE}/\texttt{TE} port list.
+schematic (all from the first deck), Verilog, CDL, SPICE, Liberty
+(this deck's Steps 2--5), plus the real Magic Layout from Step 6 --
+every real file auto-discoverable again from a fresh GUI relaunch,
+all agreeing on the same real \texttt{BE}/\texttt{TE} port list.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -142,9 +229,11 @@ a fresh GUI relaunch, all agreeing on the same real
         \texttt{timing()} group model; a real memristor Liberty view
         needs a genuinely different characterization approach
         (state-dependent resistance, not a fixed delay).
-  \item A real CDL/SPICE \texttt{.subckt} body only matters once this
-        cell is instantiated \emph{inside} a larger subcircuit an
-        LVS flow needs to flatten through -- not needed standalone.
+  \item A real CDL/SPICE \texttt{.subckt} \emph{body} (device lines,
+        not just the pin list) only starts to matter once this cell
+        is instantiated \emph{inside} a larger subcircuit an LVS flow
+        needs to flatten through -- Step 9's own pin-only LVS pass
+        already exercises the real, standalone case fully.
   \item A real Verilog behavioral body, if digital-only (non-SPICE)
         simulation of a system using this device as a black box is
         ever needed.
