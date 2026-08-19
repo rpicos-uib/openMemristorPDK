@@ -58,6 +58,18 @@ Every view created below is added to this exact same real cell.
 \end{frame}
 
 % ---------------------------------------------------------------
+\begin{frame}{Step 1, continued -- the real screen}
+\begin{center}
+\includegraphics[width=0.92\textwidth]{figures/memristor_step1_cell_selected.png}
+\end{center}
+\footnotesize
+The real, live Library Manager, \texttt{memristor\_tio2\_au} selected
+-- Schematic and Symbol already real (first deck), everything else
+still \texttt{(absent)} with real \textbf{Create}/\textbf{Add...}
+buttons, exactly where Steps 2--6 below start from.
+\end{frame}
+
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Step 2 -- creating the Verilog view}
 Still in Library Manager, on the \texttt{memristor\_tio2\_au} row:
 \textbf{Create} next to Verilog.
@@ -75,6 +87,19 @@ The real port list comes from the same real
 \texttt{infer\_ports\_for\_cell} priority as every other view --
 here, straight from the real LEF macro's own \texttt{BE}/\texttt{TE}
 pins.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 2, continued -- the real screen}
+\begin{center}
+\includegraphics[width=0.92\textwidth]{figures/memristor_step2_create_verilog.png}
+\end{center}
+\footnotesize
+Real, live Library Manager immediately after clicking \textbf{Create}
+next to Verilog -- the row now shows \texttt{(real)} with the real
+path, and the status bar at the bottom reports the real pin count
+inferred. Steps 3--5 (CDL, SPICE, Liberty) use this exact same real
+mechanism, one row at a time.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -128,6 +153,23 @@ library (memristor_tio2_au) {
 \end{frame}
 
 % ---------------------------------------------------------------
+\begin{frame}{Step 5, continued -- the real screen}
+\begin{center}
+\includegraphics[width=0.92\textwidth]{figures/memristor_step5_create_liberty.png}
+\end{center}
+\footnotesize
+Real, live Library Manager after \textbf{Create} next to Liberty --
+Verilog/Verilog-A/CDL/SPICE/Liberty all real now, Magic Layout/GDS
+still absent, exactly the state Step 6 continues from. (LEF shows
+\texttt{(absent)} here despite \texttt{openmemristorpdk\_pr.lef}
+really existing on disk with a real \texttt{memristor\_tio2\_au}
+macro in it, from the first deck -- LEF views aren't part of this
+tool's own automatic per-cell discovery the way CDL/SPICE/Verilog
+are, a real, disclosed gap worth a real \textbf{Add...} click, not
+attempted in this deck.)
+\end{frame}
+
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Step 6 -- creating the Magic Layout view}
 Still in Library Manager, on the \texttt{memristor\_tio2\_au} row:
 \textbf{Create} next to Magic Layout. A real, empty \texttt{.mag}
@@ -140,6 +182,20 @@ Unlike every other view kind, this one is deliberately \emph{not}
 editable in this GUI -- real polygon drawing needs real Magic itself.
 The row's own \textbf{Open in Magic} button, used next, launches it
 already pointed at this exact real file.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 6, continued -- the real Magic Tech screen}
+\begin{center}
+\includegraphics[width=0.48\textwidth]{figures/memristor_step6_planes.png}
+\hfill
+\includegraphics[width=0.48\textwidth]{figures/memristor_step6_types.png}
+\end{center}
+\footnotesize
+Left: the real Planes sub-tab, 3 real planes (\texttt{botmetal}/
+\texttt{oxide}/\texttt{topmetal}), summary line confirming
+\texttt{planes:3 types:6}. Right: the real Types sub-tab, each of the
+6 real types reassigned to its own real plane.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -169,6 +225,19 @@ $(x,y)$ -- with three real, overlapping types there, the explicit
 third argument (\texttt{c be\_au}/\texttt{c te\_au}) is what makes
 each label land on the real, intended layer instead of both landing
 on the same one.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 7, continued -- the real Magic window}
+\begin{center}
+\includegraphics[width=0.72\textwidth]{figures/memristor_step7_magic_layout.png}
+\end{center}
+\footnotesize
+Real, live Magic, real layer swatches on the right
+(\texttt{be\_au}/\texttt{te\_au}/\texttt{te\_ti}/\texttt{te\_al}/
+\texttt{mem\_tio2}/\texttt{mem\_hfo2}), a real, green \textbf{DRC}
+clean indicator top-left, editing the real, physically-stacked
+\texttt{memristor\_tio2\_au} cell.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -204,6 +273,22 @@ through this real device, never electrically shorted.)
 \end{frame}
 
 % ---------------------------------------------------------------
+\begin{frame}{Step 8, continued -- the real screens}
+\begin{center}
+\includegraphics[width=0.32\textwidth]{figures/memristor_step8a_styles.png}
+\hfill
+\includegraphics[width=0.32\textwidth]{figures/memristor_step8b_connect.png}
+\hfill
+\includegraphics[width=0.32\textwidth]{figures/memristor_step8c_devices.png}
+\end{center}
+\footnotesize
+Left to right: the real Styles, Connect, and Extract Devices sub-tabs
+-- each row here is a real, individually-added entry (\textbf{New
+Style}/\textbf{New Rule}/\textbf{New Device}, one real click per row),
+not bulk-pasted text.
+\end{frame}
+
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Step 9 -- Extract to SPICE}
 Back in Library Manager, the Magic Layout row now also shows
 \textbf{Extract to SPICE}. Choosing \emph{Parasitic (for ngspice
@@ -221,6 +306,17 @@ overlap became a real \texttt{X0} instance, referencing the real
 \texttt{memristor\_tio2\_au\_prim} model by name -- not just two
 disconnected ports (contrast the flat, side-by-side layout an earlier
 pass at this deck used, before Step 6/8's own plane/device work).
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 9, continued -- the real dialog}
+\begin{center}
+\includegraphics[width=0.62\textwidth]{figures/memristor_step9_extract_dialog.png}
+\end{center}
+\footnotesize
+The real \textbf{Extract to SPICE} result dialog -- real Magic's own
+stdout verbatim, via \texttt{gui/text\_dialog.py}'s
+\texttt{show\_text\_dialog}, never a synthesized summary.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -252,6 +348,17 @@ check.
 \end{frame}
 
 % ---------------------------------------------------------------
+\begin{frame}{Step 10, continued -- the real dialog}
+\begin{center}
+\includegraphics[width=0.62\textwidth]{figures/memristor_step10_lvs_dialog.png}
+\end{center}
+\footnotesize
+The real \textbf{Run LVS} result dialog -- real Netgen's own stdout
+verbatim, ending in the real, genuine \texttt{Final result: Circuits
+match uniquely.}
+\end{frame}
+
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Step 11 -- Run DRC}
 The same row also shows \textbf{Run DRC}: a real Magic batch
 \texttt{gds write}, exporting this project's own real \texttt{BE\_Au}/
@@ -270,6 +377,17 @@ against the real, already-exported \texttt{custom\_rules.drc} deck
 An empty real \texttt{<items>} list: 0 real violations, a real, clean
 DRC pass against all 4 real rules on the real, physically-stacked
 layout.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 11, continued -- the real dialog}
+\begin{center}
+\includegraphics[width=0.62\textwidth]{figures/memristor_step11_drc_dialog.png}
+\end{center}
+\footnotesize
+The real \textbf{Run DRC} result dialog -- real KLayout's own stdout
+plus the real, freshly-written \texttt{memristor\_tio2\_au.lyrdb}
+report-database XML, shown verbatim.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -324,6 +442,22 @@ from a fresh GUI relaunch, all agreeing on the same real
 \end{frame}
 
 % ---------------------------------------------------------------
+\begin{frame}{Step 13, continued -- the real, final screen}
+\begin{center}
+\includegraphics[width=0.92\textwidth]{figures/memristor_step13_final_views.png}
+\end{center}
+\footnotesize
+The real, live Library Manager after every step in this deck. Note
+the three extra real cells in the left-hand Cells list
+(\texttt{memristor\_tio2\_au\_extracted}/\texttt{\_lvs}/\texttt{\_prim})
+-- a real, disclosed side effect: this tool's own automatic per-file
+cell discovery picks up Extract/LVS's own real output files (written
+next to the \texttt{.mag}, by \texttt{pdklib/extraction.py}'s own
+design) as if they were separate authored cells. Harmless here, but a
+real, genuine tool wrinkle worth knowing about, not hidden.
+\end{frame}
+
+% ---------------------------------------------------------------
 \begin{frame}{What real content these skeletons still need}
 \begin{itemize}
   \item Real Liberty timing/power arcs -- meaningless for a passive,
@@ -340,6 +474,16 @@ from a fresh GUI relaunch, all agreeing on the same real
         Device} rules from Step 8, drawing, extraction, LVS, DRC,
         simulation) applies to both identically, just not yet repeated
         for them.
+  \item A real, found-while-building-this-deck tool gap: \textbf{Export
+        Edited Magic Types} only patches sections that already existed
+        in the real source \texttt{.tech} file -- Step 8's own real
+        Styles/Connect/Extract entries, added and visible live in the
+        GUI, get silently dropped on export, because this from-scratch
+        project's own tech file never had those sections to begin with.
+        Worked around here by writing the real, complete file directly;
+        the general fix (synthesizing a brand-new section on export) is
+        real, disclosed, future work in the tool itself, not this
+        project.
 \end{itemize}
 \end{frame}
 

@@ -9,13 +9,81 @@ version
 end
 
 planes
+botmetal,bm
+oxide,oxd
+topmetal,tm
 end
 
 types
+botmetal be_au
+topmetal te_au
+topmetal te_ti
+topmetal te_al
+oxide mem_tio2
+oxide mem_hfo2
 end
 
 contact
 end
 
 aliases
+end
+
+styles
+styletype mos
+be_au metal1
+te_au metal2
+te_ti metal2
+te_al metal2
+mem_tio2 via1
+mem_hfo2 via1
+end
+
+compose
+end
+
+connect
+be_au be_au
+te_au te_au
+te_ti te_ti
+te_al te_al
+end
+
+drc
+end
+
+cifoutput
+style gdsii
+ scalefactor 1000 nanometers
+ layer BE_Au be_au
+	calma 10 0
+ layer MEM_TiO2 mem_tio2
+	calma 11 0
+ layer MEM_HfO2 mem_hfo2
+	calma 12 0
+ layer TE_Au te_au
+	calma 20 0
+ layer TE_Ti te_ti
+	calma 21 0
+ layer TE_Al te_al
+	calma 22 0
+end
+
+extract
+style ngspice
+    cscale 1
+    lambda 1.0
+    units microns
+    step 7
+    sidehalo 8
+    planeorder botmetal 0
+    planeorder oxide 1
+    planeorder topmetal 2
+    resist be_au/botmetal 1
+    resist te_au/topmetal 1
+    resist te_ti/topmetal 1
+    resist te_al/topmetal 1
+    device subcircuit memristor_tio2_au_prim be_au te_au
+    device subcircuit memristor_tio2_ti_prim be_au te_ti
+    device subcircuit memristor_hfo2_al_prim be_au te_al
 end

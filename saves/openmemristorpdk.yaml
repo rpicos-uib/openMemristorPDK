@@ -74,22 +74,22 @@ drc_rules:
   window_step_um: null
 magic_types:
   openmemristorpdk:
-  - plane: metal
+  - plane: botmetal
     canonical_name: be_au
     aliases: []
     obsolete: false
     line_no: 0
-  - plane: metal
+  - plane: topmetal
     canonical_name: te_au
     aliases: []
     obsolete: false
     line_no: 0
-  - plane: metal
+  - plane: topmetal
     canonical_name: te_ti
     aliases: []
     obsolete: false
     line_no: 0
-  - plane: metal
+  - plane: topmetal
     canonical_name: te_al
     aliases: []
     obsolete: false
@@ -106,22 +106,61 @@ magic_types:
     line_no: 0
 magic_planes:
   openmemristorpdk:
-  - name: metal
-    short_code: mtl
+  - name: botmetal
+    short_code: bm
     line_no: 0
   - name: oxide
     short_code: oxd
+    line_no: 0
+  - name: topmetal
+    short_code: tm
     line_no: 0
 magic_contacts:
   openmemristorpdk: []
 magic_aliases:
   openmemristorpdk: []
 magic_styles:
-  openmemristorpdk: []
+  openmemristorpdk:
+  - type_name: be_au
+    style_names:
+    - metal1
+    line_no: 0
+  - type_name: te_au
+    style_names:
+    - metal2
+    line_no: 0
+  - type_name: te_ti
+    style_names:
+    - metal2
+    line_no: 0
+  - type_name: te_al
+    style_names:
+    - metal2
+    line_no: 0
+  - type_name: mem_tio2
+    style_names:
+    - via1
+    line_no: 0
+  - type_name: mem_hfo2
+    style_names:
+    - via1
+    line_no: 0
 magic_compose:
   openmemristorpdk: []
 magic_connect:
-  openmemristorpdk: []
+  openmemristorpdk:
+  - types_a: be_au
+    types_b: be_au
+    line_no: 0
+  - types_a: te_au
+    types_b: te_au
+    line_no: 0
+  - types_a: te_ti
+    types_b: te_ti
+    line_no: 0
+  - types_a: te_al
+    types_b: te_al
+    line_no: 0
 magic_cifinput_ignored_layers:
   openmemristorpdk: []
 magic_cifinput_layer_hints:
@@ -131,13 +170,55 @@ magic_cif_layers:
 magic_extract_misc:
   openmemristorpdk: []
 magic_extract_plane_order:
-  openmemristorpdk: []
+  openmemristorpdk:
+  - name: botmetal
+    order: 0
+    line_no: 0
+  - name: oxide
+    order: 1
+    line_no: 0
+  - name: topmetal
+    order: 2
+    line_no: 0
 magic_extract_resist:
-  openmemristorpdk: []
+  openmemristorpdk:
+  - layer_spec: be_au/botmetal
+    milliohms_per_square: 1
+    line_no: 0
+  - layer_spec: te_au/topmetal
+    milliohms_per_square: 1
+    line_no: 0
+  - layer_spec: te_ti/topmetal
+    milliohms_per_square: 1
+    line_no: 0
+  - layer_spec: te_al/topmetal
+    milliohms_per_square: 1
+    line_no: 0
 magic_extract_cap_coefficients:
   openmemristorpdk: []
 magic_extract_devices:
-  openmemristorpdk: []
+  openmemristorpdk:
+  - devclass: subcircuit
+    model: memristor_tio2_au_prim
+    type_name: be_au
+    rest:
+    - te_au
+    start_line: 0
+    end_line: 0
+  - devclass: subcircuit
+    model: memristor_tio2_ti_prim
+    type_name: be_au
+    rest:
+    - te_ti
+    start_line: 0
+    end_line: 0
+  - devclass: subcircuit
+    model: memristor_hfo2_al_prim
+    type_name: be_au
+    rest:
+    - te_al
+    start_line: 0
+    end_line: 0
 magic_drc_angle_checks:
   openmemristorpdk: []
 magic_drc_checks:
@@ -283,6 +364,59 @@ lef_macros:
       - 0.0
       - 0.0
       obs_layers: []
+spice_corners:
+  libs.tech/ngspice/models/openmemristorpdk_corners.lib:
+  - name: TT
+    params:
+    - - ron_tio2_au
+      - '100'
+    - - roff_tio2_au
+      - 16k
+    - - ron_tio2_ti
+      - '250'
+    - - roff_tio2_ti
+      - 20k
+    - - ron_hfo2_al
+      - '500'
+    - - roff_hfo2_al
+      - 50k
+    includes: []
+    start_line: 20
+    end_line: 27
+  - name: FF
+    params:
+    - - ron_tio2_au
+      - '80'
+    - - roff_tio2_au
+      - 12.8k
+    - - ron_tio2_ti
+      - '200'
+    - - roff_tio2_ti
+      - 16k
+    - - ron_hfo2_al
+      - '400'
+    - - roff_hfo2_al
+      - 40k
+    includes: []
+    start_line: 29
+    end_line: 40
+  - name: SS
+    params:
+    - - ron_tio2_au
+      - '120'
+    - - roff_tio2_au
+      - 19.2k
+    - - ron_tio2_ti
+      - '300'
+    - - roff_tio2_ti
+      - 24k
+    - - ron_hfo2_al
+      - '600'
+    - - roff_hfo2_al
+      - 60k
+    includes: []
+    start_line: 42
+    end_line: 51
 layers:
   libs.tech/klayout/tech/openmemristorpdk.lyp:
   - name: BE_Au.drawing

@@ -31,10 +31,6 @@ entries:
   path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.sch
 - library: openmemristorpdk_pr
   cell: memristor_tio2_au
-  view_kind: verilog
-  path: /foss/designs/openMemristorPDK/user_models/verilog/memristor_tio2_au.v
-- library: openmemristorpdk_pr
-  cell: memristor_tio2_au
   view_kind: cdl
   path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.cdl
 - library: openmemristorpdk_pr
@@ -43,13 +39,29 @@ entries:
   path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.spice
 - library: openmemristorpdk_pr
   cell: memristor_tio2_au
-  view_kind: liberty
-  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.lib
-- library: openmemristorpdk_pr
-  cell: memristor_tio2_au
   view_kind: mag
   path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.mag
 - library: openmemristorpdk_pr
   cell: memristor_tio2_au
   view_kind: gds
   path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.gds
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au_extracted
+  view_kind: spice
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au_extracted.spice
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au_lvs
+  view_kind: spice
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au_lvs.spice
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au_prim
+  view_kind: spice
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au_prim.spice
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au
+  view_kind: verilog
+  path: /foss/designs/openMemristorPDK/user_models/verilog/memristor_tio2_au.v
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au
+  view_kind: liberty
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.lib
