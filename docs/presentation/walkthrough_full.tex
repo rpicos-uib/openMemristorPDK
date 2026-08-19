@@ -88,6 +88,17 @@ stand-in.
 \end{frame}
 
 % ---------------------------------------------------------------
+\begin{frame}{Step 2, continued -- the real, freshly-launched screen}
+\begin{center}
+\includegraphics[width=0.85\textwidth]{figures/walkthrough_step2_overview.png}
+\end{center}
+\footnotesize
+The real Overview tab: a live inventory scan of whatever real files
+already sit under \texttt{data/openmemristorpdk/} at launch --
+Technology/Cells/Simulation (Steps 3 onward below) fill in from here.
+\end{frame}
+
+% ---------------------------------------------------------------
 \begin{frame}{Step 3 -- the PDK Wizard}
 \begin{center}
 \includegraphics[width=0.72\textwidth]{figures/pdk_wizard.jpg}
@@ -122,6 +133,18 @@ TE\_Al.drawing & 22/0 & drawing & Top electrode (Al) \\
 \footnotesize
 Fictional, illustrative GDS numbers/colors -- a demo stack, not a
 qualified process.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 4, continued -- the real screen}
+\begin{center}
+\includegraphics[width=0.92\textwidth]{figures/walkthrough_step4_layers.png}
+\end{center}
+\footnotesize
+The real Layers tab: all 6 real layers, correct GDS layer/datatype
+numbers, and a real, live ``Stack cross-section'' diagram built from
+them -- \texttt{BE\_Au.drawing} selected on the right with its own
+real GDS layer \#10, datatype \#0.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -165,6 +188,18 @@ where they're actually used.
 \end{frame}
 
 % ---------------------------------------------------------------
+\begin{frame}{Step 6, continued -- the real screens}
+\begin{center}
+\includegraphics[width=0.48\textwidth]{figures/walkthrough_step6_planes.png}
+\hfill
+\includegraphics[width=0.48\textwidth]{figures/walkthrough_step6_types.png}
+\end{center}
+\footnotesize
+Left: the real Planes sub-tab, all 3 real planes. Right: the real
+Types sub-tab, all 6 real types each on their own real plane.
+\end{frame}
+
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Step 7 -- DRC rules}
 Technology $\to$ DRC Rules $\to$ \textbf{New DRC Deck...}, then
 \textbf{New Rule} $\times$4:
@@ -186,6 +221,17 @@ Edits}, then Export $\to$ \textbf{Export Edited Magic Types} /
 \textbf{Export Edited DRC Rules} -- the DRC rules, having no real
 downloaded deck behind them, generate a real, valid KLayout DRC Ruby
 script, \texttt{custom\_rules.drc}.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 7, continued -- the real screen}
+\begin{center}
+\includegraphics[width=0.92\textwidth]{figures/walkthrough_step7_drc_rules.png}
+\end{center}
+\footnotesize
+The real DRC Rules tab: all 4 real rules, plus a real, live rule
+diagram (\texttt{width $\geq$ 0.2}) rendered from \texttt{BE.W.1}'s
+own real field values on the right.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -253,6 +299,19 @@ returning \texttt{4}.
 \end{frame}
 
 % ---------------------------------------------------------------
+\begin{frame}{Steps 8--10, continued -- the real screen}
+\begin{center}
+\includegraphics[width=0.92\textwidth]{figures/walkthrough_step8_lef_macros.png}
+\end{center}
+\footnotesize
+The real LEF tab: all 4 real macros on the left; \texttt{memristor\_
+tio2\_au} selected, its real \texttt{BE}/\texttt{TE} pins in the
+middle, and (right) the real, drawn \texttt{BE\_Au.drawing} port
+geometry for \texttt{BE} -- the same real \textbf{Edit Geometry...}
+canvas Step 9 describes.
+\end{frame}
+
+% ---------------------------------------------------------------
 \begin{frame}{Step 11 -- Library Manager}
 \begin{center}
 \includegraphics[width=0.95\textwidth]{figures/library_manager.jpg}
@@ -278,6 +337,18 @@ straight from the real LEF macro just built --
 existing-Verilog priority. Done once per macro; the generated
 \texttt{module <cell>(BE, TE);} skeleton is then replaced with real
 physics next.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 12, continued -- the real screen}
+\begin{center}
+\includegraphics[width=0.92\textwidth]{figures/walkthrough_step12_user_models.png}
+\end{center}
+\footnotesize
+The real User Models tab, after Step 12 is repeated once per real
+cell: all 5 real Verilog/Verilog-A modules found under
+\texttt{user\_models/}, each auto-matched (\texttt{Rescan}/
+\textbf{Link All Auto-Matches}) to its own real cell by name.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -464,6 +535,17 @@ per-corner form:
 \end{va}
 Real file:
 \texttt{data/openmemristorpdk/libs.tech/ngspice/models/openmemristorpdk\_corners.lib}.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 21, continued -- the real screen}
+\begin{center}
+\includegraphics[width=0.92\textwidth]{figures/walkthrough_step21_corners.png}
+\end{center}
+\footnotesize
+The real Corners sub-tab: all 3 real corners, \texttt{TT} selected,
+its own real 6 \texttt{param} lines (Ron/Roff for all 3 device
+variants) on the right.
 \end{frame}
 
 % ---------------------------------------------------------------
