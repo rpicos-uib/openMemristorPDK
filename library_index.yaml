@@ -9,3 +9,15 @@ entries:
   cell: memristor
   view_kind: veriloga
   path: /foss/designs/openMemristorPDK/user_models/veriloga/memristor.va
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au
+  view_kind: veriloga
+  path: /foss/designs/openMemristorPDK/user_models/veriloga/memristor_tio2_au.va
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_ti
+  view_kind: veriloga
+  path: /foss/designs/openMemristorPDK/user_models/veriloga/memristor_tio2_ti.va
+- library: openmemristorpdk_pr
+  cell: memristor_hfo2_al
+  view_kind: veriloga
+  path: /foss/designs/openMemristorPDK/user_models/veriloga/memristor_hfo2_al.va

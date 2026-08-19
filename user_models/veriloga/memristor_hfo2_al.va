@@ -1,0 +1,56 @@
+// A real, minimal *bipolar threshold-switching* memristor compact
+// model -- deliberately a genuinely different real model from
+// memristor_tio2_au.va/memristor_tio2_ti.va's linear ion-drift form,
+// not just a renamed copy with different parameters (per direct
+// request: "two different verilog models... [for] material1... [and]
+// material2"). HfO2-based RRAM is real, widely reported to switch by
+// *filamentary* conduction (a real, localized conductive filament of
+// oxygen vacancies forming/rupturing through the oxide), not the
+// linear-drift *boundary-motion* picture the classical HP TiO2 model
+// uses -- a real, qualitatively different physical picture, so a
+// qualitatively different real model structure: a state variable that
+// only moves once the real terminal voltage crosses a real threshold
+// (SET/RESET), and an exponential (tunneling-like) state-to-resistance
+// mapping instead of a linear one. This is a real, simplified,
+// illustrative form of the general real threshold-switching structure
+// widely used for filamentary RRAM compact models -- see e.g.
+// Kvatinsky et al., "TEAM: ThrEshold Adaptive Memristor Model", IEEE
+// TCAS-I 60(1), 211-221 (2013), and Yakopcic et al., "A Memristor
+// Device Model", IEEE EDL 32(10), 1436-1438 (2011), for the real,
+// general lineage this borrows its threshold-switching + exponential-
+// conduction structure from -- not a literal reimplementation of
+// either (both are considerably more elaborate; this stays a bare-
+// minimum, from-scratch teaching model, same real scope as its TiO2
+// sibling). Al top electrode: a real, common RRAM top-electrode metal
+// choice (its own native oxide is itself sometimes exploited as part
+// of a real bilayer RRAM stack elsewhere in the literature; here it's
+// simply the third, distinct real top-electrode metal this PDK's own
+// task called for, bottom electrode still always Au).
+`include "disciplines.vams"
+
+module memristor_hfo2_al(BE, TE);
+inout BE, TE;
+electrical BE, TE;
+
+parameter real Ron = 500 from (0:inf);
+parameter real Roff = 50e3 from (0:inf);
+parameter real Von = 0.8;
+parameter real Voff = -0.6 from (-inf:0);
+parameter real tau = 5n from (0:inf);
+parameter real x0 = 0.1 from [0:1];
+
+real x;
+real dxdt;
+real Rmem;
+
+analog begin
+  dxdt = 0.0;
+  if (V(BE, TE) > Von)
+    dxdt = (V(BE, TE) - Von) / tau;
+  else if (V(BE, TE) < Voff)
+    dxdt = (V(BE, TE) - Voff) / tau;
+  x = min(max(idt(dxdt, x0), 0.0), 1.0);
+  Rmem = Roff * exp(-x * ln(Roff / Ron));
+  I(BE, TE) <+ V(BE, TE) / Rmem;
+end
+endmodule

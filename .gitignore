@@ -14,10 +14,15 @@ __pycache__/
 .cache/
 
 # Regeneratable build artifacts -- real, but reproducible from the
-# tracked .va/.sp/.py sources via docs/simulation/run_simulation.sh.
+# tracked .va/.sp/.py sources via each docs/simulation/*/run_simulation.sh
+# (the original single-device demo lives flat under docs/simulation/
+# itself; each later device variant gets its own subdirectory, same
+# real .spiceinit + .sp + .csv shape either way).
 *.osdi
 docs/simulation/.spiceinit
 docs/simulation/memristor_tran.csv
+docs/simulation/*/.spiceinit
+docs/simulation/*/memristor_tran.csv
 
 # LaTeX build byproducts.
 docs/presentation/*.aux
