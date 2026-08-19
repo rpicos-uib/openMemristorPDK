@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<report-database>
+ <description>Custom DRC Rules</description>
+ <original-file>/foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.gds</original-file>
+ <generator>drc: script='/foss/designs/openMemristorPDK/export/openmemristorpdk/libs.tech/klayout/tech/drc/custom_rules.drc'</generator>
+ <top-cell>memristor_tio2_au</top-cell>
+ <tags>
+ </tags>
+ <categories>
+  <category>
+   <name>BE.W.1</name>
+   <description>Minimum width of Au bottom electrode</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>MEM1.W.1</name>
+   <description>Minimum width of TiO2 switching oxide</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>MEM2.W.1</name>
+   <description>Minimum width of HfO2 switching oxide</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>TE.S.1</name>
+   <description>Minimum spacing between top electrode features</description>
+   <categories>
+   </categories>
+  </category>
+ </categories>
+ <cells>
+  <cell>
+   <name>memristor_tio2_au</name>
+   <variant/>
+   <layout-name/>
+   <references>
+   </references>
+  </cell>
+ </cells>
+ <items>
+ </items>
+</report-database>

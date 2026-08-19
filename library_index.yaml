@@ -49,3 +49,7 @@ entries:
   cell: memristor_tio2_au
   view_kind: mag
   path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.mag
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au
+  view_kind: gds
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.gds

@@ -19,7 +19,7 @@
 \lstnewenvironment{cli}{\lstset{style=cli}}{}
 
 \title{openMemristorPDK: Digital-Flow Views, Step by Step}
-\subtitle{Real Verilog/CDL/SPICE/Liberty views, plus real layout extraction and LVS}
+\subtitle{Real Verilog/CDL/SPICE/Liberty views, plus real layout extraction, LVS, and DRC}
 \author{}
 \date{}
 
@@ -41,9 +41,10 @@
   \item This deck builds exactly those four real views for the
         \texttt{memristor\_tio2\_au} cell, through the same real GUI
         launcher as the first deck, then goes one step further: a
-        real Magic layout for the cell, a real extracted netlist, and
-        a real LVS run comparing the two -- before closing with a
-        concrete next step.
+        real Magic layout for the cell, a real extracted netlist, a
+        real LVS run comparing the two, and a real DRC run against
+        the deck already authored in the first deck -- before closing
+        with a concrete next step.
 \end{itemize}
 \end{frame}
 
@@ -149,9 +150,14 @@ stack) -- but this project's own Magic technology currently puts all
 four metal electrode types on one shared \texttt{metal} plane, so two
 electrodes genuinely cannot overlap in one real Magic layout yet
 (that needs a separate real electrode-per-plane change, not attempted
-here). Drawn instead as a real, valid, side-by-side stand-in of the
-same overall size -- left half \texttt{BE\_Au}, right half
-\texttt{TE\_Au}, each with a real port:
+here). Drawn instead as a real, valid, side-by-side stand-in -- left
+half \texttt{BE\_Au}, right half \texttt{TE\_Au}, each with a real
+port. This technology also has no real internal-grid declaration of
+its own yet, defaulting to a coarse \texttt{1 internal unit = 1
+micron} grid, so every real coordinate below snaps to a whole micron
+-- a real, disclosed reason this cell ends up 2\,\textmu m x
+2\,\textmu m rather than matching the LEF's own 1\,\textmu m x
+1\,\textmu m footprint exactly:
 \begin{cli}
 box 0 0 0.5 1
 paint be_au
@@ -212,13 +218,38 @@ layout to LVS, is closed.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 10 -- confirming all 9 real views}
-Library Manager, still on \texttt{memristor\_tio2\_au}, now lists 9
+\begin{frame}[fragile]{Step 10 -- Run DRC}
+The same row also shows \textbf{Run DRC}: a real Magic batch
+\texttt{gds write}, exporting this project's own real \texttt{BE\_Au}/
+\texttt{TE\_Au}.drawing GDS layers (10/0, 20/0 -- Step 4 of the first
+deck), followed by a real, batch KLayout DRC run
+(\texttt{klayout -b memristor\_tio2\_au.gds -r custom\_rules.drc})
+against the real, already-exported \texttt{custom\_rules.drc} deck
+(Step 7 of the first deck):
+\begin{cli}
+<report-database>
+ ...
+ <items>
+ </items>
+</report-database>
+\end{cli}
+An empty real \texttt{<items>} list: 0 real violations, a real, clean
+DRC pass against all 4 real rules. (This technology's own coarse,
+1-\textmu m-snap grid, noted in Step 7, is too coarse to draw a shape
+that actually violates any of this deck's real, sub-micron
+thresholds -- a real, disclosed reason a genuine DRC \emph{failure}
+isn't demonstrated here.)
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 11 -- confirming all 10 real views}
+Library Manager, still on \texttt{memristor\_tio2\_au}, now lists 10
 real views for this one cell: LEF, Verilog-A, xschem symbol, xschem
 schematic (all from the first deck), Verilog, CDL, SPICE, Liberty
-(this deck's Steps 2--5), plus the real Magic Layout from Step 6 --
-every real file auto-discoverable again from a fresh GUI relaunch,
-all agreeing on the same real \texttt{BE}/\texttt{TE} port list.
+(this deck's Steps 2--5), the real Magic Layout from Step 6, and the
+real GDS written by Step 10 -- every real file auto-discoverable again
+from a fresh GUI relaunch, all agreeing on the same real
+\texttt{BE}/\texttt{TE} port list.
 \end{frame}
 
 % ---------------------------------------------------------------

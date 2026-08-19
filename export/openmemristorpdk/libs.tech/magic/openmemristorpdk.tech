@@ -51,6 +51,23 @@ end
 drc
 end
 
+cifoutput
+style gdsii
+ scalefactor 1000 nanometers
+ layer BE_Au be_au
+	calma 10 0
+ layer MEM_TiO2 mem_tio2
+	calma 11 0
+ layer MEM_HfO2 mem_hfo2
+	calma 12 0
+ layer TE_Au te_au
+	calma 20 0
+ layer TE_Ti te_ti
+	calma 21 0
+ layer TE_Al te_al
+	calma 22 0
+end
+
 extract
 style ngspice
     cscale 1

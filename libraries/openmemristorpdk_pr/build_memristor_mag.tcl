@@ -11,4 +11,5 @@ label TE
 port make
 port renumber
 save memristor_tio2_au
+gds write memristor_tio2_au
 quit -noprompt
