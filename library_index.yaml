@@ -29,3 +29,19 @@ entries:
   cell: memristor_tio2_au
   view_kind: xschem_schematic
   path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.sch
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au
+  view_kind: verilog
+  path: /foss/designs/openMemristorPDK/user_models/verilog/memristor_tio2_au.v
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au
+  view_kind: cdl
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.cdl
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au
+  view_kind: spice
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.spice
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au
+  view_kind: liberty
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.lib

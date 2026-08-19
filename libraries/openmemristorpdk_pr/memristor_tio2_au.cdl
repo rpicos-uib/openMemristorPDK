@@ -1,0 +1,3 @@
+.SUBCKT memristor_tio2_au BE TE
+*.PININFO BE:B TE:B
+.ENDS

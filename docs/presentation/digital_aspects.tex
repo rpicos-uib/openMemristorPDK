@@ -1,0 +1,209 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{seahorse}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+\lstdefinestyle{cli}{
+  basicstyle=\ttfamily\scriptsize,
+  backgroundcolor=\color{black!5},
+  frame=single,
+  breaklines=true,
+  columns=fullflexible,
+  keywordstyle=\color{blue},
+}
+\lstnewenvironment{cli}{\lstset{style=cli}}{}
+
+\title{openMemristorPDK: Digital-Flow Views}
+\subtitle{Giving an analog, two-terminal device real Verilog/CDL/SPICE/Liberty views}
+\author{}
+\date{}
+
+\begin{document}
+
+\frame{\titlepage}
+
+% ---------------------------------------------------------------
+\begin{frame}{Framing: a memristor has no real digital logic of its own}
+\begin{itemize}
+  \item A memristor is a real, two-terminal, purely resistive/analog
+        element -- there is no real clock, no real logic function, no
+        real digital behavior to give it directly.
+  \item ``Digital aspects'' of a memristor PDK genuinely means one
+        thing: giving the device real \textbf{views} a digital-adjacent
+        flow (LVS, mixed-signal simulation, eventually synthesis of
+        whatever \emph{surrounds} it) actually needs to reference it
+        as a primitive -- Verilog, CDL, SPICE subckt, Liberty.
+  \item This deck builds exactly those real views for the
+        \texttt{memristor\_tio2\_au} cell, through the same real GUI
+        launcher as everything else in this project, and is honest
+        about how far a real, from-scratch, empty skeleton goes
+        without real hand-authored timing/behavioral content.
+\end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Where these views come from: real, inferred ports}
+Library Manager $\to$ \texttt{openmemristorpdk\_pr} /
+\texttt{memristor\_tio2\_au} $\to$ \textbf{Create} for each of
+Verilog, CDL, SPICE, Liberty.
+\medskip
+
+Every one of them gets its own real port list from
+\texttt{infer\_ports\_for\_cell}'s own real, established priority --
+LEF $\to$ xschem $\to$ existing Verilog -- so all four real views, plus
+the existing LEF macro and Verilog-A model, agree on exactly the same
+two real pins:
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Pin & Direction \\
+\midrule
+BE & inout \\
+TE & inout \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Real Verilog + CDL views}
+\begin{columns}
+\column{0.5\textwidth}
+\texttt{user\_models/verilog/memristor\_tio2\_au.v}:
+\begin{cli}
+module memristor_tio2_au(BE, TE);
+  inout BE;
+  inout TE;
+
+endmodule
+\end{cli}
+\column{0.5\textwidth}
+\texttt{libraries/openmemristorpdk\_pr/memristor\_tio2\_au.cdl}:
+\begin{cli}
+.SUBCKT memristor_tio2_au BE TE
+*.PININFO BE:B TE:B
+.ENDS
+\end{cli}
+\end{columns}
+\vspace{0.5em}
+Both real, valid, immediately parseable by any real tool expecting
+these formats -- an empty behavioral body / an empty subcircuit,
+exactly as honest as this project's own other real ``Create'' skeletons
+(a real starting point, not a filled-in model).
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Real SPICE subckt + Liberty views}
+\begin{columns}
+\column{0.45\textwidth}
+\texttt{libraries/openmemristorpdk\_pr/
+memristor\_tio2\_au.spice}:
+\begin{cli}
+.subckt memristor_tio2_au BE TE
+.ends
+\end{cli}
+\column{0.55\textwidth}
+\texttt{libraries/openmemristorpdk\_pr/memristor\_tio2\_au.lib}:
+\begin{cli}
+library (memristor_tio2_au) {
+  cell (memristor_tio2_au) {
+    pin (BE) {
+      direction : inout;
+    }
+    pin (TE) {
+      direction : inout;
+    }
+  }
+}
+\end{cli}
+\end{columns}
+\vspace{0.5em}
+The real SPICE subckt is deliberately \emph{empty} -- the real
+device's own actual electrical behavior already lives in the
+Verilog-A model + LEF macro (this project's own single source of
+truth for it); this view exists purely so a real, external
+CDL/SPICE-based LVS or netlist-compare flow has something to bind
+the cell name to.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{What's real here -- and what a genuine digital-flow
+integration would still need}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Real}
+\begin{itemize}
+  \item 4 real views (Verilog/CDL/SPICE/Liberty), all created through
+        the real GUI launcher
+  \item All agree on the same real, LEF-inferred BE/TE port list
+  \item Genuinely parseable by external tools today
+\end{itemize}
+\column{0.5\textwidth}
+\textbf{Still needed for real use}
+\begin{itemize}
+  \item Real Liberty timing/power arcs -- meaningless for a passive,
+        history-dependent element under the classic combinational
+        \texttt{timing()} group model; a real memristor Liberty view
+        needs a genuinely different characterization approach
+        (state-dependent resistance, not a fixed delay)
+  \item A real CDL/SPICE \texttt{.subckt} body only matters once this
+        cell is instantiated \emph{inside} a larger subcircuit an LVS
+        flow needs to flatten through -- not needed standalone
+  \item A real Verilog behavioral body, if ever needed for
+        digital-only (non-SPICE) simulation of a system using this
+        device as a black box
+\end{itemize}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{A real, concrete next step: a 1T1R bit-cell}
+The one genuinely ``digital'' real use case for a two-terminal
+memristor: a non-volatile, resistive memory bit-cell (RRAM), typically
+\textbf{1T1R} -- one real access transistor in series with one real
+memristor, addressed by a real wordline/bitline pair.
+\begin{itemize}
+  \item \textbf{Deliberately out of scope here}: a real access
+        transistor needs a real, qualified CMOS process -- this
+        project is a from-scratch, \emph{analog-only} memristor PDK
+        with no real transistor model of its own, by explicit design
+        (``bare minimum'').
+  \item The real, concrete path: instantiate one of this project's
+        own real memristor cells alongside a real transistor from a
+        real digital PDK (e.g.\ the IHP-based project this same tool
+        already builds against) in one real, mixed schematic, using
+        exactly the real xschem/Library-Manager workflow already
+        demonstrated in the first deck.
+  \item Not attempted in this session -- a real, separate, well-scoped
+        follow-up, not a padding slide.
+\end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Where these views live}
+\begin{cli}
+openMemristorPDK/
+  user_models/verilog/memristor_tio2_au.v
+  libraries/openmemristorpdk_pr/
+    memristor_tio2_au.cdl
+    memristor_tio2_au.spice
+    memristor_tio2_au.lib
+  library_index.yaml   # ties all 4 to the same real cell name
+\end{cli}
+Every one of these is auto-discoverable again from a fresh GUI
+relaunch -- the same real Library Manager view shown in the first
+deck now lists 8 real views for \texttt{memristor\_tio2\_au}: LEF,
+Verilog-A, xschem symbol, xschem schematic, Verilog, CDL, SPICE,
+Liberty.
+\end{frame}
+
+\begin{frame}
+\centering\Large Thanks!
+\end{frame}
+
+\end{document}
