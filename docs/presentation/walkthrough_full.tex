@@ -101,7 +101,7 @@ Technology/Cells/Simulation (Steps 3 onward below) fill in from here.
 % ---------------------------------------------------------------
 \begin{frame}{Step 3 -- the PDK Wizard}
 \begin{center}
-\includegraphics[width=0.72\textwidth]{figures/pdk_wizard.jpg}
+\includegraphics[width=0.62\textwidth]{figures/pdk_wizard.jpg}
 \end{center}
 \footnotesize
 Green = real data present. The Wizard tab lays the whole build out as
@@ -138,7 +138,7 @@ qualified process.
 % ---------------------------------------------------------------
 \begin{frame}{Step 4, continued -- the real screen}
 \begin{center}
-\includegraphics[width=0.92\textwidth]{figures/walkthrough_step4_layers.png}
+\includegraphics[width=0.62\textwidth]{figures/walkthrough_step4_layers.png}
 \end{center}
 \footnotesize
 The real Layers tab: all 6 real layers, correct GDS layer/datatype
@@ -226,7 +226,7 @@ script, \texttt{custom\_rules.drc}.
 % ---------------------------------------------------------------
 \begin{frame}{Step 7, continued -- the real screen}
 \begin{center}
-\includegraphics[width=0.92\textwidth]{figures/walkthrough_step7_drc_rules.png}
+\includegraphics[width=0.62\textwidth]{figures/walkthrough_step7_drc_rules.png}
 \end{center}
 \footnotesize
 The real DRC Rules tab: all 4 real rules, plus a real, live rule
@@ -301,7 +301,7 @@ returning \texttt{4}.
 % ---------------------------------------------------------------
 \begin{frame}{Steps 8--10, continued -- the real screen}
 \begin{center}
-\includegraphics[width=0.92\textwidth]{figures/walkthrough_step8_lef_macros.png}
+\includegraphics[width=0.62\textwidth]{figures/walkthrough_step8_lef_macros.png}
 \end{center}
 \footnotesize
 The real LEF tab: all 4 real macros on the left; \texttt{memristor\_
@@ -342,7 +342,7 @@ physics next.
 % ---------------------------------------------------------------
 \begin{frame}{Step 12, continued -- the real screen}
 \begin{center}
-\includegraphics[width=0.92\textwidth]{figures/walkthrough_step12_user_models.png}
+\includegraphics[width=0.62\textwidth]{figures/walkthrough_step12_user_models.png}
 \end{center}
 \footnotesize
 The real User Models tab, after Step 12 is repeated once per real
@@ -540,7 +540,7 @@ Real file:
 % ---------------------------------------------------------------
 \begin{frame}{Step 21, continued -- the real screen}
 \begin{center}
-\includegraphics[width=0.92\textwidth]{figures/walkthrough_step21_corners.png}
+\includegraphics[width=0.62\textwidth]{figures/walkthrough_step21_corners.png}
 \end{center}
 \footnotesize
 The real Corners sub-tab: all 3 real corners, \texttt{TT} selected,
@@ -550,15 +550,17 @@ variants) on the right.
 
 % ---------------------------------------------------------------
 \begin{frame}{Step 22 -- result: a real TT/FF/SS corner sweep}
-\begin{center}
-\includegraphics[width=0.78\textwidth]{figures/memristor_corners_transient.png}
-\end{center}
+\begin{columns}
+\column{0.5\textwidth}
+\includegraphics[width=0.95\textwidth]{figures/memristor_corners_transient.png}
 \footnotesize
+\column{0.5\textwidth}
 Au/TiO$_2$/Au, same real drive, three real corner runs via
 \texttt{.lib openmemristorpdk\_corners.lib \{TT,FF,SS\}} +
 \texttt{\{ron\_tio2\_au\}}-style parameter overrides on the
 \texttt{.model} line -- FF the widest current swing (lowest
 resistance window), SS the narrowest, TT in between.
+\end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------
