@@ -1,5 +1,6 @@
 * NGSPICE file created from memristor_tio2_au.ext - technology: openmemristorpdk
 
 .subckt memristor_tio2_au BE TE
+X0 BE TE memristor_tio2_au_prim
 .ends
 

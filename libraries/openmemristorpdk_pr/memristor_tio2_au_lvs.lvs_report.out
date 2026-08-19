@@ -1,8 +1,25 @@
 
-Cell memristor_tio2_au (0) disconnected node: BE
-Cell memristor_tio2_au (0) disconnected node: TE
-Cell memristor_tio2_au (1) disconnected node: BE
-Cell memristor_tio2_au (1) disconnected node: TE
+Circuit 1 cell memristor_tio2_au_prim and Circuit 2 cell memristor_tio2_au_prim are black boxes.
+Warning: Equate pins:  cell memristor_tio2_au_prim is a placeholder, treated as a black box.
+Warning: Equate pins:  cell memristor_tio2_au_prim is a placeholder, treated as a black box.
+
+Subcircuit pins:
+Circuit 1: memristor_tio2_au_prim          |Circuit 2: memristor_tio2_au_prim          
+-------------------------------------------|-------------------------------------------
+1                                          |1                                          
+2                                          |2                                          
+---------------------------------------------------------------------------------------
+Cell pin lists are equivalent.
+Device classes memristor_tio2_au_prim and memristor_tio2_au_prim are equivalent.
+
+Subcircuit summary:
+Circuit 1: memristor_tio2_au               |Circuit 2: memristor_tio2_au               
+-------------------------------------------|-------------------------------------------
+memristor_tio2_au_prim (1)                 |memristor_tio2_au_prim (1)                 
+Number of devices: 1                       |Number of devices: 1                       
+Number of nets: 2                          |Number of nets: 2                          
+---------------------------------------------------------------------------------------
+Netlists match uniquely.
 
 Subcircuit pins:
 Circuit 1: memristor_tio2_au               |Circuit 2: memristor_tio2_au               
@@ -13,4 +30,5 @@ TE                                         |TE
 Cell pin lists are equivalent.
 Device classes memristor_tio2_au and memristor_tio2_au are equivalent.
 
-Final result: Verify:  cell /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.cdl has no elements and/or nodes.  Not checked.
+Final result: Circuits match uniquely.
+.

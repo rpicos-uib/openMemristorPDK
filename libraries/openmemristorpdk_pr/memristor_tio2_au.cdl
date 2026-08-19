@@ -1,3 +1,4 @@
 .SUBCKT memristor_tio2_au BE TE
 *.PININFO BE:B TE:B
+X1 BE TE memristor_tio2_au_prim
 .ENDS

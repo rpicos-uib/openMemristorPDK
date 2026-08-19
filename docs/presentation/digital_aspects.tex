@@ -143,82 +143,116 @@ already pointed at this exact real file.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 7 -- drawing the real layout in Magic}
+\begin{frame}[fragile]{Step 7 -- drawing the real, physically-stacked layout}
 The real LEF macro's own \texttt{BE}/\texttt{TE} pins both cover the
-whole \texttt{1.0 x 1.0} footprint (a real vertical BE/oxide/TE
-stack) -- but this project's own Magic technology currently puts all
-four metal electrode types on one shared \texttt{metal} plane, so two
-electrodes genuinely cannot overlap in one real Magic layout yet
-(that needs a separate real electrode-per-plane change, not attempted
-here). Drawn instead as a real, valid, side-by-side stand-in -- left
-half \texttt{BE\_Au}, right half \texttt{TE\_Au}, each with a real
-port. This technology also has no real internal-grid declaration of
-its own yet, defaulting to a coarse \texttt{1 internal unit = 1
-micron} grid, so every real coordinate below snaps to a whole micron
--- a real, disclosed reason this cell ends up 2\,\textmu m x
-2\,\textmu m rather than matching the LEF's own 1\,\textmu m x
-1\,\textmu m footprint exactly:
+whole \texttt{1.0 x 1.0} footprint -- a real vertical BE/oxide/TE
+stack, and (with Step 6's own 3-plane redesign) one a real Magic
+layout can now actually draw: three overlapping boxes, one real type
+per plane, at the true \texttt{0.5} lambda (= 1\,\textmu m) size:
 \begin{cli}
-box 0 0 0.5 1
+box 0 0 0.5 0.5
 paint be_au
-label BE
+label BE c be_au
 port make
-box 0.5 0 1 1
+box 0 0 0.5 0.5
+paint mem_tio2
+box 0 0 0.5 0.5
 paint te_au
-label TE
+label TE c te_au
 port make
 port renumber
 save memristor_tio2_au
 \end{cli}
+A real Magic quirk worth knowing: \texttt{label} without an explicit
+layer argument infers one from whatever's currently topmost at that
+$(x,y)$ -- with three real, overlapping types there, the explicit
+third argument (\texttt{c be\_au}/\texttt{c te\_au}) is what makes
+each label land on the real, intended layer instead of both landing
+on the same one.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 8 -- Extract to SPICE}
+\begin{frame}[fragile]{Step 8 -- Connect/Extract: real device recognition}
+Technology $\to$ Magic Tech $\to$ Connect/Extract sub-tabs, all real,
+already-built GUI editors:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Sub-tab & Action & Real value \\
+\midrule
+Styles & New Style $\times$6 & each type $\to$ a real display style \\
+Connect & New Rule $\times$4 & \texttt{be\_au}/\texttt{te\_au}/\texttt{te\_ti}/\texttt{te\_al}, self only \\
+Extract & New Plane Order $\times$3 & botmetal=0, oxide=1, topmetal=2 \\
+Extract & New Resist $\times$4 & \texttt{be\_au/botmetal}, \texttt{te\_*/topmetal} = 1 \\
+Extract & New Device $\times$3 & see below \\
+\bottomrule
+\end{tabular}
+\end{center}
+The three \textbf{New Device} rows (Devclass \texttt{subcircuit}) are
+what turn a real BE/oxide/TE overlap into a real, recognized
+2-terminal device during extraction, one per real top-electrode
+metal:
+\begin{cli}
+Model                    Type     Rest
+memristor_tio2_au_prim   be_au    te_au
+memristor_tio2_ti_prim   be_au    te_ti
+memristor_hfo2_al_prim   be_au    te_al
+\end{cli}
+(No connect rule joins \texttt{be\_au} to any \texttt{te\_*} directly
+-- BE and TE stay two real, distinct extraction nodes, connected only
+through this real device, never electrically shorted.)
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Step 9 -- Extract to SPICE}
 Back in Library Manager, the Magic Layout row now also shows
 \textbf{Extract to SPICE}. Choosing \emph{Parasitic (for ngspice
 simulation)} runs a real, freshly-generated Magic batch script
 (\texttt{extract all} + \texttt{ext2spice}) and reports the real
 result:
 \begin{cli}
-$ magic -dnull -noconsole memristor_tio2_au_extracted.tcl
-...
-Extracting memristor_tio2_au into memristor_tio2_au.ext:
-exttospice finished.
-
-Wrote memristor_tio2_au_extracted.spice
-\end{cli}
-\begin{cli}
 * NGSPICE file created from memristor_tio2_au.ext
 .subckt memristor_tio2_au BE TE
+X0 BE TE memristor_tio2_au_prim
 .ends
 \end{cli}
-Both real, named ports survive extraction -- the real Magic layout
-and the real LEF/CDL/SPICE views now agree independently.
+Step 8's own real device-recognition rule fired: the real BE/oxide/TE
+overlap became a real \texttt{X0} instance, referencing the real
+\texttt{memristor\_tio2\_au\_prim} model by name -- not just two
+disconnected ports (contrast the flat, side-by-side layout an earlier
+pass at this deck used, before Step 6/8's own plane/device work).
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 9 -- Run LVS}
-With a CDL view already present, the same row also shows \textbf{Run
-LVS}: a real, fast LVS-preset extraction followed by a real Netgen
-batch run (\texttt{netgen -batch source ...}) comparing it against
-the real \texttt{memristor\_tio2\_au.cdl} skeleton from Step 3:
+\begin{frame}[fragile]{Step 10 -- Run LVS}
+Filling in the real, previously-empty CDL skeleton from Step 3 with a
+matching real device call -- the one real, meaningful addition its
+own ``what real content this still needs'' note (below) used to
+flag:
 \begin{cli}
-Subcircuit pins:
-Circuit 1: memristor_tio2_au   |Circuit 2: memristor_tio2_au
--------------------------------|-------------------------------
-BE                             |BE
-TE                             |TE
--------------------------------------------------------------
-Cell pin lists are equivalent.
-Device classes memristor_tio2_au and memristor_tio2_au are equivalent.
+.SUBCKT memristor_tio2_au BE TE
+*.PININFO BE:B TE:B
+X1 BE TE memristor_tio2_au_prim
+.ENDS
 \end{cli}
-A real, genuine LVS pass on real Magic-extracted and real
-CDL-authored netlists -- the loop from layout to simulation, and from
-layout to LVS, is closed.
+Then \textbf{Run LVS}: a real, fast LVS-preset extraction followed by
+a real Netgen batch run (\texttt{netgen -batch source ...}):
+\begin{cli}
+Number of devices: 1        | Number of devices: 1
+Netlists match uniquely.
+
+Cell pin lists are equivalent.
+Device classes memristor_tio2_au and
+  memristor_tio2_au are equivalent.
+
+Final result: Circuits match uniquely.
+\end{cli}
+A real, genuine, device-level LVS \textbf{pass} -- not just a pin-list
+check.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 10 -- Run DRC}
+\begin{frame}[fragile]{Step 11 -- Run DRC}
 The same row also shows \textbf{Run DRC}: a real Magic batch
 \texttt{gds write}, exporting this project's own real \texttt{BE\_Au}/
 \texttt{TE\_Au}.drawing GDS layers (10/0, 20/0 -- Step 4 of the first
@@ -234,20 +268,57 @@ against the real, already-exported \texttt{custom\_rules.drc} deck
 </report-database>
 \end{cli}
 An empty real \texttt{<items>} list: 0 real violations, a real, clean
-DRC pass against all 4 real rules. (This technology's own coarse,
-1-\textmu m-snap grid, noted in Step 7, is too coarse to draw a shape
-that actually violates any of this deck's real, sub-micron
-thresholds -- a real, disclosed reason a genuine DRC \emph{failure}
-isn't demonstrated here.)
+DRC pass against all 4 real rules on the real, physically-stacked
+layout.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 11 -- confirming all 10 real views}
+\begin{frame}[fragile]{Step 12 -- simulating the real extracted netlist}
+A real ngspice transient, driven through the real extracted netlist
+itself (not a bare \texttt{.model}/instance line): \texttt{X0}
+resolves to a real \texttt{.subckt memristor\_tio2\_au\_prim} wrapper
+around this project's own real, OpenVAF-compiled OSDI model
+(\texttt{memristor\_tio2\_au.va}). One real, confirmed ngspice
+requirement: its own implicit ``match an \texttt{.osdi} file in cwd
+to an unresolved \texttt{.model} name'' only works with \emph{no}
+\texttt{.subckt} anywhere in the deck -- the real, documented,
+explicit fix, \texttt{pre\_osdi <file>.osdi} inside a leading
+\texttt{.control} block, loads it before the netlist is parsed:
+\begin{cli}
+.control
+pre_osdi memristor_tio2_au.osdi
+.endc
+.model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0.3
+.subckt memristor_tio2_au_prim BE TE
+n1 BE TE mm
+.ends
+.include memristor_tio2_au_extracted.spice
+X1 te 0 memristor_tio2_au
+vte te 0 dc 0 sin(0 1.0 0.6)
+.tran 300u 3.34
+\end{cli}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 12, continued -- the real result}
+\begin{center}
+\includegraphics[width=0.95\textwidth]{figures/memristor_tio2_au_extracted_comparison.png}
+\end{center}
+\footnotesize
+Overlaid against the original, hand-written testbench's own real
+transient (\texttt{docs/simulation/memristor\_tio2\_au/mem\_tran.sp})
+-- 0.0000\% relative current difference, every single sample: the
+real, Magic-extracted, device-recognized layout netlist reproduces
+the exact same real pinched hysteresis loop.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 13 -- confirming all 10 real views}
 Library Manager, still on \texttt{memristor\_tio2\_au}, now lists 10
 real views for this one cell: LEF, Verilog-A, xschem symbol, xschem
 schematic (all from the first deck), Verilog, CDL, SPICE, Liberty
 (this deck's Steps 2--5), the real Magic Layout from Step 6, and the
-real GDS written by Step 10 -- every real file auto-discoverable again
+real GDS written by Step 11 -- every real file auto-discoverable again
 from a fresh GUI relaunch, all agreeing on the same real
 \texttt{BE}/\texttt{TE} port list.
 \end{frame}
@@ -260,14 +331,15 @@ from a fresh GUI relaunch, all agreeing on the same real
         \texttt{timing()} group model; a real memristor Liberty view
         needs a genuinely different characterization approach
         (state-dependent resistance, not a fixed delay).
-  \item A real CDL/SPICE \texttt{.subckt} \emph{body} (device lines,
-        not just the pin list) only starts to matter once this cell
-        is instantiated \emph{inside} a larger subcircuit an LVS flow
-        needs to flatten through -- Step 9's own pin-only LVS pass
-        already exercises the real, standalone case fully.
   \item A real Verilog behavioral body, if digital-only (non-SPICE)
         simulation of a system using this device as a black box is
         ever needed.
+  \item \texttt{memristor\_tio2\_ti}/\texttt{memristor\_hfo2\_al}
+        have no real Magic Layout view at all yet -- Steps 6--12's own
+        real work (the 3-plane stack, the two matching \textbf{New
+        Device} rules from Step 8, drawing, extraction, LVS, DRC,
+        simulation) applies to both identically, just not yet repeated
+        for them.
 \end{itemize}
 \end{frame}
 

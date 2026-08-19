@@ -9,15 +9,16 @@ version
 end
 
 planes
-metal,mtl
+botmetal,bm
 oxide,oxd
+topmetal,tm
 end
 
 types
-metal be_au
-metal te_au
-metal te_ti
-metal te_al
+botmetal be_au
+topmetal te_au
+topmetal te_ti
+topmetal te_al
 oxide mem_tio2
 oxide mem_hfo2
 end
@@ -75,10 +76,14 @@ style ngspice
     units microns
     step 7
     sidehalo 8
-    planeorder metal 0
+    planeorder botmetal 0
     planeorder oxide 1
-    resist be_au/metal 1
-    resist te_au/metal 1
-    resist te_ti/metal 1
-    resist te_al/metal 1
+    planeorder topmetal 2
+    resist be_au/botmetal 1
+    resist te_au/topmetal 1
+    resist te_ti/topmetal 1
+    resist te_al/topmetal 1
+    device subcircuit memristor_tio2_au_prim be_au te_au
+    device subcircuit memristor_tio2_ti_prim be_au te_ti
+    device subcircuit memristor_hfo2_al_prim be_au te_al
 end

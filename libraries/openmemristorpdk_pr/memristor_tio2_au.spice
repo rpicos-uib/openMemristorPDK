@@ -1,2 +1,3 @@
 .subckt memristor_tio2_au BE TE
+X1 BE TE memristor_tio2_au_prim
 .ends

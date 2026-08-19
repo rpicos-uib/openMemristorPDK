@@ -39,7 +39,7 @@
 % ---------------------------------------------------------------
 \begin{frame}{What gets built}
 \begin{itemize}
-  \item A real, from-scratch technology: 6 GDS layers, 2 Magic
+  \item A real, from-scratch technology: 6 GDS layers, 3 Magic
         planes/6 types, 4 DRC rules.
   \item 4 real LEF macros -- two switching-oxide materials
         (TiO$_2$, HfO$_2$), three top-electrode metals (Au, Ti, Al),
@@ -138,21 +138,30 @@ A real, valid, open\_pdks-format KLayout layer file with all 6 real
 % ---------------------------------------------------------------
 \begin{frame}[fragile]{Step 6 -- Magic Tech: planes and types}
 Technology $\to$ Magic Tech $\to$ type a new path $\to$ \textbf{New
-.tech File...}, then \textbf{New Plane} $\times$2 and \textbf{New
-Type} $\times$6:
+.tech File...}, then \textbf{New Plane} $\times$3 and \textbf{New
+Type} $\times$6. Three planes, not one shared ``metal'' plane -- a
+real vertical BE/oxide/TE stack needs each level on its own real
+Magic plane, or the bottom and top electrodes could never physically
+overlap in one real layout (two types on the \emph{same} plane are
+mutually exclusive at a given $(x,y)$):
 \begin{center}
 \begin{tabular}{lll}
 \toprule
 Plane & Short code & Types on this plane \\
 \midrule
-metal & mtl & be\_au, te\_au, te\_ti, te\_al \\
+botmetal & bm & be\_au \\
 oxide & oxd & mem\_tio2, mem\_hfo2 \\
+topmetal & tm & te\_au, te\_ti, te\_al \\
 \bottomrule
 \end{tabular}
 \end{center}
 Each real Magic type is entered by name, then its own \textbf{Plane}
 field is set to the matching plane above via the Types sub-tab's own
-form.
+form. The Styles/Connect/Extract sub-tabs (real display styles, real
+electrical connectivity, real extraction parameters -- all needed
+before real Magic layout extraction works at all, not just for
+display) are covered later, in \texttt{digital\_aspects.tex}, right
+where they're actually used.
 \end{frame}
 
 % ---------------------------------------------------------------
