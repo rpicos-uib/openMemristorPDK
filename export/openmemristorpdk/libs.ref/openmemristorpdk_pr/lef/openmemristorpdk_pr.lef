@@ -1,0 +1,93 @@
+VERSION 5.7 ;
+BUSBITCHARS "[]" ;
+DIVIDERCHAR "/" ;
+MACRO memristor
+  CLASS CORE ;
+  SIZE 1.0 BY 1.0 ;
+  SYMMETRY X Y ;
+  PIN BE
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER BE_Au.drawing ;
+        RECT 0 0 1 1 ;
+    END
+  END BE
+  PIN TE
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER TE_Au.drawing ;
+        RECT 0 0 1 1 ;
+    END
+  END TE
+END memristor
+
+MACRO memristor_tio2_au
+  CLASS CORE ;
+  ORIGIN 0 0 ;
+  SIZE 1.0 BY 1.0 ;
+  SITE CoreSite ;
+  PIN BE
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER BE_Au.drawing ;
+        RECT 0 0 1 1 ;
+    END
+  END BE
+  PIN TE
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER TE_Au.drawing ;
+        RECT 0 0 1 1 ;
+    END
+  END TE
+END memristor_tio2_au
+
+MACRO memristor_tio2_ti
+  CLASS CORE ;
+  ORIGIN 0 0 ;
+  SIZE 1.0 BY 1.0 ;
+  SITE CoreSite ;
+  PIN BE
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER BE_Au.drawing ;
+        RECT 0 0 1 1 ;
+    END
+  END BE
+  PIN TE
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER TE_Ti.drawing ;
+        RECT 0 0 1 1 ;
+    END
+  END TE
+END memristor_tio2_ti
+
+MACRO memristor_hfo2_al
+  CLASS CORE ;
+  ORIGIN 0 0 ;
+  SIZE 1.0 BY 1.0 ;
+  SITE CoreSite ;
+  PIN BE
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER BE_Au.drawing ;
+        RECT 0 0 1 1 ;
+    END
+  END BE
+  PIN TE
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER TE_Al.drawing ;
+        RECT 0 0 1 1 ;
+    END
+  END TE
+END memristor_hfo2_al

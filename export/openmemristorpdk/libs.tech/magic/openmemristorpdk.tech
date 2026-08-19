@@ -9,13 +9,17 @@ version
 end
 
 planes
-metal, m
+metal, mtl
+oxide, oxd
 end
 
 types
-metal be
-metal mem
-metal te
+metal be_au
+metal te_au
+metal te_ti
+metal te_al
+oxide mem_tio2
+oxide mem_hfo2
 end
 
 contact

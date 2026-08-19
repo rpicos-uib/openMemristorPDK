@@ -1,12 +1,150 @@
-project_name: Untitled PDK Project
-drc_rules: []
+project_name: openMemristorPDK -- bare-minimum memristor PDK
+drc_rules:
+- rule_id: BE.W.1
+  description: Minimum width of Au bottom electrode
+  check_type: min_width
+  layers:
+  - BE_Au.drawing
+  applies_to_override: null
+  value: 0.2
+  units: ''
+  net_qualifier: not_applicable
+  classification: ''
+  condition: ''
+  process_revision: ''
+  owner: ''
+  source_provenance: ''
+  why: ''
+  status: placeholder
+  window_size_um: null
+  window_step_um: null
+- rule_id: MEM1.W.1
+  description: Minimum width of TiO2 switching oxide
+  check_type: min_width
+  layers:
+  - MEM_TiO2.drawing
+  applies_to_override: null
+  value: 0.1
+  units: ''
+  net_qualifier: not_applicable
+  classification: ''
+  condition: ''
+  process_revision: ''
+  owner: ''
+  source_provenance: ''
+  why: ''
+  status: placeholder
+  window_size_um: null
+  window_step_um: null
+- rule_id: MEM2.W.1
+  description: Minimum width of HfO2 switching oxide
+  check_type: min_width
+  layers:
+  - MEM_HfO2.drawing
+  applies_to_override: null
+  value: 0.1
+  units: ''
+  net_qualifier: not_applicable
+  classification: ''
+  condition: ''
+  process_revision: ''
+  owner: ''
+  source_provenance: ''
+  why: ''
+  status: placeholder
+  window_size_um: null
+  window_step_um: null
+- rule_id: TE.S.1
+  description: Minimum spacing between top electrode features
+  check_type: min_spacing
+  layers:
+  - TE_Au.drawing
+  applies_to_override: null
+  value: 0.15
+  units: ''
+  net_qualifier: not_applicable
+  classification: ''
+  condition: ''
+  process_revision: ''
+  owner: ''
+  source_provenance: ''
+  why: ''
+  status: placeholder
+  window_size_um: null
+  window_step_um: null
 magic_types:
-  openmemristorpdk: []
+  openmemristorpdk:
+  - plane: metal
+    canonical_name: be_au
+    aliases: []
+    obsolete: false
+    line_no: 0
+  - plane: metal
+    canonical_name: te_au
+    aliases: []
+    obsolete: false
+    line_no: 0
+  - plane: metal
+    canonical_name: te_ti
+    aliases: []
+    obsolete: false
+    line_no: 0
+  - plane: metal
+    canonical_name: te_al
+    aliases: []
+    obsolete: false
+    line_no: 0
+  - plane: oxide
+    canonical_name: mem_tio2
+    aliases: []
+    obsolete: false
+    line_no: 0
+  - plane: oxide
+    canonical_name: mem_hfo2
+    aliases: []
+    obsolete: false
+    line_no: 0
 magic_planes:
-  openmemristorpdk: []
+  openmemristorpdk:
+  - name: metal
+    short_code: mtl
+    line_no: 0
+  - name: oxide
+    short_code: oxd
+    line_no: 0
 magic_contacts:
   openmemristorpdk: []
 magic_aliases:
+  openmemristorpdk: []
+magic_styles:
+  openmemristorpdk: []
+magic_compose:
+  openmemristorpdk: []
+magic_connect:
+  openmemristorpdk: []
+magic_cifinput_ignored_layers:
+  openmemristorpdk: []
+magic_cifinput_layer_hints:
+  openmemristorpdk: []
+magic_cif_layers:
+  openmemristorpdk: []
+magic_extract_misc:
+  openmemristorpdk: []
+magic_extract_plane_order:
+  openmemristorpdk: []
+magic_extract_resist:
+  openmemristorpdk: []
+magic_extract_cap_coefficients:
+  openmemristorpdk: []
+magic_extract_devices:
+  openmemristorpdk: []
+magic_drc_angle_checks:
+  openmemristorpdk: []
+magic_drc_checks:
+  openmemristorpdk: []
+magic_drc_misc:
+  openmemristorpdk: []
+magic_cifinput_recipes:
   openmemristorpdk: []
 lef_pins:
   libs.ref/openmemristorpdk_pr/lef/openmemristorpdk_pr.lef:
@@ -15,15 +153,213 @@ lef_pins:
       direction: INOUT
       use: SIGNAL
       ports:
-      - layer: BE
-        rect_count: 1
-      start_line: 8
-      end_line: 15
+      - layer: BE_Au.drawing
+        rects:
+        - - 0.0
+          - 0.0
+          - 1.0
+          - 1.0
+      start_line: 0
+      end_line: 0
     - name: TE
       direction: INOUT
       use: SIGNAL
       ports:
-      - layer: TE
-        rect_count: 1
-      start_line: 16
-      end_line: 23
+      - layer: TE_Au.drawing
+        rects:
+        - - 0.0
+          - 0.0
+          - 1.0
+          - 1.0
+      start_line: 0
+      end_line: 0
+    memristor_tio2_au:
+    - name: BE
+      direction: INOUT
+      use: SIGNAL
+      ports:
+      - layer: BE_Au.drawing
+        rects:
+        - - 0.0
+          - 0.0
+          - 1.0
+          - 1.0
+      start_line: 0
+      end_line: 0
+    - name: TE
+      direction: INOUT
+      use: SIGNAL
+      ports:
+      - layer: TE_Au.drawing
+        rects:
+        - - 0.0
+          - 0.0
+          - 1.0
+          - 1.0
+      start_line: 0
+      end_line: 0
+    memristor_tio2_ti:
+    - name: BE
+      direction: INOUT
+      use: SIGNAL
+      ports:
+      - layer: BE_Au.drawing
+        rects:
+        - - 0.0
+          - 0.0
+          - 1.0
+          - 1.0
+      start_line: 0
+      end_line: 0
+    - name: TE
+      direction: INOUT
+      use: SIGNAL
+      ports:
+      - layer: TE_Ti.drawing
+        rects:
+        - - 0.0
+          - 0.0
+          - 1.0
+          - 1.0
+      start_line: 0
+      end_line: 0
+    memristor_hfo2_al:
+    - name: BE
+      direction: INOUT
+      use: SIGNAL
+      ports:
+      - layer: BE_Au.drawing
+        rects:
+        - - 0.0
+          - 0.0
+          - 1.0
+          - 1.0
+      start_line: 0
+      end_line: 0
+    - name: TE
+      direction: INOUT
+      use: SIGNAL
+      ports:
+      - layer: TE_Al.drawing
+        rects:
+        - - 0.0
+          - 0.0
+          - 1.0
+          - 1.0
+      start_line: 0
+      end_line: 0
+lef_macros:
+  libs.ref/openmemristorpdk_pr/lef/openmemristorpdk_pr.lef:
+    memristor_tio2_au:
+      macro_class: CORE
+      size:
+      - 1.0
+      - 1.0
+      site: CoreSite
+      symmetry: []
+      origin:
+      - 0.0
+      - 0.0
+      obs_layers: []
+    memristor_tio2_ti:
+      macro_class: CORE
+      size:
+      - 1.0
+      - 1.0
+      site: CoreSite
+      symmetry: []
+      origin:
+      - 0.0
+      - 0.0
+      obs_layers: []
+    memristor_hfo2_al:
+      macro_class: CORE
+      size:
+      - 1.0
+      - 1.0
+      site: CoreSite
+      symmetry: []
+      origin:
+      - 0.0
+      - 0.0
+      obs_layers: []
+layers:
+  libs.tech/klayout/tech/openmemristorpdk.lyp:
+  - name: BE_Au.drawing
+    gds_layer: 10
+    gds_datatype: 0
+    purpose: drawing
+    plane: routing
+    stack_order: 0
+    frame_color: '#7f7f7f'
+    fill_color: '#d9d9d9'
+    streamout_allowed: null
+    notes: ''
+    status: placeholder
+    start_line: 0
+    end_line: 0
+  - name: MEM_TiO2.drawing
+    gds_layer: 11
+    gds_datatype: 0
+    purpose: drawing
+    plane: routing
+    stack_order: 1
+    frame_color: '#7f7f7f'
+    fill_color: '#d9d9d9'
+    streamout_allowed: null
+    notes: ''
+    status: placeholder
+    start_line: 0
+    end_line: 0
+  - name: MEM_HfO2.drawing
+    gds_layer: 12
+    gds_datatype: 0
+    purpose: drawing
+    plane: routing
+    stack_order: 2
+    frame_color: '#7f7f7f'
+    fill_color: '#d9d9d9'
+    streamout_allowed: null
+    notes: ''
+    status: placeholder
+    start_line: 0
+    end_line: 0
+  - name: TE_Au.drawing
+    gds_layer: 20
+    gds_datatype: 0
+    purpose: drawing
+    plane: routing
+    stack_order: 3
+    frame_color: '#7f7f7f'
+    fill_color: '#d9d9d9'
+    streamout_allowed: null
+    notes: ''
+    status: placeholder
+    start_line: 0
+    end_line: 0
+  - name: TE_Ti.drawing
+    gds_layer: 21
+    gds_datatype: 0
+    purpose: drawing
+    plane: routing
+    stack_order: 4
+    frame_color: '#7f7f7f'
+    fill_color: '#d9d9d9'
+    streamout_allowed: null
+    notes: ''
+    status: placeholder
+    start_line: 0
+    end_line: 0
+  - name: TE_Al.drawing
+    gds_layer: 22
+    gds_datatype: 0
+    purpose: drawing
+    plane: routing
+    stack_order: 5
+    frame_color: '#7f7f7f'
+    fill_color: '#d9d9d9'
+    streamout_allowed: null
+    notes: ''
+    status: placeholder
+    start_line: 0
+    end_line: 0
