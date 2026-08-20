@@ -181,7 +181,11 @@ libraries/openmemristorpdk_pr/memristor_tio2_au.mag
 Unlike every other view kind, this one is deliberately \emph{not}
 editable in this GUI -- real polygon drawing needs real Magic itself.
 The row's own \textbf{Open in Magic} button, used next, launches it
-already pointed at this exact real file.
+already pointed at this exact real file -- with an explicit, generated
+\texttt{tech load <path>} line naming this project's own real
+technology by name, not left to Magic's own CWD-based
+\texttt{.magicrc} auto-sourcing (which has no real equivalent for a
+from-scratch project with none of its own).
 \end{frame}
 
 % ---------------------------------------------------------------

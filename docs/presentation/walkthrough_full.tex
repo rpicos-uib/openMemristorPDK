@@ -582,12 +582,17 @@ with the two real pins positioned at \texttt{(-40,0)} (BE) and
 % ---------------------------------------------------------------
 \begin{frame}{Step 24 -- opening it in real xschem}
 \begin{center}
-\includegraphics[width=0.55\textwidth]{figures/xschem_memristor_symbol.jpg}
+\includegraphics[width=0.6\textwidth]{figures/xschem_memristor_symbol.jpg}
 \end{center}
 \footnotesize
 Confirmed by actually launching real xschem on the exported file, the
-same way the Library Manager's own \textbf{Open in xschem} action
-does it: \texttt{xschem <path>}, run from the project root.
+same way the Library Manager's own \textbf{Open in xschem} action does
+it: \texttt{xschem --rcfile <rcfile> <path>}, where \texttt{<rcfile>}
+points \texttt{XSCHEM\_LIBRARY\_PATH} at this project's own real
+symbol library -- never the dev container's own global default (a
+real, found-and-fixed bug: that default silently pointed at IHP's own
+PDK instead, visible as a spurious ``IHP'' menu in an earlier real
+screenshot here, now gone).
 \end{frame}
 
 % ---------------------------------------------------------------
