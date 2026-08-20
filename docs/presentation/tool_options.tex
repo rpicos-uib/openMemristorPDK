@@ -39,12 +39,19 @@
         tool, assuming zero prior knowledge of any of them -- what
         the flag is called, what it actually does, and why this
         project passes exactly that one and not something else.
+  \item For each of the four real, interactive GUIs (Magic, xschem,
+        KLayout, Qucs-S) it also goes one level further: a real
+        ``menu bar, tab by tab'' table covering \emph{every single
+        real top-level menu} that tool's own GUI actually has, opened
+        live and read directly -- not just the launch flags, but what
+        you'd actually see once the window is open.
   \item Nothing here is guessed. Every claim was checked directly
         against each real tool's own \texttt{--help}/\texttt{-h}
-        output, its own real, installed man page, or (where neither
-        existed) its own real, fetched source code -- and several
-        real, live screenshots below are real bugs this project found
-        and fixed \emph{because} of that checking.
+        output, its own real, installed man page, its own real menu
+        bar (opened live, screenshotted, read), or (where none of
+        those existed) its own real, fetched source code -- and
+        several real, live screenshots below are real bugs this
+        project found and fixed \emph{because} of that checking.
   \item If you've never used a terminal-based EDA tool before, start
         with the next slide. If you already know what a CLI flag and
         an environment variable are, skip straight to Magic.
@@ -172,6 +179,35 @@ project's own real layers, correctly loaded.
 \end{columns}
 \end{frame}
 
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Magic's own menu bar, tab by tab}
+Every one of Magic's own real top-level menus, opened live and read
+directly (not from memory) -- what each is actually for:
+\footnotesize
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Real menu & What it's actually for \\
+\midrule
+File & Open/Save a real \texttt{.mag}; Import SPICE; Read/Write GDS \\
+Edit & Undo/Redo, Delete, real rotate/mirror/move/stretch \\
+Cell & New/Save cell; hierarchy navigation; Expand/Lock a real cell \\
+Window & New/clone view; real zoom/grid controls, per-window \\
+Layers & Protect/Unlock base layers; Reorder layers \\
+Drc & Run/report DRC, interactively (this project's own real
+      \textbf{Run DRC} button instead runs it in real batch mode) \\
+Options & Toggle real sub-panels -- Cell/Library/Tech/DRC Manager,
+          Netlist Window, 3D Display \\
+Devices & A real, parameterized device generator (MOSFETs, diodes,
+           resistors, \dots) -- IHP-supplied content here, not
+           generic Magic, and not this project's own real memristor
+           device (which has none of these) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\normalsize
+\end{frame}
+
 % =================================================================
 \section{xschem}
 \begin{frame}{xschem -- what it is}
@@ -250,6 +286,64 @@ between Help and Netlist -- for a memristor project's own symbol.
 \footnotesize After: no IHP menu, the exact same real symbol, status
 bar showing the real \texttt{--rcfile <path>} that fixed it.
 \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{xschem's own menu bar, tab by tab (1/2)}
+\footnotesize
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Real menu & What it's actually for \\
+\midrule
+File & Open/Save/Reload a real schematic or symbol; Component
+       browser; Image export \\
+Edit & Undo/Redo, Copy/Cut/Paste; real move/rotate/flip; Push/Pop
+       into a real subcircuit hierarchy \\
+Options & Real drawing/wiring preferences -- e.g.\ orthogonal
+           wiring, auto-join wires, GPU workarounds; not this
+           deck's own real \texttt{XSCHEM\_LIBRARY\_PATH} fix, which
+           lives in the rc file instead, not here \\
+View & Real zoom/redraw; toggle real side panels (Layers, Cells,
+       Libraries); line width/colorscheme \\
+Properties & Edit a real selected object's own real attributes --
+              including the real, deliberately red
+              \textbf{Edit file (danger!)} entry, a genuine, honest
+              in-GUI warning \\
+\bottomrule
+\end{tabular}
+\end{center}
+\normalsize
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{xschem's own menu bar, tab by tab (2/2)}
+\footnotesize
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Real menu & What it's actually for \\
+\midrule
+Layers & A real, numbered (0--19) drawing-layer color palette --
+          which real layer new lines/text land on next \\
+Symbol & Make symbol$\leftrightarrow$schematic; place real pins/
+         ports/net labels \\
+Highlight & Real net/pin highlighting; compare two real schematics
+            side by side \\
+Simulation & \textbf{Configure simulators and tools} -- the real
+              in-GUI counterpart to this deck's own
+              \texttt{ngspice}/\texttt{osdi} discussion; also
+              real netlist-directory and LVS settings \\
+Help & Real keybinding reference; About \\
+\bottomrule
+\end{tabular}
+\end{center}
+\normalsize
+Three real, one-click \textbf{action buttons} sit to the right of the
+menu bar, not inside it -- \textbf{Netlist}/\textbf{Simulate}/
+\textbf{Waves} each just runs, immediately, rather than opening a
+dropdown (confirmed live: clicking \textbf{Netlist} here really did
+generate a real \texttt{.spice} file on the spot).
 \end{frame}
 
 % =================================================================
@@ -355,6 +449,40 @@ ever running until dismissed, before \texttt{KLAYOUT\_HOME} pre-seeding
 made it never appear at all.
 \end{frame}
 
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{KLayout's own menu bar, tab by tab}
+\footnotesize
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Real menu & What it's actually for \\
+\midrule
+File & Open/Save a real layout; Screenshot; Load/Save real Layer
+       Properties (the real GUI counterpart of this deck's own
+       \texttt{-l <lyp>} flag) \\
+Edit & Undo/Redo; real Layout/Cell/Layer/Selection editing;
+       Search and Replace \\
+View & Toggle real panels (Layers, Cells, Libraries, Navigator);
+       grid/marker/text display \\
+Bookmarks & Save/return to a real, named view position \\
+Display & Real zoom/hierarchy depth (Full/Box Only/Top Level);
+           Descend/Ascend into a real cell \\
+Tools & \textbf{Manage Technologies} (the real GUI counterpart of
+         \texttt{-n}/\texttt{-nn}/\texttt{KLAYOUT\_HOME}); real
+         LVS/DRC/XOR/Diff tools; Netlist Browser \\
+Macros & Real Ruby/Python macro editor -- the same real engine this
+          project's own generated \texttt{pya} automation script
+          (\textbf{Open in KLayout}'s persistent-instance mechanism)
+          runs inside of \\
+Help & \textbf{Show All Tips} -- the real, in-GUI way to re-enable
+        the Tip dialogs this deck's own real
+        \texttt{tip-window-hidden} fix suppresses \\
+\bottomrule
+\end{tabular}
+\end{center}
+\normalsize
+\end{frame}
+
 % =================================================================
 \section{Qucs-S}
 \begin{frame}{Qucs-S -- what it is}
@@ -405,6 +533,41 @@ The real Projects panel after the fix, correctly listing
 project's own real \texttt{libs.tech/qucs-s} subdirectories, not the
 dev container's own default \texttt{/headless/QucsWorkspace} (itself a
 real symlink into IHP's own PDK install).
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Qucs-S's own menu bar, tab by tab}
+\footnotesize
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Real menu & What it's actually for \\
+\midrule
+File & Real Open/Save; \textbf{Application Settings} -- the real
+       GUI's own version of this deck's own \texttt{QucsHomeDir} fix
+       (edits the same real, shared config this project's own
+       \texttt{\_qucs\_env()} copies instead of touching directly) \\
+Edit & Real Cut/Copy/Paste; Move/Rotate/Mirror; Go into/Pop out of a
+       real subcircuit \\
+Positioning & Real align/center/distribute -- purely cosmetic,
+               layout-only \\
+Insert & Real Wire, Ground, Port, Equation, Marker placement \\
+Project & \textbf{New/Open Project} -- browses from real
+           \texttt{QucsHomeDir}, exactly the setting this deck's own
+           real fix redirects; also real Verilog-A module build/load \\
+Tools & A real RF-design toolbox -- filter/matching/attenuator
+         synthesis, line calculation, S-parameters -- unrelated to
+         this deck's own real launch-environment focus \\
+Simulation & \textbf{Simulators Settings} -- the real GUI's own
+              version of \texttt{qucs\_s.conf}'s
+              \texttt{NgspiceExecutable}/\texttt{XyceExecutable}
+              entries \\
+View & Real zoom/grid/dock-window display \\
+Help & Real Help Index, Getting Started, About \\
+\bottomrule
+\end{tabular}
+\end{center}
+\normalsize
 \end{frame}
 
 % =================================================================
