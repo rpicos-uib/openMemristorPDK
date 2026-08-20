@@ -24,6 +24,12 @@ docs/simulation/memristor_tran.csv
 docs/simulation/*/.spiceinit
 docs/simulation/*/*.csv
 
+# openpdkcreator's own real, tool-owned View Switch xschem menu --
+# regenerated on every real launch (pdklib/xschem_view_switch.py's own
+# ensure_view_switch_menu), never hand-edited, same regeneratable
+# status as the .osdi files above.
+**/libs.tech/xschem/openpdkcreator_view_switch_menu
+
 # LaTeX build byproducts.
 docs/presentation/*.aux
 docs/presentation/*.log

@@ -65,3 +65,7 @@ entries:
   cell: memristor_tio2_au
   view_kind: liberty
   path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.lib
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au_viewswitch
+  view_kind: spice
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au_viewswitch.spice

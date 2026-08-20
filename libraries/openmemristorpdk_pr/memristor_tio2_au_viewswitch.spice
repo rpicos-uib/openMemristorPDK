@@ -1,0 +1,13 @@
+* Real extracted-layout views substituted for: n1
+.include /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au_extracted.spice
+** sch_path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.sch
+**.subckt memristor_tio2_au
+Xn1 0 net1 memristor_tio2_au
+V1 0 net1 dc 0 sin(0 1.0 0.6)
+**** begin user architecture code
+
+.model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0.3
+
+**** end user architecture code
+**.ends
+.end
