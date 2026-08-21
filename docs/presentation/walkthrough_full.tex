@@ -90,7 +90,7 @@ stand-in.
 % ---------------------------------------------------------------
 \begin{frame}{Step 2, continued -- the real, freshly-launched screen}
 \begin{center}
-\includegraphics[width=0.85\textwidth]{figures/walkthrough_step2_overview.png}
+\includegraphics[width=0.55\textwidth]{figures/walkthrough_step2_overview.png}
 \end{center}
 \footnotesize
 The real Overview tab: a live inventory scan of whatever real files
@@ -101,7 +101,7 @@ Technology/Cells/Simulation (Steps 3 onward below) fill in from here.
 % ---------------------------------------------------------------
 \begin{frame}{Step 3 -- the PDK Wizard}
 \begin{center}
-\includegraphics[width=0.62\textwidth]{figures/pdk_wizard.jpg}
+\includegraphics[width=0.55\textwidth]{figures/pdk_wizard.jpg}
 \end{center}
 \footnotesize
 Green = real data present. The Wizard tab lays the whole build out as
@@ -116,7 +116,7 @@ of this same chain (Step 3, continued, next).
 % ---------------------------------------------------------------
 \begin{frame}{Step 3, continued -- Extraction / LVS / DRC}
 \begin{center}
-\includegraphics[width=0.85\textwidth]{figures/wizard_extraction_lvs_drc_stage.png}
+\includegraphics[width=0.55\textwidth]{figures/wizard_extraction_lvs_drc_stage.png}
 \end{center}
 \footnotesize
 Layout-to-netlist, for real: \textbf{Extract to SPICE} runs real batch
@@ -331,7 +331,7 @@ canvas Step 9 describes.
 % ---------------------------------------------------------------
 \begin{frame}{Step 11 -- Library Manager}
 \begin{center}
-\includegraphics[width=0.95\textwidth]{figures/library_manager.jpg}
+\includegraphics[width=0.65\textwidth]{figures/library_manager.jpg}
 \end{center}
 \footnotesize
 Every real LEF macro is auto-discovered as a library/cell (library
@@ -435,6 +435,8 @@ state-to-resistance mapping:
 \qquad
 R_{mem}(x) = R_{off}\, e^{-x\ln(R_{off}/R_{on})}
 \]
+\end{frame}
+\begin{frame}[fragile]{Step 15 -- authoring Model 2}
 \begin{va}
 module memristor_hfo2_al(BE, TE);
 inout BE, TE;

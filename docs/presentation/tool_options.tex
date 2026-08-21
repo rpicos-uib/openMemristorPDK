@@ -7,6 +7,7 @@
 \usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{tabularx}
 
 \lstdefinestyle{cli}{
   basicstyle=\ttfamily\scriptsize,
@@ -45,6 +46,10 @@
         real top-level menu} that tool's own GUI actually has, opened
         live and read directly -- not just the launch flags, but what
         you'd actually see once the window is open.
+\end{itemize}
+\end{frame}
+\begin{frame}{What this deck is}
+\begin{itemize}
   \item Nothing here is guessed. Every claim was checked directly
         against each real tool's own \texttt{--help}/\texttt{-h}
         output, its own real, installed man page, its own real menu
@@ -52,9 +57,7 @@
         those existed) its own real, fetched source code -- and
         several real, live screenshots below are real bugs this
         project found and fixed \emph{because} of that checking.
-  \item If you've never used a terminal-based EDA tool before, start
-        with the next slide. If you already know what a CLI flag and
-        an environment variable are, skip straight to Magic.
+  \item If you've never used a terminal-based EDA tool before, start with the next slide. If you already know what a CLI flag and an environment variable are, skip straight to Magic.
 \end{itemize}
 \end{frame}
 
@@ -80,6 +83,10 @@ klayout -e mychip.gds
         exit'' -- no window ever opens; the opposite of
         \textbf{interactive mode}, where a real window stays open for
         a human to click around in.
+\end{itemize}
+\end{frame}
+\begin{frame}[fragile]{Building blocks, for total beginners}
+\begin{itemize}
   \item \textbf{A startup/init file} (often called an ``rc file'',
         short for ``run commands'') is a real script a program reads
         automatically every time it starts, before doing anything
@@ -185,7 +192,7 @@ Every one of Magic's own real top-level menus, opened live and read
 directly (not from memory) -- what each is actually for:
 \footnotesize
 \begin{center}
-\begin{tabular}{ll}
+\begin{tabularx}{\textwidth}{@{}p{0.18\textwidth}X@{}}
 \toprule
 Real menu & What it's actually for \\
 \midrule
@@ -203,7 +210,7 @@ Devices & A real, parameterized device generator (MOSFETs, diodes,
            generic Magic, and not this project's own real memristor
            device (which has none of these) \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
 \normalsize
 \end{frame}
@@ -245,6 +252,8 @@ xschem --rcfile <path-to-real-rc-file> <symbol-or-schematic-file>
         \texttt{--tcl <script>} (run arbitrary Tcl before startup --
         more power than this one, narrow job needs).
 \end{itemize}
+\end{frame}
+\begin{frame}[fragile]{xschem -- the real flags this project passes}
 Inside that real rc file, two real lines actually matter: the library
 path append, and a conditional \texttt{source} of this project's own
 real, tool-owned View Switch menu file (a later addition, regenerated
@@ -298,7 +307,7 @@ bar showing the real \texttt{--rcfile <path>} that fixed it.
 \begin{frame}[fragile]{xschem's own menu bar, tab by tab (1/2)}
 \footnotesize
 \begin{center}
-\begin{tabular}{ll}
+\begin{tabularx}{\textwidth}{@{}p{0.18\textwidth}X@{}}
 \toprule
 Real menu & What it's actually for \\
 \midrule
@@ -317,7 +326,7 @@ Properties & Edit a real selected object's own real attributes --
               \textbf{Edit file (danger!)} entry, a genuine, honest
               in-GUI warning \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
 \normalsize
 \end{frame}
@@ -326,7 +335,7 @@ Properties & Edit a real selected object's own real attributes --
 \begin{frame}[fragile]{xschem's own menu bar, tab by tab (2/2)}
 \footnotesize
 \begin{center}
-\begin{tabular}{ll}
+\begin{tabularx}{\textwidth}{@{}p{0.18\textwidth}X@{}}
 \toprule
 Real menu & What it's actually for \\
 \midrule
@@ -342,7 +351,7 @@ Simulation & \textbf{Configure simulators and tools} -- the real
               real netlist-directory and LVS settings \\
 Help & Real keybinding reference; About \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
 \normalsize
 Three real, one-click \textbf{action buttons} sit to the right of the
@@ -459,7 +468,7 @@ made it never appear at all.
 \begin{frame}[fragile]{KLayout's own menu bar, tab by tab}
 \footnotesize
 \begin{center}
-\begin{tabular}{ll}
+\begin{tabularx}{\textwidth}{@{}p{0.18\textwidth}X@{}}
 \toprule
 Real menu & What it's actually for \\
 \midrule
@@ -484,7 +493,7 @@ Help & \textbf{Show All Tips} -- the real, in-GUI way to re-enable
         the Tip dialogs this deck's own real
         \texttt{tip-window-hidden} fix suppresses \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
 \normalsize
 \end{frame}
@@ -544,35 +553,54 @@ real symlink into IHP's own PDK install).
 % ---------------------------------------------------------------
 \begin{frame}[fragile]{Qucs-S's own menu bar, tab by tab}
 \footnotesize
+
 \begin{center}
-\begin{tabular}{ll}
+\begin{tabularx}{\textwidth}{@{}p{0.18\textwidth}X@{}}
 \toprule
-Real menu & What it's actually for \\
+\textbf{Real menu} & \textbf{What it's actually for} \\
 \midrule
-File & Real Open/Save; \textbf{Application Settings} -- the real
-       GUI's own version of this deck's own \texttt{QucsHomeDir} fix
-       (edits the same real, shared config this project's own
-       \texttt{\_qucs\_env()} copies instead of touching directly) \\
-Edit & Real Cut/Copy/Paste; Move/Rotate/Mirror; Go into/Pop out of a
-       real subcircuit \\
-Positioning & Real align/center/distribute -- purely cosmetic,
-               layout-only \\
-Insert & Real Wire, Ground, Port, Equation, Marker placement \\
-Project & \textbf{New/Open Project} -- browses from real
-           \texttt{QucsHomeDir}, exactly the setting this deck's own
-           real fix redirects; also real Verilog-A module build/load \\
-Tools & A real RF-design toolbox -- filter/matching/attenuator
-         synthesis, line calculation, S-parameters -- unrelated to
-         this deck's own real launch-environment focus \\
-Simulation & \textbf{Simulators Settings} -- the real GUI's own
-              version of \texttt{qucs\_s.conf}'s
-              \texttt{NgspiceExecutable}/\texttt{XyceExecutable}
-              entries \\
-View & Real zoom/grid/dock-window display \\
-Help & Real Help Index, Getting Started, About \\
+
+File &
+Real Open/Save; \textbf{Application Settings} -- the real GUI's own
+version of this deck's own \texttt{QucsHomeDir} fix
+(edits the same real, shared config this project's own
+\texttt{\_qucs\_env()} copies instead of touching directly) \\
+
+Edit &
+Real Cut/Copy/Paste; Move/Rotate/Mirror; Go into/Pop out of a
+real subcircuit \\
+
+Positioning &
+Real align/center/distribute -- purely cosmetic, layout-only \\
+
+Insert &
+Real Wire, Ground, Port, Equation, Marker placement \\
+
+Project &
+\textbf{New/Open Project} -- browses from real \texttt{QucsHomeDir},
+exactly the setting this deck's own real fix redirects; also real
+Verilog-A module build/load \\
+
+Tools &
+A real RF-design toolbox -- filter/matching/attenuator synthesis,
+line calculation, S-parameters -- unrelated to this deck's own real
+launch-environment focus \\
+
+Simulation &
+\textbf{Simulators Settings} -- the real GUI's own version of
+\texttt{qucs\_s.conf}'s \texttt{NgspiceExecutable}/
+\texttt{XyceExecutable} entries \\
+
+View &
+Real zoom/grid/dock-window display \\
+
+Help &
+Real Help Index, Getting Started, About \\
+
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
+
 \normalsize
 \end{frame}
 
@@ -714,7 +742,7 @@ slide).
 % ---------------------------------------------------------------
 \begin{frame}{LibreLane -- the real fix, live}
 \begin{center}
-\includegraphics[width=0.7\textwidth]{figures/tooldeck_tools_view_magic.jpg}
+\includegraphics[width=0.5\textwidth]{figures/tooldeck_tools_view_magic.jpg}
 \end{center}
 \footnotesize
 Not LibreLane itself (a real batch run takes too long for a single
