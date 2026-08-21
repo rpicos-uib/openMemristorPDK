@@ -631,11 +631,12 @@ disagreement itself is now surfaced, not silently picked one way.
 % ---------------------------------------------------------------
 \begin{frame}{A real compile-check for user Verilog/Verilog-A}
 Asked directly: ``In Cadence, editing a Verilog file automatically
-compiles it and reports errors -- can we do the same?'' This project
-has no in-GUI text editor for a model's own behavioral body (editing
-happens in the user's own external editor), so the real trigger points
-become \textbf{Rescan}/opening User Models (picks up an external edit)
-and right after \textbf{Create} (the ``adding'' half).
+compiles it and reports errors -- can we do the same?'' At the time,
+this project had no in-GUI text editor for a model's own behavioral
+body, so the real trigger points became \textbf{Rescan}/opening User
+Models (picks up an external edit) and right after \textbf{Create}
+(the ``adding'' half) -- \textbf{Edit Source}, next, closes the loop
+further.
 \begin{itemize}
   \item \texttt{run\_compile\_check} (\texttt{pdklib/user\_models.py})
         actually runs the real compiler: \texttt{openvaf
@@ -673,6 +674,42 @@ diagnostic, verbatim: file, line, column, and exactly which real
 identifier wasn't found. Cached from the last real \textbf{Rescan}, so
 opening this is instant regardless of how slow the real compiler
 itself is.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{A real, in-GUI editor -- closing the loop}
+Asked as a direct follow-up: an actual editor, not just a compiler
+hook. \textbf{Edit Source} (or double-clicking a row) reuses
+\texttt{file\_view\_dialog.view\_file\_dialog} -- the exact real
+View $\to$ Edit $\to$ Save mechanism every other real source-viewing
+dialog in this project already uses, not a second, parallel editor --
+now generalized with an \texttt{on\_save} callback.
+\begin{itemize}
+  \item \texttt{on\_save=self.refresh} triggers the same real
+        \textbf{Rescan} that re-runs every module's own compile-check,
+        so \textbf{Compile} reflects a just-saved real edit with no
+        second click.
+  \item Found and fixed along the way, prompted directly (``use the
+        same editor everywhere'', then ``check for other hardcoded
+        wording/paths''): several real dialogs -- not just this one --
+        always called a saved file ``gitignored, never committed'',
+        true for this project's own real IHP-based dev checkout but
+        wrong for a from-scratch project like this one. Fixed at the
+        root: the shared dialog now asks \texttt{git} directly, live,
+        per real file, rather than assuming.
+\end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Real, live: fixing a real compile error in place}
+\begin{center}
+\includegraphics[width=0.75\textwidth]{figures/usermodels_edit_source.png}
+\end{center}
+\footnotesize
+A deliberately broken module (an undefined identifier), opened via
+\textbf{Edit Source} -- double-click the broken identifier, retype,
+\textbf{Save}, confirm: the tree's own real compile-error count
+dropped to zero automatically, no second click.
 \end{frame}
 
 % ---------------------------------------------------------------
