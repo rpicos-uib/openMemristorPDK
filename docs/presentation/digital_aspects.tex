@@ -19,7 +19,7 @@
 \lstnewenvironment{cli}{\lstset{style=cli}}{}
 
 \title{openMemristorPDK: Digital-Flow Views, Step by Step}
-\subtitle{Real Verilog/CDL/SPICE/Liberty views, plus real layout extraction, LVS, and DRC}
+\subtitle{Real Verilog/CDL/SPICE/Liberty views, layout extraction/LVS/DRC, and a real per-instance view switch}
 \author{}
 \date{}
 
@@ -472,12 +472,6 @@ real, genuine tool wrinkle worth knowing about, not hidden.
   \item A real Verilog behavioral body, if digital-only (non-SPICE)
         simulation of a system using this device as a black box is
         ever needed.
-  \item \texttt{memristor\_tio2\_ti}/\texttt{memristor\_hfo2\_al}
-        have no real Magic Layout view at all yet -- Steps 6--12's own
-        real work (the 3-plane stack, the two matching \textbf{New
-        Device} rules from Step 8, drawing, extraction, LVS, DRC,
-        simulation) applies to both identically, just not yet repeated
-        for them.
   \item A real, found-while-building-this-deck tool gap: \textbf{Export
         Edited Magic Types} only patches sections that already existed
         in the real source \texttt{.tech} file -- Step 8's own real
@@ -489,6 +483,115 @@ real, genuine tool wrinkle worth knowing about, not hidden.
         real, disclosed, future work in the tool itself, not this
         project.
 \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{\texttt{memristor\_tio2\_ti}/\texttt{memristor\_hfo2\_al}: now complete}
+Both variants used to carry only their real Verilog-A physics model --
+everything else was missing. Brought up to the exact same real,
+9-view parity \texttt{memristor\_tio2\_au} already has:
+\begin{itemize}
+  \item xschem symbol/schematic, using each variant's own real
+        \texttt{.model} parameters -- taken from its own already-
+        verified \texttt{docs/simulation/<variant>/mem\_tran.sp}
+        reference testbench, not guessed.
+  \item Magic layout, using the tech file's own real, already-existing
+        \texttt{be\_au}/\texttt{te\_ti}/\texttt{te\_al} +
+        \texttt{mem\_tio2}/\texttt{mem\_hfo2} device-recognition rules
+        (Step 8's own \textbf{New Device} table) -- no tech-file
+        changes needed.
+  \item CDL/SPICE/Liberty/Verilog via the real Library Manager
+        \textbf{Create} flow, BE/TE ports correctly inferred from the
+        new symbol.
+  \item Extraction, LVS (both circuits match uniquely), and DRC
+        (0 violations) all run and verified via the exact real
+        \texttt{pdklib} functions Steps 9--11 already use.
+  \item A hand-authored \texttt{\_prim.spice} OSDI wrapper per
+        variant, matching \texttt{memristor\_tio2\_au\_prim.spice}'s
+        own established convention.
+\end{itemize}
+Confirmed fully end-to-end: each variant's own real, Magic-extracted
+layout netlist actually simulates cleanly in real \texttt{ngspice} via
+\texttt{pre\_osdi}.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{All three variants, real parity}
+\begin{center}
+\includegraphics[width=0.95\textwidth]{figures/memristor_hfo2_al_full_views.png}
+\end{center}
+\footnotesize
+Library Manager, \texttt{memristor\_hfo2\_al} selected: 9 real views,
+identical shape to \texttt{memristor\_tio2\_au}/\texttt{memristor\_tio2\_ti}
+in the cell list behind it (each with its own real, auto-discovered
+\texttt{\_extracted}/\texttt{\_lvs}/\texttt{\_prim} derived-artifact
+entries too).
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{A real per-instance ``switch view list''}
+Asked directly: does this schematic simulate its behavioral
+(Verilog-A/OSDI) view, or its own Magic-extracted layout view -- the
+same real question Cadence ADE's own \textbf{switch view list}
+answers per instance. Checked first, not guessed: xschem has no
+native equivalent -- its own real \texttt{Simulation > LVS} submenu
+only controls netlist \emph{formatting} for LVS comparison, and
+\texttt{Options > Netlist format / Symbol mode} only controls output
+\emph{language}.
+\begin{itemize}
+  \item Built as two real, cooperating halves
+        (\texttt{pdklib/xschem\_view\_switch.py}).
+  \item A real \textbf{View Switch} xschem menu, injected into every
+        real xschem launch, toggling a real, plain
+        \texttt{view=extracted} instance property via xschem's own
+        real \texttt{setprop}/\texttt{getprop}/\texttt{save} Tcl API
+        -- confirmed live, round-trip, both directions.
+  \item \texttt{apply\_view\_switches} (Python side): given a netlist
+        xschem already generated normally, swaps every
+        \texttt{view=extracted} instance's default call for a real
+        \texttt{.include} of its own Magic-extracted netlist plus a
+        call into that file's own top-level subcircuit.
+\end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{The real menu, live in xschem}
+\begin{center}
+\includegraphics[width=0.85\textwidth]{figures/xschem_viewswitch_menu.png}
+\end{center}
+\footnotesize
+A real \textbf{View Switch} cascade, added to every xschem launch via
+\texttt{tool\_env.py}'s own rc-file injection -- \textbf{Toggle
+Extracted/Behavioral} acts on whichever real instance(s) are
+currently selected.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Confirmed: real, persistent, per-instance}
+\begin{center}
+\includegraphics[width=0.85\textwidth]{figures/xschem_viewswitch_toggle.png}
+\end{center}
+\footnotesize
+Toggling \texttt{n1} back to behavioral -- the real confirmation names
+the exact instance and new view, and the schematic is saved
+immediately (xschem's own real \texttt{save} command, not a
+synthetic keypress): the property genuinely persists to the real
+\texttt{.sch} file on disk, confirmed round-trip in both directions.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Real netlist substitution, real simulation}
+\begin{center}
+\includegraphics[width=0.95\textwidth]{figures/xschem_viewswitch_netlist_dialog.png}
+\end{center}
+\footnotesize
+\textbf{Netlist (View Switches)} (new button, xschem Schematic row,
+Library Manager): a real, headless \texttt{xschem -n -s -q} batch
+netlist, view switches applied, written to
+\texttt{<cell>\_viewswitch.spice}. Confirmed fully end-to-end: the
+substituted netlist actually ran to completion in real
+\texttt{ngspice} via \texttt{pre\_osdi}, same as the extracted-layout
+testbenches above.
 \end{frame}
 
 % ---------------------------------------------------------------

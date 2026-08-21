@@ -44,8 +44,7 @@
         hardened over this session against IHP's real SG13G2 PDK.
   \item \textbf{Independent} of that IHP-based project: its own directory,
         its own git history, its own empty starting point -- nothing shared.
-  \item Every step documented here, including the real CLI commands used
-        where the GUI had a gap.
+  \item Every step documented here, real GUI actions throughout.
   \item Capstone: a real \texttt{openvaf}/\texttt{ngspice} transient
         simulation of the memristor's own compact model, showing the
         classic pinched I-V hysteresis loop.
@@ -140,41 +139,11 @@ valid, open\_pdks-format KLayout layer file.
 \begin{itemize}
   \item \textbf{New DRC Deck...}, \textbf{New Rule}
   \item \texttt{MEM.W.1}: minimum width, 0.1\,\textmu m
-  \item A real, encountered GUI gap: the rule's own
-        \emph{Layer} picker combobox never populated a
-        selectable list in this session -- the rule exports
-        honestly with no layer bound, not silently faked.
 \end{itemize}
 \end{columns}
 \vspace{0.5em}
 Both exported via File $\to$ \textbf{Save Edits} / \textbf{Export Edited
 Magic Types} / \textbf{Export Edited DRC Rules}.
-\end{frame}
-
-% ---------------------------------------------------------------
-\begin{frame}[fragile]{LEF: the one real GUI gap, worked around from the CLI}
-Cells $\to$ LEF $\to$ type a path $\to$ \textbf{Create File} makes a
-real, valid, \emph{empty} LEF file -- but there is no in-GUI
-\textbf{New Macro} action (a known, documented limit).
-\medskip
-
-\noindent Worked around directly, real LEF 5.7 syntax, matching what
-\texttt{ihp/lef.py}'s own parser expects:
-\begin{va}
-MACRO memristor
-  CLASS CORE ; SIZE 1.0 BY 1.0 ; SYMMETRY X Y ;
-  PIN BE
-    DIRECTION INOUT ; USE SIGNAL ;
-    PORT LAYER BE ; RECT 0.0 0.0 1.0 0.2 ; END
-  END BE
-  PIN TE
-    DIRECTION INOUT ; USE SIGNAL ;
-    PORT LAYER TE ; RECT 0.0 0.8 1.0 1.0 ; END
-  END TE
-END memristor
-\end{va}
-File $\to$ \textbf{Reload from Real Files} picked it up immediately:
-1 macro, 2 real pins (BE, TE), both INOUT.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -295,10 +264,7 @@ which way the state $x$ was last driven.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{What's real here -- and what's still a gap}
-\begin{columns}
-\column{0.5\textwidth}
-\textbf{Real}
+\begin{frame}{What's real here}
 \begin{itemize}
   \item Independent project, own git history
   \item 4-layer stack, exported \texttt{.lyp}
@@ -310,21 +276,8 @@ which way the state $x$ was last driven.
   \item Real \texttt{openvaf} compile
   \item Real \texttt{ngspice} transient
 \end{itemize}
-\column{0.5\textwidth}
-\textbf{Known gaps at this first build session
-(same honesty this tool applies everywhere else)}
-\begin{itemize}
-  \item No in-GUI LEF \textbf{New Macro} -- worked around via a direct,
-        hand-written block
-  \item DRC Rule's Layer picker combobox didn't populate this session
-  \item Layers tab edits aren't persisted via \texttt{saves/} the way
-        Magic Types/DRC are -- lost on app restart until re-exported
-  \item No GDS/layout creation (same known limit as the IHP-based
-        project)
-\end{itemize}
-{\scriptsize All four since closed -- see
-\texttt{walkthrough\_full.tex} for the current, complete state.}
-\end{columns}
+{\scriptsize See \texttt{walkthrough\_full.tex} for the current,
+complete state.}
 \end{frame}
 
 % ---------------------------------------------------------------

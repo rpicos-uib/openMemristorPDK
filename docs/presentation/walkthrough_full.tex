@@ -108,7 +108,24 @@ Green = real data present. The Wizard tab lays the whole build out as
 a graph and forks Digital vs.\ Analog/Memristor -- this build follows
 the right-hand fork, top to bottom: Layers $\to$ Magic Tech / DRC
 $\to$ LEF $\to$ User Models (Verilog-A) $\to$ xschem Symbol/Schematic.
-Each box's own \textbf{Go to Tab} button jumps straight there.
+Each box's own \textbf{Go to Tab} button jumps straight there. A
+later addition, \textbf{Extraction / LVS / DRC}, sits off to the side
+of this same chain (Step 3, continued, next).
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 3, continued -- Extraction / LVS / DRC}
+\begin{center}
+\includegraphics[width=0.85\textwidth]{figures/wizard_extraction_lvs_drc_stage.png}
+\end{center}
+\footnotesize
+Layout-to-netlist, for real: \textbf{Extract to SPICE} runs real batch
+Magic against a cell's own Magic Layout view; \textbf{Run LVS}
+extracts again (connectivity-only) and compares against the cell's
+own real CDL/SPICE via real, batch Netgen; \textbf{Run DRC} exports a
+real GDS and runs it through real, batch KLayout DRC. All three live
+as buttons on the Magic Layout row in Library Manager, not a tab of
+their own -- \textbf{Go to Tab} jumps straight there.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -304,8 +321,8 @@ returning \texttt{4}.
 \includegraphics[width=0.62\textwidth]{figures/walkthrough_step8_lef_macros.png}
 \end{center}
 \footnotesize
-The real LEF tab: all 4 real macros on the left; \texttt{memristor\_
-tio2\_au} selected, its real \texttt{BE}/\texttt{TE} pins in the
+The real LEF tab: all 4 real macros on the left; \texttt{memristor\_tio2\_au}
+selected, its real \texttt{BE}/\texttt{TE} pins in the
 middle, and (right) the real, drawn \texttt{BE\_Au.drawing} port
 geometry for \texttt{BE} -- the same real \textbf{Edit Geometry...}
 canvas Step 9 describes.
@@ -472,8 +489,8 @@ vte te 0 dc 0 sin(0 1.0 0.6)
 .endc
 \end{va}
 Each variant's own real directory
-(\texttt{docs/simulation/memristor\_tio2\_au/}, \texttt{.../
-memristor\_tio2\_ti/}, \texttt{.../memristor\_hfo2\_al/}) carries this
+(\texttt{docs/simulation/memristor\_tio2\_au/}, \texttt{.../memristor\_tio2\_ti/},
+\texttt{.../memristor\_hfo2\_al/}) carries this
 same real shape plus its own \texttt{run\_simulation.sh}:
 \begin{cli}
 openvaf <variant>.va --output <variant>.osdi
