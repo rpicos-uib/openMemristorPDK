@@ -595,6 +595,87 @@ testbenches above.
 \end{frame}
 
 % ---------------------------------------------------------------
+\begin{frame}{Cross-view pin propagation, and a real consistency check}
+Asked directly: if pin info already exists in \emph{any} of a cell's
+own real views, pull it into a newly \textbf{Create}d one too -- and
+say something if two real views disagree.
+\begin{itemize}
+  \item \texttt{infer\_ports\_for\_cell} used to check only LEF,
+        xschem symbol, and an existing Verilog/Verilog-A module -- now
+        also checks CDL, SPICE, and Liberty
+        (\texttt{pdklib/library\_index.py}'s new
+        \texttt{all\_port\_lists\_for\_cell},
+        the one real source both this and the new
+        \texttt{check\_port\_consistency} build on).
+  \item Right after every real \textbf{Create}, every real pin-list
+        source the cell now has gets compared against every other --
+        silent when they agree, a real
+        \texttt{messagebox.showwarning} naming the exact real
+        disagreement when they don't.
+\end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Real, live: a deliberate disagreement caught}
+\begin{center}
+\includegraphics[width=0.75\textwidth]{figures/pin_consistency_warning.png}
+\end{center}
+\footnotesize
+A real CDL (\texttt{A}:input, \texttt{B}:output) and a real Verilog
+module for the same cell (\texttt{A}:output, \texttt{B}:input) --
+\textbf{Create} still seeds Liberty correctly from CDL (the
+higher-priority real source, per the status line below), but the real
+disagreement itself is now surfaced, not silently picked one way.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{A real compile-check for user Verilog/Verilog-A}
+Asked directly: ``In Cadence, editing a Verilog file automatically
+compiles it and reports errors -- can we do the same?'' This project
+has no in-GUI text editor for a model's own behavioral body (editing
+happens in the user's own external editor), so the real trigger points
+become \textbf{Rescan}/opening User Models (picks up an external edit)
+and right after \textbf{Create} (the ``adding'' half).
+\begin{itemize}
+  \item \texttt{run\_compile\_check} (\texttt{pdklib/user\_models.py})
+        actually runs the real compiler: \texttt{openvaf
+        -D\_\_NGSPICE\_\_ -o <tmp>.osdi <path>} for Verilog-A -- the
+        exact same real recipe \textbf{Generate ngspice OSDI Snippet}
+        already documented but never executed -- or \texttt{iverilog
+        -t null <path>} for plain Verilog (Icarus's own real,
+        confirmed-live syntax/elaboration-only target).
+  \item Never a new parser, never guessed: the real compiler's own
+        real stdout/stderr is what gets shown, ANSI-stripped.
+\end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Real, live: every module, checked automatically}
+\begin{center}
+\includegraphics[width=0.95\textwidth]{figures/usermodels_compile_column.png}
+\end{center}
+\footnotesize
+User Models' new \textbf{Compile} column, refreshed on every real
+\textbf{Rescan}: all 7 real, existing memristor modules report
+``compiles clean''; a deliberately broken \texttt{.va} (referencing an
+undefined variable) is correctly caught, and the status line counts
+real compile errors too.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Real, live: the exact real compiler output}
+\begin{center}
+\includegraphics[width=0.85\textwidth]{figures/usermodels_compile_log.png}
+\end{center}
+\footnotesize
+\textbf{Compile Log} for the broken row above -- the real OpenVAF
+diagnostic, verbatim: file, line, column, and exactly which real
+identifier wasn't found. Cached from the last real \textbf{Rescan}, so
+opening this is instant regardless of how slow the real compiler
+itself is.
+\end{frame}
+
+% ---------------------------------------------------------------
 \begin{frame}{A real, concrete next step: a 1T1R bit-cell}
 The one genuinely ``digital'' real use case for a two-terminal
 memristor: a non-volatile, resistive memory bit-cell (RRAM),
