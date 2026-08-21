@@ -8,6 +8,7 @@
 \usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{tabularx}
 
 \lstdefinestyle{cli}{
   basicstyle=\ttfamily\scriptsize,
@@ -134,7 +135,7 @@ Technology $\to$ Layers $\to$ type a new path $\to$ \textbf{Create
 File}, then \textbf{New Layer} once per row below, filling in Name /
 GDS Layer / GDS Datatype / Purpose each time:
 \begin{center}
-\begin{tabular}{lccl}
+\begin{tabularx}{\textwidth}{lccX}
 \toprule
 Name & GDS layer/dt & Purpose & Role \\
 \midrule
@@ -145,7 +146,7 @@ TE\_Au.drawing & 20/0 & drawing & Top electrode (Au) \\
 TE\_Ti.drawing & 21/0 & drawing & Top electrode (Ti) \\
 TE\_Al.drawing & 22/0 & drawing & Top electrode (Al) \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
 \footnotesize
 Fictional, illustrative GDS numbers/colors -- a demo stack, not a
@@ -185,7 +186,7 @@ Magic plane, or the bottom and top electrodes could never physically
 overlap in one real layout (two types on the \emph{same} plane are
 mutually exclusive at a given $(x,y)$):
 \begin{center}
-\begin{tabular}{lll}
+\begin{tabularx}{\textwidth}{llX}
 \toprule
 Plane & Short code & Types on this plane \\
 \midrule
@@ -193,7 +194,7 @@ botmetal & bm & be\_au \\
 oxide & oxd & mem\_tio2, mem\_hfo2 \\
 topmetal & tm & te\_au, te\_ti, te\_al \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
 Each real Magic type is entered by name, then its own \textbf{Plane}
 field is set to the matching plane above via the Types sub-tab's own
@@ -221,7 +222,7 @@ Types sub-tab, all 6 real types each on their own real plane.
 Technology $\to$ DRC Rules $\to$ \textbf{New DRC Deck...}, then
 \textbf{New Rule} $\times$4:
 \begin{center}
-\begin{tabular}{lllc}
+\begin{tabularx}{\textwidth}{llXc}
 \toprule
 Rule ID & Check & Layer & Value \\
 \midrule
@@ -230,7 +231,7 @@ MEM1.W.1 & min.\ width & MEM\_TiO2.drawing & 0.1\,\textmu m \\
 MEM2.W.1 & min.\ width & MEM\_HfO2.drawing & 0.1\,\textmu m \\
 TE.S.1 & min.\ spacing & TE\_Au.drawing & 0.15\,\textmu m \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
 Each rule's own \textbf{Description} field is filled in too (e.g.\
 ``Minimum width of Au bottom electrode''). File $\to$ \textbf{Save
@@ -257,7 +258,7 @@ Cells $\to$ LEF $\to$ type a path $\to$ \textbf{Create File}, then
 \textbf{New Macro...} $\times$4, one call per macro name below,
 answering the real Site prompt with \texttt{CoreSite} each time:
 \begin{center}
-\begin{tabular}{ll}
+\begin{tabularx}{\textwidth}{lX}
 \toprule
 Macro & Composition \\
 \midrule
@@ -266,7 +267,7 @@ memristor\_tio2\_au & Au / TiO$_2$ / Au \\
 memristor\_tio2\_ti & Au / TiO$_2$ / Ti \\
 memristor\_hfo2\_al & Au / HfO$_2$ / Al \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
 For each macro: its own \textbf{Class} field is set to \texttt{CORE},
 \textbf{Size} to \texttt{1.0 BY 1.0}. Then, still on that macro,
@@ -283,7 +284,7 @@ on; the \textbf{Rect} tool then draws it by dragging two opposite
 corners. One real rect per pin, on the layer matching that macro's
 own real composition:
 \begin{center}
-\begin{tabular}{ll}
+\begin{tabularx}{\textwidth}{lX}
 \toprule
 Pin & Real layer used \\
 \midrule
@@ -292,7 +293,7 @@ TE (memristor, memristor\_tio2\_au) & TE\_Au.drawing \\
 TE (memristor\_tio2\_ti) & TE\_Ti.drawing \\
 TE (memristor\_hfo2\_al) & TE\_Al.drawing \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
 The resulting real LEF text, per pin:
 \begin{va}
@@ -507,7 +508,7 @@ dynamics stay visible at a demo-friendly timescale.
 % ---------------------------------------------------------------
 \begin{frame}{Step 18 -- result: Au/TiO$_2$/Au}
 \begin{center}
-\includegraphics[width=0.85\textwidth]{figures/memristor_tio2_au_transient.png}
+\includegraphics[width=0.65\textwidth]{figures/memristor_tio2_au_transient.png}
 \end{center}
 \footnotesize
 Real, simulated data -- the I-V loop pinches exactly at the origin
@@ -517,7 +518,7 @@ every half-cycle, the defining memristor fingerprint.
 % ---------------------------------------------------------------
 \begin{frame}{Step 19 -- result: Au/TiO$_2$/Ti}
 \begin{center}
-\includegraphics[width=0.85\textwidth]{figures/memristor_tio2_ti_transient.png}
+\includegraphics[width=0.65\textwidth]{figures/memristor_tio2_ti_transient.png}
 \end{center}
 \footnotesize
 Same real model, same real drive -- a visibly different loop shape
@@ -527,7 +528,7 @@ purely from Ti's own higher $R_{on}$/lower $\mu_v$ parameter set.
 % ---------------------------------------------------------------
 \begin{frame}{Step 20 -- result: Au/HfO$_2$/Al}
 \begin{center}
-\includegraphics[width=0.85\textwidth]{figures/memristor_hfo2_al_transient.png}
+\includegraphics[width=0.65\textwidth]{figures/memristor_hfo2_al_transient.png}
 \end{center}
 \footnotesize
 Sharp SET/RESET current spikes at the real threshold voltages, flat
@@ -571,7 +572,7 @@ variants) on the right.
 \begin{frame}{Step 22 -- result: a real TT/FF/SS corner sweep}
 \begin{columns}
 \column{0.5\textwidth}
-\includegraphics[width=0.95\textwidth]{figures/memristor_corners_transient.png}
+\includegraphics[width=0.65\textwidth]{figures/memristor_corners_transient.png}
 \footnotesize
 \column{0.5\textwidth}
 Au/TiO$_2$/Au, same real drive, three real corner runs via

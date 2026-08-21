@@ -172,13 +172,13 @@ load <cell>
 \begin{columns}
 \column{0.5\textwidth}
 \centering
-\includegraphics[width=\textwidth]{figures/tooldeck_magic_wrong_tech.jpg}
+\includegraphics[width=0.65\textwidth]{figures/tooldeck_magic_wrong_tech.jpg}
 \footnotesize Before the fix: title bar reads
 \texttt{Technology: ihp-sg13g2} -- wrong real technology, real layer
 panel shows IHP's own layers, for a memristor project.
 \column{0.5\textwidth}
 \centering
-\includegraphics[width=\textwidth]{figures/tooldeck_magic_correct_tech.jpg}
+\includegraphics[width=0.65\textwidth]{figures/tooldeck_magic_correct_tech.jpg}
 \footnotesize After: title bar reads
 \texttt{Technology: openmemristorpdk}, real layer panel shows
 \texttt{be\_au}/\texttt{te\_au}/\texttt{mem\_tio2}/\dots -- this
@@ -292,12 +292,12 @@ this one, gets nothing extra.
 \begin{columns}
 \column{0.5\textwidth}
 \centering
-\includegraphics[width=\textwidth]{figures/tooldeck_xschem_ihp_menu.jpg}
+\includegraphics[width=0.65\textwidth]{figures/tooldeck_xschem_ihp_menu.jpg}
 \footnotesize Before the fix: a real, spurious \textbf{IHP} menu
 between Help and Netlist -- for a memristor project's own symbol.
 \column{0.5\textwidth}
 \centering
-\includegraphics[width=\textwidth]{figures/tooldeck_xschem_correct.jpg}
+\includegraphics[width=0.65\textwidth]{figures/tooldeck_xschem_correct.jpg}
 \footnotesize After: no IHP menu, the exact same real symbol, status
 bar showing the real \texttt{--rcfile <path>} that fixed it.
 \end{columns}
@@ -760,7 +760,7 @@ real \texttt{--pdk-root}/\texttt{--pdk} -- agree.
 \begin{frame}[fragile]{Every real tool, every real flag, at a glance}
 \footnotesize
 \begin{center}
-\begin{tabular}{lll}
+\begin{tabularx}{\textwidth}{llX}
 \toprule
 Tool & Real flag(s) this project passes & Real purpose \\
 \midrule
@@ -775,7 +775,7 @@ Yosys & \texttt{-c <script> -Q} & real synthesis script; safe by design \\
 OpenROAD & \texttt{-exit -no\_splash -metrics} & real PnR/STA; \texttt{-no\_init} gap closed one level up \\
 LibreLane & \texttt{--manual-pdk --pdk-root --pdk} & real, explicit, structurally safest of all \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
 \normalsize
 Every one of these was checked against the real tool's own real

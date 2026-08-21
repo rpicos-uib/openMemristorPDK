@@ -7,6 +7,7 @@
 \usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{tabularx}
 
 \lstdefinestyle{cli}{
   basicstyle=\ttfamily\scriptsize,
@@ -60,7 +61,7 @@ Every view created below is added to this exact same real cell.
 % ---------------------------------------------------------------
 \begin{frame}{Step 1, continued -- the real screen}
 \begin{center}
-\includegraphics[width=0.92\textwidth]{figures/memristor_step1_cell_selected.png}
+\includegraphics[width=0.65\textwidth]{figures/memristor_step1_cell_selected.png}
 \end{center}
 \footnotesize
 The real, live Library Manager, \texttt{memristor\_tio2\_au} selected
@@ -92,7 +93,7 @@ pins.
 % ---------------------------------------------------------------
 \begin{frame}{Step 2, continued -- the real screen}
 \begin{center}
-\includegraphics[width=0.92\textwidth]{figures/memristor_step2_create_verilog.png}
+\includegraphics[width=0.65\textwidth]{figures/memristor_step2_create_verilog.png}
 \end{center}
 \footnotesize
 Real, live Library Manager immediately after clicking \textbf{Create}
@@ -155,7 +156,7 @@ library (memristor_tio2_au) {
 % ---------------------------------------------------------------
 \begin{frame}{Step 5, continued -- the real screen}
 \begin{center}
-\includegraphics[width=0.92\textwidth]{figures/memristor_step5_create_liberty.png}
+\includegraphics[width=0.65\textwidth]{figures/memristor_step5_create_liberty.png}
 \end{center}
 \footnotesize
 Real, live Library Manager after \textbf{Create} next to Liberty --
@@ -234,7 +235,7 @@ on the same one.
 % ---------------------------------------------------------------
 \begin{frame}{Step 7, continued -- the real Magic window}
 \begin{center}
-\includegraphics[width=0.72\textwidth]{figures/memristor_step7_magic_layout.png}
+\includegraphics[width=0.65\textwidth]{figures/memristor_step7_magic_layout.png}
 \end{center}
 \footnotesize
 Real, live Magic, real layer swatches on the right
@@ -249,7 +250,7 @@ clean indicator top-left, editing the real, physically-stacked
 Technology $\to$ Magic Tech $\to$ Connect/Extract sub-tabs, all real,
 already-built GUI editors:
 \begin{center}
-\begin{tabular}{lll}
+\begin{tabularx}{\textwidth}{lXX}
 \toprule
 Sub-tab & Action & Real value \\
 \midrule
@@ -259,7 +260,7 @@ Extract & New Plane Order $\times$3 & botmetal=0, oxide=1, topmetal=2 \\
 Extract & New Resist $\times$4 & \texttt{be\_au/botmetal}, \texttt{te\_*/topmetal} = 1 \\
 Extract & New Device $\times$3 & see below \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
 The three \textbf{New Device} rows (Devclass \texttt{subcircuit}) are
 what turn a real BE/oxide/TE overlap into a real, recognized
@@ -424,7 +425,7 @@ vte te 0 dc 0 sin(0 1.0 0.6)
 % ---------------------------------------------------------------
 \begin{frame}{Step 12, continued -- the real result}
 \begin{center}
-\includegraphics[width=0.95\textwidth]{figures/memristor_tio2_au_extracted_comparison.png}
+\includegraphics[width=0.65\textwidth]{figures/memristor_tio2_au_extracted_comparison.png}
 \end{center}
 \footnotesize
 Overlaid against the original, hand-written testbench's own real
@@ -448,7 +449,7 @@ from a fresh GUI relaunch, all agreeing on the same real
 % ---------------------------------------------------------------
 \begin{frame}{Step 13, continued -- the real, final screen}
 \begin{center}
-\includegraphics[width=0.92\textwidth]{figures/memristor_step13_final_views.png}
+\includegraphics[width=0.65\textwidth]{figures/memristor_step13_final_views.png}
 \end{center}
 \footnotesize
 The real, live Library Manager after every step in this deck. Note
@@ -518,7 +519,7 @@ layout netlist actually simulates cleanly in real \texttt{ngspice} via
 % ---------------------------------------------------------------
 \begin{frame}{All three variants, real parity}
 \begin{center}
-\includegraphics[width=0.95\textwidth]{figures/memristor_hfo2_al_full_views.png}
+\includegraphics[width=0.65\textwidth]{figures/memristor_hfo2_al_full_views.png}
 \end{center}
 \footnotesize
 Library Manager, \texttt{memristor\_hfo2\_al} selected: 9 real views,
@@ -557,7 +558,7 @@ only controls netlist \emph{formatting} for LVS comparison, and
 % ---------------------------------------------------------------
 \begin{frame}{The real menu, live in xschem}
 \begin{center}
-\includegraphics[width=0.85\textwidth]{figures/xschem_viewswitch_menu.png}
+\includegraphics[width=0.65\textwidth]{figures/xschem_viewswitch_menu.png}
 \end{center}
 \footnotesize
 A real \textbf{View Switch} cascade, added to every xschem launch via
@@ -569,7 +570,7 @@ currently selected.
 % ---------------------------------------------------------------
 \begin{frame}{Confirmed: real, persistent, per-instance}
 \begin{center}
-\includegraphics[width=0.85\textwidth]{figures/xschem_viewswitch_toggle.png}
+\includegraphics[width=0.65\textwidth]{figures/xschem_viewswitch_toggle.png}
 \end{center}
 \footnotesize
 Toggling \texttt{n1} back to behavioral -- the real confirmation names
@@ -582,7 +583,7 @@ synthetic keypress): the property genuinely persists to the real
 % ---------------------------------------------------------------
 \begin{frame}{Real netlist substitution, real simulation}
 \begin{center}
-\includegraphics[width=0.95\textwidth]{figures/xschem_viewswitch_netlist_dialog.png}
+\includegraphics[width=0.65\textwidth]{figures/xschem_viewswitch_netlist_dialog.png}
 \end{center}
 \footnotesize
 \textbf{Netlist (View Switches)} (new button, xschem Schematic row,
@@ -618,7 +619,7 @@ say something if two real views disagree.
 % ---------------------------------------------------------------
 \begin{frame}{Real, live: a deliberate disagreement caught}
 \begin{center}
-\includegraphics[width=0.75\textwidth]{figures/pin_consistency_warning.png}
+\includegraphics[width=0.65\textwidth]{figures/pin_consistency_warning.png}
 \end{center}
 \footnotesize
 A real CDL (\texttt{A}:input, \texttt{B}:output) and a real Verilog
@@ -653,7 +654,7 @@ further.
 % ---------------------------------------------------------------
 \begin{frame}{Real, live: every module, checked automatically}
 \begin{center}
-\includegraphics[width=0.95\textwidth]{figures/usermodels_compile_column.png}
+\includegraphics[width=0.65\textwidth]{figures/usermodels_compile_column.png}
 \end{center}
 \footnotesize
 User Models' new \textbf{Compile} column, refreshed on every real
@@ -666,7 +667,7 @@ real compile errors too.
 % ---------------------------------------------------------------
 \begin{frame}{Real, live: the exact real compiler output}
 \begin{center}
-\includegraphics[width=0.85\textwidth]{figures/usermodels_compile_log.png}
+\includegraphics[width=0.65\textwidth]{figures/usermodels_compile_log.png}
 \end{center}
 \footnotesize
 \textbf{Compile Log} for the broken row above -- the real OpenVAF
@@ -703,7 +704,7 @@ now generalized with an \texttt{on\_save} callback.
 % ---------------------------------------------------------------
 \begin{frame}{Real, live: fixing a real compile error in place}
 \begin{center}
-\includegraphics[width=0.75\textwidth]{figures/usermodels_edit_source.png}
+\includegraphics[width=0.65\textwidth]{figures/usermodels_edit_source.png}
 \end{center}
 \footnotesize
 A deliberately broken module (an undefined identifier), opened via

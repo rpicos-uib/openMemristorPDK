@@ -8,6 +8,7 @@
 \usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{tabularx}
 
 \lstdefinestyle{cli}{
   basicstyle=\ttfamily\scriptsize,
@@ -91,7 +92,7 @@ not just editing an existing real PDK.
 % ---------------------------------------------------------------
 \begin{frame}{The PDK Wizard's own Analog/Memristor path}
 \begin{center}
-\includegraphics[width=0.72\textwidth]{figures/pdk_wizard.jpg}
+\includegraphics[width=0.65\textwidth]{figures/pdk_wizard.jpg}
 \end{center}
 \footnotesize
 Green = real data present. The wizard already forks
@@ -105,7 +106,7 @@ $\to$ xschem Symbol/Schematic.
 Technology $\to$ Layers $\to$ \textbf{New .lyp File...}, then
 \textbf{New Layer} $\times 4$:
 \begin{center}
-\begin{tabular}{lccl}
+\begin{tabularx}{\textwidth}{lccX}
 \toprule
 Name & GDS layer/dt & Purpose & Role \\
 \midrule
@@ -114,7 +115,7 @@ MEM & 31/0 & drawing & Memristive switching oxide \\
 TE & 32/0 & drawing & Top electrode metal \\
 PRBOUNDARY & 235/4 & marker & Cell outline, no real geometry \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{center}
 \vspace{0.3em}
 \footnotesize
@@ -149,7 +150,7 @@ Magic Types} / \textbf{Export Edited DRC Rules}.
 % ---------------------------------------------------------------
 \begin{frame}{Library Manager: the real payoff}
 \begin{center}
-\includegraphics[width=0.95\textwidth]{figures/library_manager.jpg}
+\includegraphics[width=0.65\textwidth]{figures/library_manager.jpg}
 \end{center}
 \end{frame}
 
@@ -178,7 +179,7 @@ a brand-new project it had never seen before.
 % ---------------------------------------------------------------
 \begin{frame}{The generated Verilog-A model}
 \begin{center}
-\includegraphics[width=0.85\textwidth]{figures/veriloga_model.jpg}
+\includegraphics[width=0.65\textwidth]{figures/veriloga_model.jpg}
 \end{center}
 \end{frame}
 
@@ -253,7 +254,7 @@ bash run_simulation.sh
 % ---------------------------------------------------------------
 \begin{frame}{Result: the real pinched hysteresis loop}
 \begin{center}
-\includegraphics[width=0.95\textwidth]{figures/memristor_transient.png}
+\includegraphics[width=0.65\textwidth]{figures/memristor_transient.png}
 \end{center}
 \footnotesize
 Real, simulated data (11{,}145 points) -- the I-V loop pinches exactly
