@@ -245,9 +245,16 @@ xschem --rcfile <path-to-real-rc-file> <symbol-or-schematic-file>
         \texttt{--tcl <script>} (run arbitrary Tcl before startup --
         more power than this one, narrow job needs).
 \end{itemize}
-Inside that real rc file, the one line that actually matters:
+Inside that real rc file, two real lines actually matter: the library
+path append, and a conditional \texttt{source} of this project's own
+real, tool-owned View Switch menu file (a later addition, regenerated
+on every launch, not hand-edited -- \texttt{pdklib/
+xschem\_view\_switch.py}):
 \begin{cli}
 append XSCHEM_LIBRARY_PATH :<this project's own real libs.tech/xschem>
+if {[file exists <...>/openpdkcreator_view_switch_menu]} {
+  source <...>/openpdkcreator_view_switch_menu
+}
 \end{cli}
 \end{frame}
 
