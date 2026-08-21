@@ -1,0 +1,10 @@
+library (memristor_tio2_ti) {
+  cell (memristor_tio2_ti) {
+    pin (BE) {
+      direction : inout;
+    }
+    pin (TE) {
+      direction : inout;
+    }
+  }
+}

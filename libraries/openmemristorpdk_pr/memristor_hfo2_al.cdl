@@ -1,0 +1,4 @@
+.SUBCKT memristor_hfo2_al BE TE
+*.PININFO BE:B TE:B
+X1 BE TE memristor_hfo2_al_prim
+.ENDS

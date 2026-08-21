@@ -1,0 +1,10 @@
+library (memristor_hfo2_al) {
+  cell (memristor_hfo2_al) {
+    pin (BE) {
+      direction : inout;
+    }
+    pin (TE) {
+      direction : inout;
+    }
+  }
+}

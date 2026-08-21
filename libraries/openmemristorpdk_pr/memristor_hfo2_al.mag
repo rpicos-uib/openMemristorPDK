@@ -1,0 +1,18 @@
+magic
+tech openmemristorpdk
+magscale 1 2
+timestamp 1787310491
+<< checkpaint >>
+rect 0 0 1 1
+<< be_au >>
+rect 0 0 1 1
+<< te_al >>
+rect 0 0 1 1
+<< mem_hfo2 >>
+rect 0 0 1 1
+<< labels >>
+rlabel be_au 0 0 1 1 0 BE
+port 0 nsew
+rlabel te_al 0 0 1 1 0 TE
+port 1 nsew
+<< end >>

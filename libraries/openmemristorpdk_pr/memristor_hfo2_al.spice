@@ -1,0 +1,2 @@
+.subckt memristor_hfo2_al BE TE
+.ends

@@ -1,0 +1,34 @@
+
+Circuit 1 cell memristor_hfo2_al_prim and Circuit 2 cell memristor_hfo2_al_prim are black boxes.
+Warning: Equate pins:  cell memristor_hfo2_al_prim is a placeholder, treated as a black box.
+Warning: Equate pins:  cell memristor_hfo2_al_prim is a placeholder, treated as a black box.
+
+Subcircuit pins:
+Circuit 1: memristor_hfo2_al_prim          |Circuit 2: memristor_hfo2_al_prim          
+-------------------------------------------|-------------------------------------------
+1                                          |1                                          
+2                                          |2                                          
+---------------------------------------------------------------------------------------
+Cell pin lists are equivalent.
+Device classes memristor_hfo2_al_prim and memristor_hfo2_al_prim are equivalent.
+
+Subcircuit summary:
+Circuit 1: memristor_hfo2_al               |Circuit 2: memristor_hfo2_al               
+-------------------------------------------|-------------------------------------------
+memristor_hfo2_al_prim (1)                 |memristor_hfo2_al_prim (1)                 
+Number of devices: 1                       |Number of devices: 1                       
+Number of nets: 2                          |Number of nets: 2                          
+---------------------------------------------------------------------------------------
+Netlists match uniquely.
+
+Subcircuit pins:
+Circuit 1: memristor_hfo2_al               |Circuit 2: memristor_hfo2_al               
+-------------------------------------------|-------------------------------------------
+BE                                         |BE                                         
+TE                                         |TE                                         
+---------------------------------------------------------------------------------------
+Cell pin lists are equivalent.
+Device classes memristor_hfo2_al and memristor_hfo2_al are equivalent.
+
+Final result: Circuits match uniquely.
+.

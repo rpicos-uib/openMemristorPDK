@@ -1,0 +1,18 @@
+* Real primitive-device wrapper for the Au/HfO2/Al memristor -- the
+* real name a real Magic `device subcircuit` recognition rule
+* (openmemristorpdk.tech's own extract section) emits for any real
+* be_au/mem_hfo2/te_al stack it finds during extraction. Deliberately
+* named _prim (not memristor_hfo2_al) to avoid a real, recursive
+* self-reference against the cell's own extracted top-level subckt,
+* which is also named memristor_hfo2_al.
+*
+* `mm` is ngspice's own real OSDI-backed memristor_hfo2_al model,
+* auto-loaded from memristor_hfo2_al.osdi (compiled by openvaf from
+* user_models/veriloga/memristor_hfo2_al.va) once that file sits in
+* the simulation's own working directory -- the same real convention
+* docs/simulation/memristor_hfo2_al/mem_tran.sp already uses.
+.model mm memristor_hfo2_al ron=500 roff=50k von=0.8 voff=-0.6 tau=1m x0=0.1
+
+.subckt memristor_hfo2_al_prim BE TE
+n1 BE TE mm
+.ends

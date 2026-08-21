@@ -1,0 +1,2 @@
+.subckt memristor_tio2_ti BE TE
+.ends

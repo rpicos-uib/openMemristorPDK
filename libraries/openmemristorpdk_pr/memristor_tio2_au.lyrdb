@@ -2,7 +2,7 @@
 <report-database>
  <description>Custom DRC Rules</description>
  <original-file>/foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au.gds</original-file>
- <generator>drc: script='/foss/designs/openMemristorPDK/export/openmemristorpdk/libs.tech/klayout/tech/drc/custom_rules.drc'</generator>
+ <generator>drc: script='/foss/designs/openMemristorPDK/data/openmemristorpdk/libs.tech/klayout/tech/drc/custom_rules.drc'</generator>
  <top-cell>memristor_tio2_au</top-cell>
  <tags>
  </tags>

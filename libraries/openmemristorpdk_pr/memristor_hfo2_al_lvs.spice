@@ -1,0 +1,6 @@
+* NGSPICE file created from memristor_hfo2_al.ext - technology: openmemristorpdk
+
+.subckt memristor_hfo2_al BE TE
+X0 BE TE memristor_hfo2_al_prim
+.ends
+
