@@ -218,7 +218,85 @@ Types sub-tab, all 6 real types each on their own real plane.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 7 -- DRC rules}
+\begin{frame}[fragile]{Step 7 -- Magic Tech: Contacts, Aliases, Compose}
+Same Magic Tech tab, three more real sub-tabs -- each genuinely small
+for this project, but real, confirmed Magic syntax throughout (New
+Contact/New Alias/New Statement):
+\begin{center}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+Sub-tab & Real entry \\
+\midrule
+Contacts & \texttt{via1 be\_au te\_au} -- a real via between the
+  metal1-equivalent and metal2-equivalent layers, matching IHP's own
+  real \texttt{via\emph{N} metal\emph{N} metal\emph{N+1}} convention;
+  for real interconnect elsewhere on the chip, not through the active
+  device stack \\
+Aliases & \texttt{be\_au} $\to$ \texttt{m1}, \texttt{te\_au} $\to$
+  \texttt{m2} -- shorthand matching the metal1/metal2-style
+  convention Styles already establishes \\
+Compose & \texttt{active\_tio2 = be\_au AND mem\_tio2} -- the real
+  bottom-electrode/oxide overlap, the actual switching interface of
+  \texttt{memristor\_tio2\_au}, mirroring IHP's own real
+  \texttt{nfet = poly AND ndiff} pattern \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\footnotesize
+A real via needs no separate Connect rule of its own -- Magic derives
+the electrical connection from the geometric overlap the Contacts
+entry itself declares (confirmed against IHP's own real Connect
+section: every real cross-metal case there is a via, no explicit
+metal1-metal2 connect line exists at all).
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Step 8 -- Magic Tech: DRC (Magic), with real selectors}
+A fourth Magic Tech sub-tab, \textbf{DRC (Magic)} -- Magic's own
+native DRC dialect, genuinely different from \textbf{Technology >
+DRC Rules} next (Magic types vs.\ this project's own named Layers, its
+own real syntax, no automatic bridge between the two except where
+explicitly asked for -- Step 10):
+\begin{center}
+\begin{tabularx}{\textwidth}{lXc}
+\toprule
+Check & Real statement & Value \\
+\midrule
+width & be\_au & 0.2\,\textmu m \\
+width & mem\_tio2 & 0.1\,\textmu m \\
+width & mem\_hfo2 & 0.1\,\textmu m \\
+width & te\_ti & 0.15\,\textmu m \\
+spacing & te\_au te\_au & 0.15\,\textmu m \\
+maxwidth & mem\_hfo2 & 5.0\,\textmu m \\
+angles & be\_au, 90\textdegree & -- \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\footnotesize
+\textbf{Check Type}/\textbf{Directive} are real, closed-enum
+\textbf{comboboxes} now (read-only -- there is no other real value
+ever); angles' own \textbf{Layer} field is a combobox too, refreshed
+live from this technology's own current real Type names, but stays
+editable since the real type it suggests can itself be mid-edit.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 8, continued -- real, live: the Layers multi-select}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{figures/walkthrough_step8_select_layers.png}
+\end{center}
+\footnotesize
+\textbf{Select Layers...}, directly under the Layers field: one real,
+resizable \texttt{Listbox} per side (Ctrl+click/Shift+click to union
+several real types onto one side, two independent sides for a real
+\texttt{spacing} check), pre-selecting whatever \texttt{layer\_args}
+already names. \textbf{Apply} writes the real, correct comma-joined
+union back -- exactly \texttt{layers\_text}'s own existing format,
+just built from a real, closed list instead of hand-typed.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Step 9 -- DRC rules}
 Technology $\to$ DRC Rules $\to$ \textbf{New DRC Deck...}, then
 \textbf{New Rule} $\times$4:
 \begin{center}
@@ -242,7 +320,7 @@ script, \texttt{custom\_rules.drc}.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 7, continued -- the real screen}
+\begin{frame}{Step 9, continued -- the real screen}
 \begin{center}
 \includegraphics[width=0.62\textwidth]{figures/walkthrough_step7_drc_rules.png}
 \end{center}
@@ -253,7 +331,40 @@ own real field values on the right.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 8 -- LEF: 4 real macros}
+\begin{frame}[fragile]{Step 10 -- Copy to DRC Rules: bridging the two real dialects}
+Back in \textbf{DRC (Magic)}, \textbf{Copy to DRC Rules} next to the
+width/spacing/maxwidth editor -- checks real coherence first, only
+ever writes a rule when the two real dialects actually agree, reports
+every real mismatch either way:
+\begin{itemize}
+  \item \texttt{width be\_au}/\texttt{mem\_tio2}/\texttt{mem\_hfo2} and
+        \texttt{spacing te\_au te\_au} each match an existing real DRC
+        Rules entry (\textbf{BE.W.1}/\textbf{MEM1.W.1}/
+        \textbf{MEM2.W.1}/\textbf{TE.S.1} from Step 9) --
+        \textbf{correctly refused as duplicates}, not re-created.
+  \item \texttt{width te\_ti} has no matching DRC Rules entry yet --
+        \textbf{copied clean} as a new real rule,
+        \texttt{TE\_Ti.drawing.W.1}.
+  \item \texttt{maxwidth mem\_hfo2} -- \textbf{correctly refused}: no
+        real \texttt{check\_type} in DRC Rules' own schema means
+        ``maximum width'' at all.
+\end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}{Step 10, continued -- the real result}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{figures/walkthrough_step10_copy_to_drc_rules.png}
+\end{center}
+\footnotesize
+Real, live: \textbf{Copy to DRC Rules} on the \texttt{te\_ti} width
+check -- the real confirmation names the new rule
+\texttt{TE\_Ti.drawing.W.1}, and the DRC Rules tab's own tree picks it
+up immediately, no second click.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Step 11 -- LEF: 4 real macros}
 Cells $\to$ LEF $\to$ type a path $\to$ \textbf{Create File}, then
 \textbf{New Macro...} $\times$4, one call per macro name below,
 answering the real Site prompt with \texttt{CoreSite} each time:
@@ -276,7 +387,7 @@ each with \textbf{Direction}~\texttt{INOUT} and \textbf{Use}~\texttt{SIGNAL}.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 9 -- real port geometry, per pin}
+\begin{frame}[fragile]{Step 12 -- real port geometry, per pin}
 Still on the LEF tab, with a pin selected: \textbf{Edit Geometry...}
 opens a real, interactive canvas. Its own \textbf{Layer for new
 rects} field picks which real layer a click-drawn rectangle lands
@@ -304,7 +415,7 @@ END BE
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 10 -- saving and exporting the LEF}
+\begin{frame}[fragile]{Step 13 -- saving and exporting the LEF}
 File $\to$ \textbf{Save Edits}, then Export $\to$ \textbf{Export
 Edited LEF Files}. The real exported file now shows all 4 real
 \texttt{MACRO...END} blocks, each with its own real
@@ -317,7 +428,7 @@ returning \texttt{4}.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Steps 8--10, continued -- the real screen}
+\begin{frame}{Steps 11--13, continued -- the real screen}
 \begin{center}
 \includegraphics[width=0.62\textwidth]{figures/walkthrough_step8_lef_macros.png}
 \end{center}
@@ -326,11 +437,11 @@ The real LEF tab: all 4 real macros on the left; \texttt{memristor\_tio2\_au}
 selected, its real \texttt{BE}/\texttt{TE} pins in the
 middle, and (right) the real, drawn \texttt{BE\_Au.drawing} port
 geometry for \texttt{BE} -- the same real \textbf{Edit Geometry...}
-canvas Step 9 describes.
+canvas Step 12 describes.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 11 -- Library Manager}
+\begin{frame}{Step 14 -- Library Manager}
 \begin{center}
 \includegraphics[width=0.65\textwidth]{figures/library_manager.jpg}
 \end{center}
@@ -342,7 +453,7 @@ cell name.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 12 -- creating the Verilog-A skeletons}
+\begin{frame}[fragile]{Step 15 -- creating the Verilog-A skeletons}
 Library Manager $\to$ select a cell $\to$ \textbf{Create} next to
 Verilog-A:
 \begin{cli}
@@ -358,19 +469,19 @@ physics next.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 12, continued -- the real screen}
+\begin{frame}{Step 15, continued -- the real screen}
 \begin{center}
 \includegraphics[width=0.62\textwidth]{figures/walkthrough_step12_user_models.png}
 \end{center}
 \footnotesize
-The real User Models tab, after Step 12 is repeated once per real
+The real User Models tab, after Step 15 is repeated once per real
 cell: all 5 real Verilog/Verilog-A modules found under
 \texttt{user\_models/}, each auto-matched (\texttt{Rescan}/
 \textbf{Link All Auto-Matches}) to its own real cell by name.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 13 -- two genuinely different models}
+\begin{frame}{Step 16 -- two genuinely different models}
 Per the task's own real requirement: a real \emph{model}, not just a
 parameter set, differs between the two switching-oxide materials.
 \begin{columns}
@@ -393,7 +504,7 @@ ThrEshold Adaptive Memristor Model'', IEEE TCAS-I 60(1) (2013).
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 14 -- authoring Model 1}
+\begin{frame}[fragile]{Step 17 -- authoring Model 1}
 A thin oxide film of thickness $D$ between two electrodes; state
 $x=w/D\in[0,1]$ tracks the doped/undoped boundary:
 \[
@@ -424,7 +535,7 @@ more resistive top-electrode contact than Au's.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 15 -- authoring Model 2}
+\begin{frame}[fragile]{Step 18 -- authoring Model 2}
 A real state variable that only moves once the terminal voltage
 crosses a real threshold, with an exponential (tunneling-like)
 state-to-resistance mapping:
@@ -437,7 +548,7 @@ state-to-resistance mapping:
 R_{mem}(x) = R_{off}\, e^{-x\ln(R_{off}/R_{on})}
 \]
 \end{frame}
-\begin{frame}[fragile]{Step 15 -- authoring Model 2}
+\begin{frame}[fragile]{Step 18, continued -- authoring Model 2}
 \begin{va}
 module memristor_hfo2_al(BE, TE);
 inout BE, TE;
@@ -460,7 +571,7 @@ endmodule
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 16 -- compiling all three real files}
+\begin{frame}[fragile]{Step 19 -- compiling all three real files}
 \begin{cli}
 openvaf memristor_tio2_au.va --output memristor_tio2_au.osdi
 openvaf memristor_tio2_ti.va --output memristor_tio2_ti.osdi
@@ -480,7 +591,7 @@ to every variant:
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 17 -- a real transient testbench, per variant}
+\begin{frame}[fragile]{Step 20 -- a real transient testbench, per variant}
 \begin{va}
 .model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0.3
 n1 te 0 mm
@@ -506,7 +617,7 @@ dynamics stay visible at a demo-friendly timescale.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 18 -- result: Au/TiO$_2$/Au}
+\begin{frame}{Step 21 -- result: Au/TiO$_2$/Au}
 \begin{center}
 \includegraphics[width=0.65\textwidth]{figures/memristor_tio2_au_transient.png}
 \end{center}
@@ -516,7 +627,7 @@ every half-cycle, the defining memristor fingerprint.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 19 -- result: Au/TiO$_2$/Ti}
+\begin{frame}{Step 22 -- result: Au/TiO$_2$/Ti}
 \begin{center}
 \includegraphics[width=0.65\textwidth]{figures/memristor_tio2_ti_transient.png}
 \end{center}
@@ -526,7 +637,7 @@ purely from Ti's own higher $R_{on}$/lower $\mu_v$ parameter set.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 20 -- result: Au/HfO$_2$/Al}
+\begin{frame}{Step 23 -- result: Au/HfO$_2$/Al}
 \begin{center}
 \includegraphics[width=0.65\textwidth]{figures/memristor_hfo2_al_transient.png}
 \end{center}
@@ -538,7 +649,7 @@ model.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 21 -- real process corners}
+\begin{frame}[fragile]{Step 24 -- real process corners}
 Simulation $\to$ ngspice Models $\to$ type a new path $\to$
 \textbf{Create File}, then \textbf{New Corner} $\times$3 (TT, FF, SS),
 each with a real \texttt{key = value} line per parameter in the
@@ -558,7 +669,7 @@ Real file:
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 21, continued -- the real screen}
+\begin{frame}{Step 24, continued -- the real screen}
 \begin{center}
 \includegraphics[width=0.62\textwidth]{figures/walkthrough_step21_corners.png}
 \end{center}
@@ -569,7 +680,7 @@ variants) on the right.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 22 -- result: a real TT/FF/SS corner sweep}
+\begin{frame}{Step 25 -- result: a real TT/FF/SS corner sweep}
 \begin{columns}
 \column{0.5\textwidth}
 \includegraphics[width=0.65\textwidth]{figures/memristor_corners_transient.png}
@@ -584,7 +695,7 @@ resistance window), SS the narrowest, TT in between.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 23 -- a real xschem symbol}
+\begin{frame}[fragile]{Step 26 -- a real xschem symbol}
 Cells $\to$ xschem $\to$ Symbols $\to$ type a path $\to$
 \textbf{Create File}, then, on the Pins sub-tab, \textbf{New Port}
 $\times$2 -- name \texttt{BE}/\texttt{TE}, direction
@@ -600,7 +711,7 @@ with the two real pins positioned at \texttt{(-40,0)} (BE) and
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 24 -- opening it in real xschem}
+\begin{frame}{Step 27 -- opening it in real xschem}
 \begin{center}
 \includegraphics[width=0.6\textwidth]{figures/xschem_memristor_symbol.jpg}
 \end{center}
@@ -616,7 +727,7 @@ screenshot here, now gone).
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 25 -- a real testbench schematic}
+\begin{frame}[fragile]{Step 28 -- a real testbench schematic}
 Cells $\to$ xschem $\to$ Schematics $\to$ \textbf{Create}, then
 placed (via the Library Manager's own \textbf{Add...} + real xschem
 component placement): one memristor instance, xschem's own bundled
@@ -638,18 +749,18 @@ own \texttt{vsource.sym} uses (\texttt{name=V1}).
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Step 26 -- the real, wired schematic}
+\begin{frame}{Step 29 -- the real, wired schematic}
 \begin{center}
 \includegraphics[width=0.55\textwidth]{figures/xschem_memristor_schematic.jpg}
 \end{center}
 \footnotesize
 Memristor and voltage source in parallel across the same two real
 nets, each referenced to its own ground -- opened in real xschem via
-the real launcher, exactly as in Step 24.
+the real launcher, exactly as in Step 27.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 27 -- netlisting and simulating the schematic}
+\begin{frame}[fragile]{Step 30 -- netlisting and simulating the schematic}
 \begin{cli}
 xschem -n -s -q libraries/openmemristorpdk_pr/memristor_tio2_au.sch
 \end{cli}
@@ -660,7 +771,7 @@ V1 0 net1 dc 0 sin(0 1.0 0.6)
 \end{va}
 Run through real ngspice/OSDI: resistance window
 9343--16000\,$\Omega$ -- byte-for-byte the same real result as the
-directly hand-authored testbench in Step 17. The real schematic and
+directly hand-authored testbench in Step 20. The real schematic and
 the real hand-written netlist agree exactly.
 \end{frame}
 
