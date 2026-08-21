@@ -115,10 +115,6 @@ magic_planes:
   - name: topmetal
     short_code: tm
     line_no: 0
-magic_contacts:
-  openmemristorpdk: []
-magic_aliases:
-  openmemristorpdk: []
 magic_styles:
   openmemristorpdk:
   - type_name: be_au
@@ -145,8 +141,6 @@ magic_styles:
     style_names:
     - via1
     line_no: 0
-magic_compose:
-  openmemristorpdk: []
 magic_connect:
   openmemristorpdk:
   - types_a: be_au
@@ -164,8 +158,6 @@ magic_connect:
 magic_cifinput_ignored_layers:
   openmemristorpdk: []
 magic_cifinput_layer_hints:
-  openmemristorpdk: []
-magic_cif_layers:
   openmemristorpdk: []
 magic_extract_misc:
   openmemristorpdk: []
@@ -219,10 +211,6 @@ magic_extract_devices:
     - te_al
     start_line: 0
     end_line: 0
-magic_drc_angle_checks:
-  openmemristorpdk: []
-magic_drc_checks:
-  openmemristorpdk: []
 magic_drc_misc:
   openmemristorpdk: []
 magic_cifinput_recipes:
