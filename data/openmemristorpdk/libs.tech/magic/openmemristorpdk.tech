@@ -15,7 +15,7 @@ topmetal,tm
 end
 
 types
-botmetal be_au
+botmetal be_au,via1
 topmetal te_au
 topmetal te_ti
 topmetal te_al
@@ -28,8 +28,9 @@ contact
 end
 
 aliases
-  be_au  m1
-  te_au  m2
+  m1  be_au
+  m2  te_au
+  active_tio2  mem_tio2
 end
 
 styles
@@ -43,7 +44,7 @@ mem_hfo2 via1
 end
 
 compose
-  compose  active_tio2  be_au  mem_tio2
+  compose  active_tio2  te_au  mem_tio2
 end
 
 connect
@@ -58,7 +59,7 @@ width be_au 200 "Minimum width of Au bottom electrode (BE.W.1)"
 width mem_tio2 100 "Minimum width of TiO2 switching oxide (MEM1.W.1)"
 width mem_hfo2 100 "Minimum width of HfO2 switching oxide (MEM2.W.1)"
 width te_ti 150 "Minimum width of Ti top electrode"
-spacing te_au te_au 150 "Minimum spacing of Au top electrode (TE.S.1)"
+spacing te_au te_au 150 touching_ok "Minimum spacing of Au top electrode (TE.S.1)"
 maxwidth mem_hfo2 5000 "Maximum width of HfO2 oxide, antenna/uniformity limit"
 angles be_au 90 "Manhattan-only bottom electrode geometry"
 end

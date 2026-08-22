@@ -232,12 +232,11 @@ Contacts & \texttt{via1 be\_au te\_au} -- a real via between the
   real \texttt{via\emph{N} metal\emph{N} metal\emph{N+1}} convention;
   for real interconnect elsewhere on the chip, not through the active
   device stack \\
-Aliases & \texttt{be\_au} $\to$ \texttt{m1}, \texttt{te\_au} $\to$
-  \texttt{m2} -- shorthand matching the metal1/metal2-style
+Aliases & \texttt{m1} $\to$ \texttt{be\_au}, \texttt{m2} $\to$
+  \texttt{te\_au} -- shorthand matching the metal1/metal2-style
   convention Styles already establishes \\
-Compose & \texttt{active\_tio2 = be\_au AND mem\_tio2} -- the real
-  bottom-electrode/oxide overlap, the actual switching interface of
-  \texttt{memristor\_tio2\_au}, mirroring IHP's own real
+Compose & \texttt{active\_tio2 = te\_au AND mem\_tio2} -- the real
+  top-electrode/oxide overlap, mirroring IHP's own real
   \texttt{nfet = poly AND ndiff} pattern \\
 \bottomrule
 \end{tabularx}
@@ -245,9 +244,15 @@ Compose & \texttt{active\_tio2 = be\_au AND mem\_tio2} -- the real
 \footnotesize
 A real via needs no separate Connect rule of its own -- Magic derives
 the electrical connection from the geometric overlap the Contacts
-entry itself declares (confirmed against IHP's own real Connect
-section: every real cross-metal case there is a via, no explicit
-metal1-metal2 connect line exists at all).
+entry itself declares. Two real, live-checked Magic constraints, not
+guessed: an Alias's own first name must be new (real Magic rejects
+\texttt{be\_au m1} -- ``shadows a defined type'' -- the correct real
+order is \texttt{m1 be\_au}), and \textbf{Contacts must be declared
+before Aliases} in the real file (Magic's own real, enforced section
+order), with \texttt{via1} itself given as a second real alias
+directly on \texttt{be\_au}'s own Types-section line so Contacts can
+resolve it. Both confirmed by loading this exact real file through
+real Magic, zero section errors.
 \end{frame}
 
 % ---------------------------------------------------------------
