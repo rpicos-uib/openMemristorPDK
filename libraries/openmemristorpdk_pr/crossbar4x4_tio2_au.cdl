@@ -1,0 +1,19 @@
+.SUBCKT crossbar4x4_tio2_au BE1 BE2 BE3 BE4 TE1 TE2 TE3 TE4
+*.PININFO BE1:B BE2:B BE3:B BE4:B TE1:B TE2:B TE3:B TE4:B
+X1 BE1 TE1 memristor_tio2_au_prim
+X2 BE1 TE2 memristor_tio2_au_prim
+X3 BE1 TE3 memristor_tio2_au_prim
+X4 BE1 TE4 memristor_tio2_au_prim
+X5 BE2 TE1 memristor_tio2_au_prim
+X6 BE2 TE2 memristor_tio2_au_prim
+X7 BE2 TE3 memristor_tio2_au_prim
+X8 BE2 TE4 memristor_tio2_au_prim
+X9 BE3 TE1 memristor_tio2_au_prim
+X10 BE3 TE2 memristor_tio2_au_prim
+X11 BE3 TE3 memristor_tio2_au_prim
+X12 BE3 TE4 memristor_tio2_au_prim
+X13 BE4 TE1 memristor_tio2_au_prim
+X14 BE4 TE2 memristor_tio2_au_prim
+X15 BE4 TE3 memristor_tio2_au_prim
+X16 BE4 TE4 memristor_tio2_au_prim
+.ENDS

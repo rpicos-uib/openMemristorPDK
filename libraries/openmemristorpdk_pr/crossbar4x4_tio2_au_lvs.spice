@@ -1,0 +1,9 @@
+* NGSPICE file created from crossbar4x4_tio2_au.ext - technology: openmemristorpdk
+
+.subckt crossbar4x4_tio2_au BE1 BE2 BE3 BE4 TE1 TE2 TE3 TE4
+X0 BE2 TE4 memristor_tio2_au_prim
+X1 BE4 tm_14_15# memristor_tio2_au_prim
+X2 BE1 tm_14_3# memristor_tio2_au_prim
+X3 BE3 tm_14_11# memristor_tio2_au_prim
+.ends
+

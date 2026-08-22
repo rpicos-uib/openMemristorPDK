@@ -177,3 +177,27 @@ entries:
   cell: crossbar2x2_tio2_au_lvs
   view_kind: spice
   path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/crossbar2x2_tio2_au_lvs.spice
+- library: openmemristorpdk_pr
+  cell: crossbar4x4_tio2_au
+  view_kind: cdl
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/crossbar4x4_tio2_au.cdl
+- library: openmemristorpdk_pr
+  cell: crossbar4x4_tio2_au
+  view_kind: gds
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/crossbar4x4_tio2_au.gds
+- library: openmemristorpdk_pr
+  cell: crossbar4x4_tio2_au
+  view_kind: mag
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/crossbar4x4_tio2_au.mag
+- library: openmemristorpdk_pr
+  cell: crossbar4x4_tio2_au
+  view_kind: xschem_schematic
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/crossbar4x4_tio2_au.sch
+- library: openmemristorpdk_pr
+  cell: crossbar4x4_tio2_au
+  view_kind: spice
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/crossbar4x4_tio2_au.spice
+- library: openmemristorpdk_pr
+  cell: crossbar4x4_tio2_au_lvs
+  view_kind: spice
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/crossbar4x4_tio2_au_lvs.spice
