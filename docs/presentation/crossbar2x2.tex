@@ -196,6 +196,35 @@ bus.
 \end{frame}
 
 % ---------------------------------------------------------------
+\begin{frame}[fragile]{Step 6, continued -- a real, more principled fix tried, and refuted}
+Before accepting Step 6's own limitation, a genuinely more correct
+real approach was tried: real, professional hierarchical extraction
+-- place 4 real instances of the \emph{already-working} single-device
+cell (\texttt{memristor\_tio2\_au}, which extracts perfectly alone)
+at the 4 real crosspoints via Magic's own real \texttt{getcell child
+ll parent x y}, wiring them only through ordinary same-type bus
+material, so device-recognition never needs to span more than one
+real crosspoint at a time:
+\begin{cli}
+getcell memristor_tio2_au child ll parent 2 2
+getcell memristor_tio2_au child ll parent 6 2
+getcell memristor_tio2_au child ll parent 2 6
+getcell memristor_tio2_au child ll parent 6 6
+\end{cli}
+\footnotesize
+Real, live result, with \texttt{ext2spice hierarchy on}/\texttt{blackbox
+on} explicitly set: still only \textbf{2} of the real 4 real instances
+recognized (\texttt{memristor\_tio2\_au\_1}/\texttt{\_3}, the two
+sharing the TE2 column -- the same real "roughly half, whichever net
+was processed last" pattern as the flat layout), and even those two
+were re-descended into rather than treated as real black boxes. This
+rules out layout topology (flat vs.\ hierarchical) as the real cause --
+the real limitation lives inside Magic's own core \texttt{extract}
+device-recognition itself, not in how this project's own layout is
+drawn or in \texttt{ext2spice}'s own formatting flags.
+\end{frame}
+
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Step 7 -- a real, hand-authored reference netlist}
 Rather than reshape this real demo around that limitation, a real,
 independent reference view describes the actually-intended topology
