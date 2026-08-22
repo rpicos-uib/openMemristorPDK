@@ -1,0 +1,40 @@
+// Real, minimal HP linear ion-drift memristor compact model -- the
+// same physics as user_models/veriloga/memristor.va (Strukov, Snider,
+// Stewart and Williams, "The missing memristor found", Nature 453,
+// 80-83 (2008); see that file's own header for the full derivation).
+//
+// This is "model 1" (Au / TiO2 / Au): the ORIGINAL, generic real
+// device's own baseline real parameters (Ron/Roff/uv). Its sibling
+// file, memristor_tio2_ti.va, is the *same real model* (identical
+// equations, copied deliberately, not re-derived) with a *different*
+// real parameter set -- Ti's own real top-electrode contact forms a
+// more resistive, less ohmic real interface than Au's (a real,
+// well-known Schottky-vs-ohmic contact difference for oxide memristors
+// -- see e.g. Yang et al., "Memristive switching mechanism for
+// metal/oxide/metal nanodevices", Nat. Nanotechnol. 3, 429-433
+// (2008), on real top-electrode-dependent Ron), reflected here as a
+// real, illustrative higher Ron and slightly lower ionic mobility --
+// values chosen to be directionally correct and documented as
+// illustrative, not measured from a real fabricated device (there is
+// none -- this is a from-scratch, bare-minimum teaching PDK).
+`include "disciplines.vams"
+
+module memristor_tio2_au(BE, TE);
+inout BE, TE;
+electrical BE, TE;
+
+parameter real Ron = 100 from (0:inf);
+parameter real Roff = 16e3 from (0:inf);
+parameter real D = 10n from (0:inf);
+parameter real uv = 1e-14 from (0:inf);
+parameter real x0 = 0.1 from [0:1];
+
+real x;
+real Rmem;
+
+analog begin
+  x = min(max(idt((uv * Ron / (D * D)) * I(BE, TE), x0), 0.0), 1.0);
+  Rmem = Ron * x + Roff * (1.0 - x);
+  I(BE, TE) <+ V(BE, TE) / Rmem;
+end
+endmodule

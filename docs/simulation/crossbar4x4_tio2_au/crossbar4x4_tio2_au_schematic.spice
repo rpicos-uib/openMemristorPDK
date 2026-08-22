@@ -1,0 +1,18 @@
+.subckt crossbar4x4_tio2_au BE1 BE2 BE3 BE4 TE1 TE2 TE3 TE4
+n1 BE1 TE1 mm
+n2 BE1 TE2 mm
+n3 BE1 TE3 mm
+n4 BE1 TE4 mm
+n5 BE2 TE1 mm
+n6 BE2 TE2 mm
+n7 BE2 TE3 mm
+n8 BE2 TE4 mm
+n9 BE3 TE1 mm
+n10 BE3 TE2 mm
+n11 BE3 TE3 mm
+n12 BE3 TE4 mm
+n13 BE4 TE1 mm
+n14 BE4 TE2 mm
+n15 BE4 TE3 mm
+n16 BE4 TE4 mm
+.ends
