@@ -1,0 +1,74 @@
+
+Circuit 1 cell memristor_tio2_au_prim and Circuit 2 cell memristor_tio2_au_prim are black boxes.
+Warning: Equate pins:  cell memristor_tio2_au_prim is a placeholder, treated as a black box.
+Warning: Equate pins:  cell memristor_tio2_au_prim is a placeholder, treated as a black box.
+
+Subcircuit pins:
+Circuit 1: memristor_tio2_au_prim          |Circuit 2: memristor_tio2_au_prim          
+-------------------------------------------|-------------------------------------------
+1                                          |1                                          
+2                                          |2                                          
+---------------------------------------------------------------------------------------
+Cell pin lists are equivalent.
+Device classes memristor_tio2_au_prim and memristor_tio2_au_prim are equivalent.
+
+Cell crossbar2x2_tio2_au (0) disconnected node: TE1
+Subcircuit summary:
+Circuit 1: crossbar2x2_tio2_au             |Circuit 2: crossbar2x2_tio2_au             
+-------------------------------------------|-------------------------------------------
+memristor_tio2_au_prim (2)                 |memristor_tio2_au_prim (4) **Mismatch**    
+Number of devices: 2 **Mismatch**          |Number of devices: 4 **Mismatch**          
+Number of nets: 4                          |Number of nets: 4                          
+---------------------------------------------------------------------------------------
+NET mismatches: Class fragments follow (with fanout counts):
+Circuit 1: crossbar2x2_tio2_au             |Circuit 2: crossbar2x2_tio2_au             
+
+---------------------------------------------------------------------------------------
+Net: BE1                                   |Net: BE1                                   
+  memristor_tio2_au_prim/1 = 1             |  memristor_tio2_au_prim/1 = 2             
+                                           |                                           
+Net: BE2                                   |Net: BE2                                   
+  memristor_tio2_au_prim/1 = 1             |  memristor_tio2_au_prim/1 = 2             
+                                           |                                           
+Net: tm_6_7#                               |Net: TE1                                   
+  memristor_tio2_au_prim/2 = 1             |  memristor_tio2_au_prim/2 = 2             
+                                           |                                           
+Net: TE2                                   |Net: TE2                                   
+  memristor_tio2_au_prim/2 = 1             |  memristor_tio2_au_prim/2 = 2             
+---------------------------------------------------------------------------------------
+DEVICE mismatches: Class fragments follow (with node fanout counts):
+Circuit 1: crossbar2x2_tio2_au             |Circuit 2: crossbar2x2_tio2_au             
+
+---------------------------------------------------------------------------------------
+Instance: memristor_tio2_au_prim:0         |Instance: memristor_tio2_au_prim:2         
+  1 = 1                                    |  1 = 2                                    
+  2 = 1                                    |  2 = 2                                    
+                                           |                                           
+Instance: memristor_tio2_au_prim:1         |Instance: memristor_tio2_au_prim:1         
+  1 = 1                                    |  1 = 2                                    
+  2 = 1                                    |  2 = 2                                    
+                                           |                                           
+(no matching instance)                     |Instance: memristor_tio2_au_prim:3         
+                                           |  1 = 2                                    
+                                           |  2 = 2                                    
+                                           |                                           
+(no matching instance)                     |Instance: memristor_tio2_au_prim:4         
+                                           |  1 = 2                                    
+                                           |  2 = 2                                    
+---------------------------------------------------------------------------------------
+Netlists do not match.
+Port matching may fail to disambiguate symmetries.
+
+Subcircuit pins:
+Circuit 1: crossbar2x2_tio2_au             |Circuit 2: crossbar2x2_tio2_au             
+-------------------------------------------|-------------------------------------------
+BE2                                        |BE1 **Mismatch**                           
+BE1                                        |BE2 **Mismatch**                           
+TE2                                        |TE2                                        
+(no pin, node is TE2)                      |TE1                                        
+TE1                                        |(no matching pin)                          
+---------------------------------------------------------------------------------------
+Cell pin lists for crossbar2x2_tio2_au and crossbar2x2_tio2_au altered to match.
+Device classes crossbar2x2_tio2_au and crossbar2x2_tio2_au are equivalent.
+
+Final result: Top level cell failed pin matching.

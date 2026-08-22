@@ -1,0 +1,6 @@
+.subckt crossbar2x2_tio2_au BE1 BE2 TE1 TE2
+X1 BE1 TE1 memristor_tio2_au_prim
+X2 BE1 TE2 memristor_tio2_au_prim
+X3 BE2 TE1 memristor_tio2_au_prim
+X4 BE2 TE2 memristor_tio2_au_prim
+.ends

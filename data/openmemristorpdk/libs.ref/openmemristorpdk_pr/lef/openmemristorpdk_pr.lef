@@ -22,3 +22,40 @@ MACRO memristor
     END
   END TE
 END memristor
+MACRO crossbar2x2_tio2_au
+  CLASS CORE ;
+  SIZE 9.0 BY 9.0 ;
+  SYMMETRY X Y ;
+  PIN BE1
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER BE ;
+      RECT 0.0 2.0 9.0 3.0 ;
+    END
+  END BE1
+  PIN BE2
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER BE ;
+      RECT 0.0 6.0 9.0 7.0 ;
+    END
+  END BE2
+  PIN TE1
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER TE ;
+      RECT 2.0 0.0 3.0 9.0 ;
+    END
+  END TE1
+  PIN TE2
+    DIRECTION INOUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER TE ;
+      RECT 6.0 0.0 7.0 9.0 ;
+    END
+  END TE2
+END crossbar2x2_tio2_au
