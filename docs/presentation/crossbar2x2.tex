@@ -260,6 +260,102 @@ Step 6's own finding, not silently papered over.
 \end{frame}
 
 % ---------------------------------------------------------------
+\begin{frame}[fragile]{Step 8, continued -- asked directly: is there a real fix? Read Magic's own source}
+Rather than stop at the refutation above, Magic's own real, installed
+source (\texttt{extract/ExtBasic.c}, \texttt{extract/ExtTech.c},
+version 8.3.678, the exact real version installed here) was read
+directly to find the real root cause:
+\begin{itemize}
+  \item Every real device class (MOSFET, BJT, subcircuit, resistor,
+        rsubcircuit) shares one code path: exactly \textbf{one device
+        record per connected region} of the device's own declared
+        \texttt{gate\_types} layer.
+  \item Its terminal search has a real, hard
+        \texttt{if (termcount == nsd) break;} -- it stops the moment it
+        satisfies the device's own declared \emph{minimum} terminal
+        count (\texttt{nsd}), so it grabs the first real \texttt{te\_au}
+        column touching the row and never looks for the rest.
+  \item Checked whether Magic's own \texttt{resistor}/\texttt{rsubcircuit}
+        classes -- built for exactly this "tapped bus" shape -- behave
+        differently: they don't. Same code path, and the source
+        explicitly \emph{warns} \texttt{"Resistor has \%d terminals:
+        extracted value will be wrong"} for $>2$ terminals rather than
+        splitting into multiple devices.
+\end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Step 8, continued -- the one real lever tried, and it made things worse}
+The source suggested one real, testable lever: Magic derives
+\texttt{nsd} from how many terminal-type arguments a device line
+lists, so listing \texttt{te\_au} four times should raise the real
+minimum to 4. Tried live:
+\begin{cli}
+device subcircuit memristor_tio2_au_prim be_au te_au te_au te_au te_au
+\end{cli}
+\footnotesize
+Real, live result: not four devices -- one single, malformed device
+with four pins jammed into a real 2-pin subcircuit call:
+\begin{cli}
+X0 BE2 TE4 TE1 TE1 memristor_tio2_au_prim
+\end{cli}
+Confirms the source reading exactly: raising the declared terminal
+count only asks the same one device record to swallow more pins, never
+spawns additional devices. This is architectural, not a missing flag.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Step 8, continued -- a real, geometry-driven extractor}
+Since Magic's own extractor cannot do this, a real, narrow extractor
+was written for exactly this one device shape --
+\texttt{pdklib/memristor\_extract.py} -- not a general re-implementation
+of Magic's extractor, just the one real rule that is actually true for
+a crossbar: a real device exists at every real point where a real
+\texttt{gate\_type} shape and a real \texttt{term\_type} shape overlap,
+computed directly from the \texttt{.mag} file's own real
+\texttt{rect}/\texttt{rlabel} geometry:
+\begin{cli}
+for gate in gate_rects:
+    for term in term_rects:
+        if overlap(gate, term):
+            emit device(model, label(gate), label(term))
+\end{cli}
+\footnotesize
+\textbf{Mixed with Magic's own real extraction, not replacing it}:
+\texttt{run\_extract\_with\_memristor\_patch} runs this project's own
+real, unmodified \texttt{run\_extract} first, then replaces only the
+real \texttt{X} lines whose model matches a real \texttt{device
+subcircuit} declaration -- every other real line Magic wrote (the
+\texttt{.subckt} header, any other real device, any real parasitic)
+is left untouched.
+\end{frame}
+
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Step 8, continued -- real, live result: LVS now matches}
+Real, live: all 4 real devices, correct real row/column pairing:
+\begin{cli}
+X0 BE1 TE1 memristor_tio2_au_prim
+X1 BE1 TE2 memristor_tio2_au_prim
+X2 BE2 TE1 memristor_tio2_au_prim
+X3 BE2 TE2 memristor_tio2_au_prim
+\end{cli}
+Real, live Netgen LVS against the same real reference netlist from
+Step 7 -- no longer a mismatch:
+\begin{cli}
+Number of devices: 4                | Number of devices: 4
+Number of nets: 6                   | Number of nets: 6
+Netlists match uniquely.
+Final result: Circuits match uniquely.
+\end{cli}
+\footnotesize
+A real, complete fix for this project's own memristor crosspoint
+devices specifically -- not a general Magic patch, and, as of this
+deck, only wired up as a real \texttt{pdklib} capability
+(\texttt{tests/test\_crossbar2x2.py}), not yet the GUI's own
+\textbf{Run LVS} button.
+\end{frame}
+
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Step 9 -- designing the real write-then-read test}
 A real, standard passive-crossbar bias: selected row $=V_w$, selected
 column $=0$, every other row/column $=V_w/2$ -- writes just cell
@@ -330,9 +426,12 @@ Real, simulated (ngspice/OSDI): \textbf{100$\,\Omega$} (written) $\ll$
         shared-bus crossbar topology, not four independent cells.
   \item A real, found tool limitation (Magic's own device-recognition
         model doesn't support a shared bus tapped by multiple
-        2-terminal devices), characterized directly, not guessed, and
-        worked around with a real, independent reference netlist
-        rather than reshaping the demo to avoid it.
+        2-terminal devices), root-caused directly in Magic's own real
+        source code (not guessed), ruled out as fixable via any real
+        tech-file lever, and then genuinely fixed with a real,
+        geometry-driven extractor mixed into Magic's own real
+        extraction -- real, live LVS now reports \textbf{Circuits
+        match uniquely}, not just an honestly-reported mismatch.
   \item A real, live-verified crossbar sneak-path disturb: writing one
         cell measurably, honestly perturbs its own real row/column
         neighbors, even though they were never themselves addressed --
@@ -340,8 +439,12 @@ Real, simulated (ngspice/OSDI): \textbf{100$\,\Omega$} (written) $\ll$
         not just more density.
   \item Verified for real, driven: \texttt{tests/test\_crossbar2x2.py}
         -- real LEF/CDL parsing, a real 9x9um GDS export on the
-        correct real GDS layers, the real 2-of-4 extraction limitation
-        asserted explicitly, real LVS mismatch, real DRC clean.
+        correct real GDS layers, the real 2-of-4 raw-Magic extraction
+        limitation asserted explicitly (still a real regression guard),
+        the real, patched extractor asserted to find all 4 real
+        devices with correct real pairing, real LVS mismatch on the
+        raw path \emph{and} real LVS match on the patched path, real
+        DRC clean.
 \end{itemize}
 \end{frame}
 
