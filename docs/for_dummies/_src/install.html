@@ -1,0 +1,65 @@
+<section class="chapter" id="install">
+  <header>
+    <div class="eyebrow">Only once, on a new computer</div>
+    <h2>Five steps, A to E</h2>
+    <p>Skip this section if openPDKcreator already works on this computer. On a new Linux computer (Ubuntu or similar), these five steps download everything: two programs, the openPDKcreator tool, the memristor PDK, and the "container" with all the chip-design programs. You need an internet connection and about <b>35 GB</b> of free disk space. Do them in a terminal: press <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd> to open one.</p>
+  </header>
+
+  <article class="step" data-title="Install git and podman" data-do="Run: sudo apt update, then: sudo apt install -y git podman">
+    <div class="step-head"><span class="num">A</span><h3>Install git and podman</h3></div>
+    <p class="do">Type these two lines, pressing <kbd>Enter</kbd> after each. The computer asks for <b>your</b> password (the one you log in with). Nothing shows on screen while you type it, that's normal.</p>
+    <div class="cmd">
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt update</pre><button class="copy" type="button" data-copy="sudo apt update">Copy</button></div>
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y git podman</pre><button class="copy" type="button" data-copy="sudo apt install -y git podman">Copy</button></div>
+    </div>
+    <div class="see"><strong>What these are</strong><span><code>git</code> downloads projects from GitHub. <code>podman</code> runs the container, the separate computer-inside-the-computer where all the chip-design programs live.</span></div>
+  </article>
+
+  <article class="step" data-title="Download openPDKcreator" data-do="Run: mkdir -p ~/Documentos/rodrigo, cd ~/Documentos/rodrigo, then git clone https://github.com/rpicos-uib/openpdkcreator-toolkit.git openPDKcreator">
+    <div class="step-head"><span class="num">B</span><h3>Download openPDKcreator</h3></div>
+    <p class="do">This makes a folder and downloads the openPDKcreator tool into it, as <code>openPDKcreator</code>. It's the same folder <a href="first-simulation.html#step-2">step 2 of Your first simulation</a> uses.</p>
+    <div class="cmd">
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>mkdir -p ~/Documentos/rodrigo</pre><button class="copy" type="button" data-copy="mkdir -p ~/Documentos/rodrigo">Copy</button></div>
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>cd ~/Documentos/rodrigo</pre><button class="copy" type="button" data-copy="cd ~/Documentos/rodrigo">Copy</button></div>
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>git clone https://github.com/rpicos-uib/openpdkcreator-toolkit.git openPDKcreator</pre><button class="copy" type="button" data-copy="git clone https://github.com/rpicos-uib/openpdkcreator-toolkit.git openPDKcreator">Copy</button></div>
+    </div>
+    <div class="see"><strong>You should see</strong><span>One line, in your computer's language. On a Spanish computer:</span></div>
+    <pre class="term"><span class="dim">Clonando en 'openPDKcreator'...</span></pre>
+  </article>
+
+  <article class="step" data-title="Download the memristor PDK" data-do="Run: cd openPDKcreator, then git clone https://github.com/rpicos-uib/openMemristorPDK.git">
+    <div class="step-head"><span class="num">C</span><h3>Download the memristor PDK</h3></div>
+    <p class="do">The memristor PDK goes <b>inside</b> the openPDKcreator folder, as <code>openMemristorPDK</code>:</p>
+    <div class="cmd">
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>cd openPDKcreator</pre><button class="copy" type="button" data-copy="cd openPDKcreator">Copy</button></div>
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>git clone https://github.com/rpicos-uib/openMemristorPDK.git</pre><button class="copy" type="button" data-copy="git clone https://github.com/rpicos-uib/openMemristorPDK.git">Copy</button></div>
+    </div>
+    <pre class="term"><span class="dim">Clonando en 'openMemristorPDK'...</span></pre>
+  </article>
+
+  <article class="step" data-title="Download the container launcher" data-do="Run: git clone --depth 1 https://github.com/iic-jku/IIC-OSIC-TOOLS.git ~/eda/IIC-OSIC-TOOLS">
+    <div class="step-head"><span class="num">D</span><h3>Download the container launcher</h3></div>
+    <p class="do">IIC-OSIC-TOOLS, from the university in Linz that builds the chip-design container, has the script that starts it. openPDKcreator looks for it in <code>~/eda/IIC-OSIC-TOOLS</code>:</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>git clone --depth 1 https://github.com/iic-jku/IIC-OSIC-TOOLS.git ~/eda/IIC-OSIC-TOOLS</pre><button class="copy" type="button" data-copy="git clone --depth 1 https://github.com/iic-jku/IIC-OSIC-TOOLS.git ~/eda/IIC-OSIC-TOOLS">Copy</button></div>
+  </article>
+
+  <article class="step" data-title="Start it for the first time" data-do="Run: ./start_eda_container.sh --gui-memristor and wait until it finishes. The first time downloads about 15 GB.">
+    <div class="step-head"><span class="num">E</span><h3>Start it for the first time</h3></div>
+    <p class="do">Still in the <code>openPDKcreator</code> folder, run the same start command as <a href="first-simulation.html#step-2">step 2 of Your first simulation</a>:</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>./start_eda_container.sh --gui-memristor</pre><button class="copy" type="button" data-copy="./start_eda_container.sh --gui-memristor">Copy</button></div>
+    <p>The first time, it downloads the container, about <b>15 GB</b> (it can take half an hour or more), and then prepares it for a few more minutes with no progress shown. <b>Don't close the terminal</b> until it finishes. It ends like this:</p>
+    <pre class="term"><span class="dim">[INFO] iic-osic-tools_openpdkcreator_uid_1001 does not exist -- creating it.
+[INFO] Podman rootless mode detected.
+[INFO] Adding --userns=keep-id for Podman rootless mode.
+[INFO] Container does not exist, creating iic-osic-tools_openpdkcreator_uid_1001 ...
+[INFO] With --userns=keep-id, Podman makes an ID-mapped copy of the image on the first start of each image version.
+[INFO] This can take several minutes without any progress output and needs about as much disk space as the image. Do not interrupt it.
+[HINT] CONTAINER_USER=0 CONTAINER_GROUP=0 avoids the copy, see README section 5.1.
+[INFO] Verifying that the container stays up (up to 2s) ...
+[INFO] To access the VNC session, open a browser and navigate to http://localhost:8081/?password=abc123
+[INFO] VNC session: http://127.0.0.1:8081/?password=abc123&amp;autoconnect=true&amp;resize=scale  (NOT the 'localhost' form -- see header comment)
+[INFO] Launching the openMemristorPDK GUI inside the container ...</span></pre>
+    <div class="see"><strong>Done</strong><span>Everything is installed. Now go to <a href="first-simulation.html#step-3"><b>step 3 of Your first simulation</b></a> (open the browser). From now on, starting it takes seconds: just do steps 1 and 2 there.</span></div>
+    <div class="oops"><strong>Two links?</strong><span>Use the <code>127.0.0.1</code> one (the same as in <a href="first-simulation.html#step-3">step 3</a>). The <code>localhost</code> one doesn't work with this setup.</span></div>
+  </article>
+</section>

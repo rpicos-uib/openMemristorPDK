@@ -145,5 +145,201 @@
    1853,
    930
   ]
+ },
+ "explore_xprop": {
+  "note": "",
+  "size": [
+   1680,
+   1050
+  ]
+ },
+ "explore_save": {
+  "note": "",
+  "size": [
+   1680,
+   1050
+  ]
+ },
+ "m01_library_manager": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m02_click_library": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m03_click_new_cell": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m04_type_name": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m05_choose_veriloga": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m06_created": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m07_click_view": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m08_model_file": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m09_compiled": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m10_click_tb": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m11_open_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m12_xschem_codeblock": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m13_edit_properties": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m14_select_model_word": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m15_selected_to_end": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m16_path_word": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m17_click_ok": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m14_click_before_model": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m18_click_netlist": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m19_click_simulate": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m20_result": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m21_plot_closeup": {
+  "note": "",
+  "size": [
+   713,
+   545
+  ]
+ },
+ "m22_quit_plot": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m23_quit_ngspice": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m24_close_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "m25_exit_without_saving": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
  }
 }

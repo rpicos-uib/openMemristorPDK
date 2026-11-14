@@ -1,0 +1,280 @@
+<section class="chapter" id="cell">
+  <header>
+    <div class="eyebrow">Part 1 · about 3 minutes</div>
+    <h2>Make a place for the model</h2>
+    <p>A <em>model</em> is the recipe that tells the simulator how a device behaves. In openPDKcreator every model belongs to a <em>cell</em> in the Library Manager. You'll create a new cell and give it an empty Verilog-A model.</p>
+  </header>
+  <article class="step" data-img="img/m01_library_manager.png" data-title="Open the Library Manager" data-do="In openPDKcreator, click the Library Manager tab.">
+    <div class="step-head"><span class="num">1</span><h3>Open the Library Manager</h3></div>
+    <p class="do">In openPDKcreator, click the <b class="ui">Library Manager</b> tab.</p>
+    <button class="shot" type="button"><img src="img/m01_library_manager.png" alt="Library Manager tab boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m02_click_library.png" data-title="Pick the library" data-do="Click openmemristorpdk_pr (real) in the Libraries list.">
+    <div class="step-head"><span class="num">2</span><h3>Pick the library</h3></div>
+    <p class="do">Click <b class="ui">openmemristorpdk_pr (real)</b> in the Libraries list.</p>
+    <button class="shot" type="button"><img src="img/m02_click_library.png" alt="The library row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m03_click_new_cell.png" data-title="Make a new cell" data-do="Click New Cell..., above the Cells list.">
+    <div class="step-head"><span class="num">3</span><h3>Make a new cell</h3></div>
+    <p class="do">Click <b class="ui">New Cell...</b>, above the Cells list.</p>
+    <button class="shot" type="button"><img src="img/m03_click_new_cell.png" alt="The New Cell button boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m04_type_name.png" data-title="Name it" data-do="A small box asks for the cell name. Type memristor_joglekar exactly like that, then click OK.">
+    <div class="step-head"><span class="num">4</span><h3>Name it</h3></div>
+    <p class="do">A small box asks for the cell name. Type <code>memristor_joglekar</code> exactly like that, then click <b class="ui">OK</b>.</p>
+    <button class="shot" type="button"><img src="img/m04_type_name.png" alt="The New Cell box with memristor_joglekar typed in and OK boxed in red" loading="lazy"></button>
+    <div class="see"><strong>Why that name?</strong><span>The model is the classic HP memristor with a <em>Joglekar window</em>, named after the scientist who proposed it. The name has to be exactly the same as the module inside the file you write in step 7.</span></div>
+  </article>
+  <article class="step" data-img="img/m05_choose_veriloga.png" data-title="Choose Verilog-A" data-do="A list asks what to create first. Click Verilog-A.">
+    <div class="step-head"><span class="num">5</span><h3>Choose Verilog-A</h3></div>
+    <p class="do">A list asks what to create first. Click <b class="ui">Verilog-A</b>.</p>
+    <button class="shot" type="button"><img src="img/m05_choose_veriloga.png" alt="The list of view types with Verilog-A boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m06_created.png" data-title="The empty model is ready" data-do="The new cell memristor_joglekar is selected, and its Verilog-A row now has a file. openPDKcreator made an empty model for you:">
+    <div class="step-head"><span class="num">6</span><h3>The empty model is ready</h3></div>
+    <p class="do">The new cell <b>memristor_joglekar</b> is selected, and its <b>Verilog-A</b> row now has a file. openPDKcreator made an empty model for you:</p>
+    <button class="shot" type="button"><img src="img/m06_created.png" alt="The Views panel with memristor_joglekar.va on the Verilog-A row boxed in red" loading="lazy"></button>
+    <div class="file">
+      <div class="fname"><span>openMemristorPDK/user_models/veriloga/memristor_joglekar.va</span><span>what Create wrote</span></div>
+<pre>`include &quot;disciplines.vams&quot;
+
+module memristor_joglekar();
+
+analog begin
+  // TODO: real compact-model equations here
+end
+endmodule</pre>
+    </div>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="write">
+  <header>
+    <div class="eyebrow">Part 2 · about 3 minutes</div>
+    <h2>Write the model</h2>
+    <p>Now the empty model gets its real equations. The easiest way is one command in the laptop's terminal: the project folder is shared with the container, so openPDKcreator sees the new file straight away.</p>
+  </header>
+  <article class="step" data-title="Write the model file" data-do="In the laptop's terminal (not in the browser), paste the command and press Enter.">
+    <div class="step-head"><span class="num">7</span><h3>Write the model file</h3></div>
+    <p class="do">Go to the <b>laptop's terminal</b>, the one from step 1 of Your first simulation, not the browser. Click <b>Copy</b> below, paste into the terminal with <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd>, and press <kbd>Enter</kbd>. Nothing is printed: that means it worked.</p>
+    <div class="cmd-row"><pre class="term">cat &gt; ~/Documentos/rodrigo/openPDKcreator/openMemristorPDK/user_models/veriloga/memristor_joglekar.va &lt;&lt;&#x27;EOF&#x27;
+// memristor_joglekar.va -- the HP memristor with a Joglekar window:
+// the memory x still moves with the current, but slows down near its
+// two ends (x = 0 and x = 1) instead of crashing into them.
+`include &quot;disciplines.vams&quot;
+
+module memristor_joglekar(BE, TE);
+inout BE, TE;
+electrical BE, TE;
+electrical dx;   // hidden node: how far x has moved from x0
+
+parameter real Ron  = 100   from (0:inf);  // fully &quot;on&quot; resistance (ohm)
+parameter real Roff = 16e3  from (0:inf);  // fully &quot;off&quot; resistance (ohm)
+parameter real D    = 10n   from (0:inf);  // oxide thickness (m)
+parameter real uv   = 5e-15 from (0:inf);  // how easily the memory moves
+parameter real x0   = 0.3   from [0:1];    // memory at the start
+parameter real p    = 2     from [1:inf);  // window shape
+
+real x, Rmem, i, f;
+
+analog begin
+  x = min(max(x0 + V(dx), 0.0), 1.0);                   // the memory, 0..1
+  Rmem = Ron * x + Roff * (1.0 - x);                    // today&#x27;s resistance
+  i = V(BE, TE) / Rmem;                                 // Ohm&#x27;s law
+  I(BE, TE) &lt;+ i;
+  f = 1.0 - pow((2.0 * x - 1.0) * (2.0 * x - 1.0), p);  // the window
+  I(dx) &lt;+ ddt(V(dx)) - (uv * Ron / (D * D)) * i * f;   // x moves with i*f
+  I(dx) &lt;+ 1e-12 * V(dx);                               // keeps dx defined at rest
+end
+endmodule
+EOF</pre><button class="copy" type="button" data-copy="cat &gt; ~/Documentos/rodrigo/openPDKcreator/openMemristorPDK/user_models/veriloga/memristor_joglekar.va &lt;&lt;&#x27;EOF&#x27;
+// memristor_joglekar.va -- the HP memristor with a Joglekar window:
+// the memory x still moves with the current, but slows down near its
+// two ends (x = 0 and x = 1) instead of crashing into them.
+`include &quot;disciplines.vams&quot;
+
+module memristor_joglekar(BE, TE);
+inout BE, TE;
+electrical BE, TE;
+electrical dx;   // hidden node: how far x has moved from x0
+
+parameter real Ron  = 100   from (0:inf);  // fully &quot;on&quot; resistance (ohm)
+parameter real Roff = 16e3  from (0:inf);  // fully &quot;off&quot; resistance (ohm)
+parameter real D    = 10n   from (0:inf);  // oxide thickness (m)
+parameter real uv   = 5e-15 from (0:inf);  // how easily the memory moves
+parameter real x0   = 0.3   from [0:1];    // memory at the start
+parameter real p    = 2     from [1:inf);  // window shape
+
+real x, Rmem, i, f;
+
+analog begin
+  x = min(max(x0 + V(dx), 0.0), 1.0);                   // the memory, 0..1
+  Rmem = Ron * x + Roff * (1.0 - x);                    // today&#x27;s resistance
+  i = V(BE, TE) / Rmem;                                 // Ohm&#x27;s law
+  I(BE, TE) &lt;+ i;
+  f = 1.0 - pow((2.0 * x - 1.0) * (2.0 * x - 1.0), p);  // the window
+  I(dx) &lt;+ ddt(V(dx)) - (uv * Ron / (D * D)) * i * f;   // x moves with i*f
+  I(dx) &lt;+ 1e-12 * V(dx);                               // keeps dx defined at rest
+end
+endmodule
+EOF">Copy</button></div>
+    <div class="see"><strong>What it does</strong><span><code>cat &gt; file &lt;&lt;'EOF'</code> writes everything up to the line <code>EOF</code> into the model file, replacing the empty one.</span></div>
+  </article>
+  <article class="step" data-img="img/m07_click_view.png" data-title="Open the model" data-do="Back in openPDKcreator, on the Verilog-A row, click View.">
+    <div class="step-head"><span class="num">8</span><h3>Open the model</h3></div>
+    <p class="do">Back in openPDKcreator, on the <b>Verilog-A</b> row, click <b class="ui">View</b>.</p>
+    <button class="shot" type="button"><img src="img/m07_click_view.png" alt="The View button on the Verilog-A row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m08_model_file.png" data-title="Read it, then close it" data-do="Here is the model you just wrote. Have a look, then click Close.">
+    <div class="step-head"><span class="num">9</span><h3>Read it, then close it</h3></div>
+    <p class="do">Here is the model you just wrote. Have a look, then click <b class="ui">Close</b>.</p>
+    <button class="shot" type="button"><img src="img/m08_model_file.png" alt="The file viewer showing memristor_joglekar.va with Close boxed in red" loading="lazy"></button>
+    <div class="file tall">
+      <div class="fname"><span>openMemristorPDK/user_models/veriloga/memristor_joglekar.va</span><span>the whole file</span></div>
+<pre>// memristor_joglekar.va -- the HP memristor with a Joglekar window:
+// the memory x still moves with the current, but slows down near its
+// two ends (x = 0 and x = 1) instead of crashing into them.
+`include &quot;disciplines.vams&quot;
+
+module memristor_joglekar(BE, TE);
+inout BE, TE;
+electrical BE, TE;
+electrical dx;   // hidden node: how far x has moved from x0
+
+parameter real Ron  = 100   from (0:inf);  // fully &quot;on&quot; resistance (ohm)
+parameter real Roff = 16e3  from (0:inf);  // fully &quot;off&quot; resistance (ohm)
+parameter real D    = 10n   from (0:inf);  // oxide thickness (m)
+parameter real uv   = 5e-15 from (0:inf);  // how easily the memory moves
+parameter real x0   = 0.3   from [0:1];    // memory at the start
+parameter real p    = 2     from [1:inf);  // window shape
+
+real x, Rmem, i, f;
+
+analog begin
+  x = min(max(x0 + V(dx), 0.0), 1.0);                   // the memory, 0..1
+  Rmem = Ron * x + Roff * (1.0 - x);                    // today&#x27;s resistance
+  i = V(BE, TE) / Rmem;                                 // Ohm&#x27;s law
+  I(BE, TE) &lt;+ i;
+  f = 1.0 - pow((2.0 * x - 1.0) * (2.0 * x - 1.0), p);  // the window
+  I(dx) &lt;+ ddt(V(dx)) - (uv * Ron / (D * D)) * i * f;   // x moves with i*f
+  I(dx) &lt;+ 1e-12 * V(dx);                               // keeps dx defined at rest
+end
+endmodule</pre>
+    </div>
+    <dl class="explain">
+      <dt>BE, TE</dt><dd>The two wires, bottom and top electrode, the same as the memristor in Your first simulation.</dd>
+      <dt>electrical dx</dt><dd>A hidden extra wire inside the model. Its voltage stores how far the memory has moved since the start.</dd>
+      <dt>parameter ...</dt><dd>The numbers you can change from outside: resistances, thickness, how easily the memory moves (<code>uv</code>), the starting memory <code>x0</code>, and the window shape <code>p</code>.</dd>
+      <dt>x = ...</dt><dd>The memory: the start value plus how far it has moved, kept between 0 and 1.</dd>
+      <dt>Rmem, i</dt><dd>Today's resistance and Ohm's law, just like the first model.</dd>
+      <dt>f = 1 - ...</dt><dd><b>The window.</b> It is 1 in the middle (the memory moves freely) and drops to 0 at the two ends (it slows down instead of crashing into them).</dd>
+      <dt>I(dx) &lt;+ ddt(...)</dt><dd>Makes the memory move: the more current, the faster, multiplied by the window. The 1e-12 line only keeps the hidden wire well defined when nothing is happening.</dd>
+    </dl>
+  </article>
+  <article class="step" data-img="img/m09_compiled.png" data-title="It compiles" data-do="Because the file changed, closing it compiles it: openPDKcreator turns it into memristor_joglekar.osdi, the form the simulator loads. A box says Compilation performed correctly. Click OK.">
+    <div class="step-head"><span class="num">10</span><h3>It compiles</h3></div>
+    <p class="do">Because the file changed, closing it <em>compiles</em> it: openPDKcreator turns it into <code>memristor_joglekar.osdi</code>, the form the simulator loads. A box says <b>Compilation performed correctly</b>. Click <b class="ui">OK</b>.</p>
+    <button class="shot" type="button"><img src="img/m09_compiled.png" alt="A box saying Compilation performed correctly, OK boxed in red" loading="lazy"></button>
+    <div class="oops"><strong>If it says "Compilation errors"</strong><span>The file has a typo, usually from an incomplete copy. Do step 7 again, making sure you copied the whole command, then steps 8 and 9.</span></div>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="try">
+  <header>
+    <div class="eyebrow">Part 3 · about 4 minutes</div>
+    <h2>Try it in the testbench</h2>
+    <p>The memristor's symbol only has two pins, so any memristor model fits it. You'll take the testbench from Your first simulation and swap its model for the new one, without changing anything else.</p>
+  </header>
+  <article class="step" data-img="img/m10_click_tb.png" data-title="Pick the testbench" data-do="In the Cells list, click memristor_tio2_au_tb.">
+    <div class="step-head"><span class="num">11</span><h3>Pick the testbench</h3></div>
+    <p class="do">In the Cells list, click <b class="ui">memristor_tio2_au_tb</b>.</p>
+    <button class="shot" type="button"><img src="img/m10_click_tb.png" alt="The memristor_tio2_au_tb cell boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m11_open_xschem.png" data-title="Open it in xschem" data-do="Click Open in xschem on the Schematic row.">
+    <div class="step-head"><span class="num">12</span><h3>Open it in xschem</h3></div>
+    <p class="do">Click <b class="ui">Open in xschem</b> on the Schematic row.</p>
+    <button class="shot" type="button"><img src="img/m11_open_xschem.png" alt="Open in xschem boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m12_xschem_codeblock.png" data-title="Open the code block" data-do="Wait until xschem shows the drawing (up to half a minute). Then double-click on the code text at the bottom, inside the red box.">
+    <div class="step-head"><span class="num">13</span><h3>Open the code block</h3></div>
+    <p class="do">Wait until xschem shows the drawing (up to half a minute). Then <b>double-click</b> on the code text at the bottom, inside the <b class="ui">red box</b>.</p>
+    <button class="shot" type="button"><img src="img/m12_xschem_codeblock.png" alt="xschem with the code block at the bottom boxed in red" loading="lazy"></button>
+    <div class="oops"><strong>If a box called "Text input" opens instead</strong><span>The double-click missed the text. Click <b>Cancel</b> and double-click right on the words <code>.control</code> or <code>.model</code>.</span></div>
+  </article>
+  <article class="step" data-img="img/m14_click_before_model.png" data-title="Click before the model name" data-do="A box called Edit Properties opens with the code. In the line .model mm memristor_tio2_au ..., click once just before the m of memristor_tio2_au (inside the red box).">
+    <div class="step-head"><span class="num">14</span><h3>Click before the model name</h3></div>
+    <p class="do">A box called <b>Edit Properties</b> opens with the code. In the line <code>.model mm memristor_tio2_au ...</code>, click <b>once</b> just before the <b>m</b> of <code>memristor_tio2_au</code> (inside the <b class="ui">red box</b>).</p>
+    <button class="shot" type="button"><img src="img/m14_click_before_model.png" alt="The Edit Properties box, with the start of memristor_tio2_au boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m15_selected_to_end.png" data-title="Replace the rest of the line" data-do="Press Shift + End: the rest of the line turns grey (selected). Now type memristor_joglekar. The line becomes .model mm memristor_joglekar.">
+    <div class="step-head"><span class="num">15</span><h3>Replace the rest of the line</h3></div>
+    <p class="do">Press <kbd>Shift</kbd> + <kbd>End</kbd>: the rest of the line turns grey (selected). Now type <code>memristor_joglekar</code>. The line becomes <code>.model mm memristor_joglekar</code>.</p>
+    <button class="shot" type="button"><img src="img/m15_selected_to_end.png" alt="The rest of the .model line selected, boxed in red" loading="lazy"></button>
+    <div class="see"><strong>Why delete the numbers too?</strong><span>The old numbers (<code>ron=100</code>, <code>uv=1e-14</code>...) were chosen for the old model. Without them, the new model uses its own values from the <code>parameter</code> lines in step 9.</span></div>
+  </article>
+  <article class="step" data-img="img/m16_path_word.png" data-title="Change the file name" data-do="In the pre_osdi line, double-click the word memristor_tio2_au near the end (in the red box) and type memristor_joglekar. The line now ends in memristor_joglekar.osdi: the file compiled in step 10.">
+    <div class="step-head"><span class="num">16</span><h3>Change the file name</h3></div>
+    <p class="do">In the <code>pre_osdi</code> line, <b>double-click</b> the word <code>memristor_tio2_au</code> near the end (in the <b class="ui">red box</b>) and type <code>memristor_joglekar</code>. The line now ends in <code>memristor_joglekar.osdi</code>: the file compiled in step 10.</p>
+    <button class="shot" type="button"><img src="img/m16_path_word.png" alt="The memristor_tio2_au word in the pre_osdi line boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m17_click_ok.png" data-title="Click OK" data-do="Check both lines, then click OK.">
+    <div class="step-head"><span class="num">17</span><h3>Click OK</h3></div>
+    <p class="do">Check both lines, then click <b class="ui">OK</b>.</p>
+    <button class="shot" type="button"><img src="img/m17_click_ok.png" alt="Edit Properties with the two lines changed and OK boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m18_click_netlist.png" data-title="Click Netlist" data-do="In xschem&#x27;s top bar, click Netlist and wait until it turns green.">
+    <div class="step-head"><span class="num">18</span><h3>Click Netlist</h3></div>
+    <p class="do">In xschem's top bar, click <b class="ui">Netlist</b> and wait until it turns green.</p>
+    <button class="shot" type="button"><img src="img/m18_click_netlist.png" alt="Netlist boxed in red; the code block now says memristor_joglekar" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m19_click_simulate.png" data-title="Click Simulate" data-do="Click Simulate and wait about 10 seconds.">
+    <div class="step-head"><span class="num">19</span><h3>Click Simulate</h3></div>
+    <p class="do">Click <b class="ui">Simulate</b> and wait about 10 seconds.</p>
+    <button class="shot" type="button"><img src="img/m19_click_simulate.png" alt="Simulate boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m20_result.png" data-title="The new model&#x27;s loop" data-do="The plot shows the new model. Still a pinched loop, so still a memristor, but a different one.">
+    <div class="step-head"><span class="num">20</span><h3>The new model's loop</h3></div>
+    <p class="do">The plot shows the new model. Still a pinched loop, so still a memristor, but a different one.</p>
+    <button class="shot" type="button"><img src="img/m20_result.png" alt="xschem, the ngspice window and the plot with the new loop" loading="lazy"></button>
+    <div class="two">
+      <button class="shot" type="button"><img src="img/m21_plot_closeup.png" alt="Close-up of the new loop, reaching about plus and minus 113 microamps" loading="lazy"></button>
+      <div class="see"><strong>What changed</strong>
+        <span>The loop now reaches about ±113 µA, wider than the ±79 µA in Your first simulation. This model's memory starts at 0.3 and swings up to about 0.6, so its resistance drops further.</span>
+        <span>The window keeps that swing smooth: if you made the memory move much faster (a bigger <code>uv</code>), it would slow down near 1 instead of stopping dead.</span>
+      </div>
+    </div>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="tidy">
+  <header>
+    <div class="eyebrow">Part 4 · 1 minute</div>
+    <h2>Tidy up</h2>
+    <p>Close the windows and leave the testbench as it was. The new model stays in the PDK.</p>
+  </header>
+  <article class="step" data-img="img/m22_quit_plot.png" data-title="Close the plot" data-do="Click Quit in the plot window.">
+    <div class="step-head"><span class="num">21</span><h3>Close the plot</h3></div>
+    <p class="do">Click <b class="ui">Quit</b> in the plot window.</p>
+    <button class="shot" type="button"><img src="img/m22_quit_plot.png" alt="Quit in the plot window boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m23_quit_ngspice.png" data-title="Close the simulator" data-do="Click inside the white ngspice window, type quit and press Enter.">
+    <div class="step-head"><span class="num">22</span><h3>Close the simulator</h3></div>
+    <p class="do">Click inside the white ngspice window, type <code>quit</code> and press <kbd>Enter</kbd>.</p>
+    <button class="shot" type="button"><img src="img/m23_quit_ngspice.png" alt="The ngspice prompt boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m24_close_xschem.png" data-title="Close xschem" data-do="Click the X at the top-right of the xschem window.">
+    <div class="step-head"><span class="num">23</span><h3>Close xschem</h3></div>
+    <p class="do">Click the <b class="ui">X</b> at the top-right of the xschem window.</p>
+    <button class="shot" type="button"><img src="img/m24_close_xschem.png" alt="xschem&#x27;s close button boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/m25_exit_without_saving.png" data-title="Exit without saving" data-do="xschem asks UNSAVED data: want to exit? Click OK. That throws away the swap you made in steps 14–17, so the testbench stays exactly as Your first simulation uses it.">
+    <div class="step-head"><span class="num">24</span><h3>Exit without saving</h3></div>
+    <p class="do">xschem asks <b>UNSAVED data: want to exit?</b> Click <b class="ui">OK</b>. That throws away the swap you made in steps 14–17, so the testbench stays exactly as Your first simulation uses it.</p>
+    <button class="shot" type="button"><img src="img/m25_exit_without_saving.png" alt="The unsaved-data question with OK boxed in red" loading="lazy"></button>
+    <div class="see"><strong>What you added to the PDK</strong><span>The cell <code>memristor_joglekar</code> with its model <code>user_models/veriloga/memristor_joglekar.va</code>. Its compiled <code>.osdi</code> is rebuilt automatically whenever openPDKcreator starts or you change the file.</span></div>
+    <div class="oops"><strong>Want to do this section again?</strong><span>Step 4 will refuse a name that already exists. Use another name (and the same name in step 7's command and the testbench), or delete <code>memristor_joglekar.va</code> from <code>user_models/veriloga/</code> first.</span></div>
+  </article>
+</section>
