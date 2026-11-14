@@ -47,6 +47,8 @@ if "${CONTAINER_ENGINE}" exec "${CONTAINER_NAME}" pgrep -f "main.py --pdk-root d
     echo "[INFO] main.py gui is already running against data/openmemristorpdk."
 else
     echo "[INFO] Launching main.py gui against data/openmemristorpdk ..."
+    # bash -l so the container's PATH includes /foss/tools/... --
+    # otherwise the GUI finds none of the EDA tools.
     "${CONTAINER_ENGINE}" exec -d -e DISPLAY=:1 -w /foss/designs/openMemristorPDK "${CONTAINER_NAME}" \
-        python3 main.py --pdk-root data/openmemristorpdk gui
+        bash -lc 'exec python3 main.py --pdk-root data/openmemristorpdk gui'
 fi

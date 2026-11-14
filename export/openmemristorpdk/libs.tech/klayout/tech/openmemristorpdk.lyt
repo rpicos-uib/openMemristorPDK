@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KLayout technology for openMemristorPDK: registers the PDK's own
+     layer names/colors (openmemristorpdk.lyp) so a GDS from this PDK
+     opens with them in any KLayout that has this directory on its
+     KLAYOUT_PATH, e.g.
+       KLAYOUT_PATH=<pdk>/libs.tech/klayout klayout -nn openmemristorpdk <file>.gds
+     dbu 0.001 um matches the 1 nm grid the library GDS files use. -->
+<technology>
+ <name>openmemristorpdk</name>
+ <description>openMemristorPDK -- bare-minimum memristor PDK (Au/TiO2/HfO2/Ti/Al)</description>
+ <group/>
+ <dbu>0.001</dbu>
+ <base-path></base-path>
+ <original-base-path></original-base-path>
+ <layer-properties_file>openmemristorpdk.lyp</layer-properties_file>
+ <add-other-layers>true</add-other-layers>
+ <default-grids>0.01,0.005!</default-grids>
+</technology>

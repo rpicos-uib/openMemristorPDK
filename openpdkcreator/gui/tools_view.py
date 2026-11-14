@@ -37,6 +37,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 from .. import eda_tools
+from ..pdklib import klayout_server as klayout_server_mod
 from ..pdklib import tool_env as tool_env_mod
 
 
@@ -194,6 +195,15 @@ class ToolsView(ttk.Frame):
             if script is not None:
                 extra_argv = (script,)
 
+        elif tool_id == "klayout":
+            # Same project-only KLAYOUT_PATH/HOME as Library Manager's
+            # Open in KLayout -- see klayout_server.klayout_env.
+            extra_env = klayout_server_mod.klayout_env(self.app.pdk_root)
+
         argv, cwd = eda_tools.resolve_launch(status.tool, status.path, extra_argv=extra_argv)
+        if tool_id == "klayout" and "-l" not in argv:
+            lyp = klayout_server_mod.current_layers_lyp(self.app.pdk_root, self.app.lyp_path, self.app.project.layers)
+            if lyp is not None:
+                argv = [*argv, "-l", str(lyp)]
         env = {**os.environ, **extra_env} if extra_env else None
         subprocess.Popen(argv, cwd=cwd, env=env)

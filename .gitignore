@@ -3,10 +3,10 @@
 # LEF, DRC) -- the actual deliverable -- so it is tracked, not
 # gitignored. Same for saves/ (Magic Types/DRC edits have no other
 # tracked home -- they are never written back into data/ itself) and
-# export/ (the real, patched open_pdks-format output -- for Layers
-# specifically, the ONLY place the real content ends up at all, since
-# Layers edits are not persisted via saves/ the way LEF/DRC/Magic
-# Types are; a real, documented gap, see docs/presentation/).
+# export/ (the real, patched open_pdks-format output). Layers live in
+# data/.../libs.tech/klayout/tech/openmemristorpdk.lyp itself (plus the
+# openmemristorpdk.lyt KLayout technology next to it), so any KLayout
+# opens this PDK's GDS with the right layer names, not just this app.
 shell_env/
 __pycache__/
 *.pyc

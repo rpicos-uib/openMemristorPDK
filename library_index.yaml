@@ -201,3 +201,11 @@ entries:
   cell: crossbar4x4_tio2_au_lvs
   view_kind: spice
   path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/crossbar4x4_tio2_au_lvs.spice
+- library: openmemristorpdk_pr
+  cell: crossbar4x4_tio2_au_extracted
+  view_kind: spice
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/crossbar4x4_tio2_au_extracted.spice
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au_tb
+  view_kind: xschem_schematic
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au_tb.sch

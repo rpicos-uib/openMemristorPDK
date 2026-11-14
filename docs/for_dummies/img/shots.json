@@ -1,0 +1,156 @@
+{
+ "s01_gui_opens": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s02_click_library_manager": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s03_click_library": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s04_click_cell": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s05_click_view_veriloga": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s06_veriloga_file": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s07_click_tb_cell": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s08_click_open_xschem": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s09_xschem_opens": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s10_click_netlist": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s11_click_simulate": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s12_simulation_result": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s13_plot_closeup": {
+  "note": "",
+  "size": [
+   713,
+   545
+  ]
+ },
+ "s14_close_plot": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s15_quit_ngspice": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s16_close_xschem": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s17_layout_click_cell": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s18_layout_click_klayout": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s19_layout_klayout": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s20_layout_closeup": {
+  "note": "",
+  "size": [
+   810,
+   634
+  ]
+ },
+ "s21_layout_close": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ },
+ "s06b_compiled_ok": {
+  "note": "",
+  "size": [
+   1853,
+   930
+  ]
+ }
+}
