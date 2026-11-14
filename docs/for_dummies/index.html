@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Your First Memristor Simulation</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,6 +44,10 @@
 }
 
 * { box-sizing: border-box; }
+/* The player overlay is hidden with the hidden attribute; .overlay's own
+   display: grid would otherwise override it when the file is opened
+   straight from disk, leaving the player stuck over the page. */
+[hidden] { display: none !important; }
 body {
   background: var(--bg); color: var(--ink);
   font-family: var(--body); font-size: 1.0625rem; line-height: 1.6;

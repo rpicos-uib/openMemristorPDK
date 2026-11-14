@@ -26,7 +26,8 @@ PROJECT = Path("/foss/designs/openMemristorPDK")
 OUT = PROJECT / "docs" / "for_dummies" / "img"
 DRV = Path("/tmp/drv")
 TOOL = Path("/foss/designs")  # openPDKcreator itself: the checkout this project lives inside
-os.chdir(PROJECT)
+# Same working directory as ./start_eda_container.sh --gui-memristor uses.
+os.chdir(TOOL)
 sys.path.insert(0, str(TOOL))
 
 import tkinter as tk  # noqa: E402
@@ -228,7 +229,8 @@ from main import use_project_root  # noqa: E402
 use_project_root(PROJECT)  # same as main.py --project-root openMemristorPDK
 
 root = tk.Tk()
-app = App(root, Path("data/openmemristorpdk"))
+# Same as main.py --pdk-root openMemristorPDK/data/openmemristorpdk (main.py resolves it).
+app = App(root, (PROJECT / "data" / "openmemristorpdk").resolve())
 root.geometry("1400x860+40+30")
 
 DRV.mkdir(exist_ok=True)
