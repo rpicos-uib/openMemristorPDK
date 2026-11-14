@@ -76,11 +76,16 @@ SECTIONS = [
     {
         "slug": "corners-montecarlo",
         "title": "Corners and Monte Carlo",
-        "short": "Corners & Monte Carlo",
-        "status": "soon",
-        "time": "",
+        "short": "Monte Carlo",
+        "status": "ready",
+        "time": "about 15 min · 41 steps",
         "desc": "Simulate the TT/FF/SS process corners, then a Monte Carlo run where Ron, Roff and "
                 "the oxide thickness vary from device to device.",
+        "lede": "No two devices from a factory are exactly alike. Read the PDK's process corners, simulate "
+                "the typical and the slow memristor, then build 20 random memristors in one Monte Carlo run "
+                "and find out which manufacturing spread matters most.",
+        "prereq": 'Do <a href="first-simulation.html">Your first simulation</a> first: this section uses the '
+                  'same moves (Netlist, Simulate, Quit, quit). Start with openPDKcreator open.',
     },
 ]
 

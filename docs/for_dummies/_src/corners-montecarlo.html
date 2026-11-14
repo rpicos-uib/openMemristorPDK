@@ -1,0 +1,366 @@
+<section class="chapter" id="corners">
+  <header>
+    <div class="eyebrow">Part 1 · about 2 minutes</div>
+    <h2>What the factory promises</h2>
+    <p>A real factory never makes two devices exactly alike: the oxide comes out a little thicker here, the metal a little rougher there. So the PDK doesn't give one value for Ron and Roff, it gives <b>corners</b>: the typical case and the two extremes a designer must survive. Here they live in one file, <code>openmemristorpdk_corners.lib</code>, and openPDKcreator shows them in a table.</p>
+  </header>
+  <article class="step" data-img="img/e01_click_pdk.png" data-title="Open the PDK tab" data-do="Click the PDK tab at the top.">
+    <div class="step-head"><span class="num">1</span><h3>Open the PDK tab</h3></div>
+    <p class="do">Click the <b class="ui">PDK</b> tab at the top.</p>
+    <button class="shot" type="button"><img src="img/e01_click_pdk.png" alt="The PDK tab boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e02_click_simulation.png" data-title="Simulation" data-do="Click Simulation.">
+    <div class="step-head"><span class="num">2</span><h3>Simulation</h3></div>
+    <p class="do">Click <b class="ui">Simulation</b>.</p>
+    <button class="shot" type="button"><img src="img/e02_click_simulation.png" alt="The Simulation tab boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e03_click_corners.png" data-title="Corners" data-do="You are on ngspice Models, with the file openmemristorpdk_corners.lib already chosen. Click the small Corners tab.">
+    <div class="step-head"><span class="num">3</span><h3>Corners</h3></div>
+    <p class="do">You are on <b>ngspice Models</b>, with the file <code>openmemristorpdk_corners.lib</code> already chosen. Click the small <b class="ui">Corners</b> tab.</p>
+    <button class="shot" type="button"><img src="img/e03_click_corners.png" alt="The Corners sub-tab boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e04_corners.png" data-title="The three corners" data-do="Three rows (1): TT, FF and SS. TT is selected, and its values are in the box at the bottom right (2).">
+    <div class="step-head"><span class="num">4</span><h3>The three corners</h3></div>
+    <p class="do">Three rows (1): <b>TT</b>, <b>FF</b> and <b>SS</b>. TT is selected, and its values are in the box at the bottom right (2).</p>
+    <button class="shot" type="button"><img src="img/e04_corners.png" alt="The TT, FF and SS rows boxed as 1, the TT values boxed as 2" loading="lazy"></button>
+    <dl class="explain">
+      <dt>TT · typical</dt><dd>What most devices look like: <code>ron_tio2_au = 100</code> Ω and <code>roff_tio2_au = 16k</code> (16 000 Ω).</dd>
+      <dt>FF · fast</dt><dd>Every resistance 20 % <b>lower</b>: more current, faster circuits.</dd>
+      <dt>SS · slow</dt><dd>Every resistance 20 % <b>higher</b>: less current, slower circuits.</dd>
+      <dt>tio2_au, tio2_ti, hfo2_al</dt><dd>One pair of numbers per memristor in the PDK. This section uses the Au/TiO₂/Au one, the same as in <a href="first-simulation.html">Your first simulation</a>.</dd>
+    </dl>
+  </article>
+  <article class="step" data-img="img/e05_click_ff.png" data-title="Look at FF" data-do="Click the FF row.">
+    <div class="step-head"><span class="num">5</span><h3>Look at FF</h3></div>
+    <p class="do">Click the <b class="ui">FF</b> row.</p>
+    <button class="shot" type="button"><img src="img/e05_click_ff.png" alt="The FF row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e06_ff_values.png" data-title="Lower resistances" data-do="The box now shows the FF values: ron_tio2_au = 80 and roff_tio2_au = 12.8k, both 20 % below TT. Don&#x27;t change anything here.">
+    <div class="step-head"><span class="num">6</span><h3>Lower resistances</h3></div>
+    <p class="do">The box now shows the FF values: <code>ron_tio2_au = 80</code> and <code>roff_tio2_au = 12.8k</code>, both 20 % below TT. Don't change anything here.</p>
+    <button class="shot" type="button"><img src="img/e06_ff_values.png" alt="The FF values boxed in red: 80 and 12.8k for tio2_au" loading="lazy"></button>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="tt">
+  <header>
+    <div class="eyebrow">Part 2 · about 3 minutes</div>
+    <h2>Simulate the typical corner</h2>
+    <p>A testbench picks one corner with a single word. You'll run the typical one first.</p>
+  </header>
+  <article class="step" data-img="img/e07_click_libman.png" data-title="Library Manager" data-do="Click the Library Manager tab.">
+    <div class="step-head"><span class="num">7</span><h3>Library Manager</h3></div>
+    <p class="do">Click the <b class="ui">Library Manager</b> tab.</p>
+    <button class="shot" type="button"><img src="img/e07_click_libman.png" alt="The Library Manager tab boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e08_click_corners_tb.png" data-title="The corners testbench" data-do="Click the library openmemristorpdk_pr (1) if it isn&#x27;t selected yet, then the cell memristor_tio2_au_corners_tb (2).">
+    <div class="step-head"><span class="num">8</span><h3>The corners testbench</h3></div>
+    <p class="do">Click the library <b class="ui">openmemristorpdk_pr</b> (1) if it isn't selected yet, then the cell <b class="ui">memristor_tio2_au_corners_tb</b> (2).</p>
+    <button class="shot" type="button"><img src="img/e08_click_corners_tb.png" alt="The library boxed as 1, memristor_tio2_au_corners_tb boxed as 2" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e09_open_xschem.png" data-title="Open it" data-do="Click Open in xschem on the Schematic row.">
+    <div class="step-head"><span class="num">9</span><h3>Open it</h3></div>
+    <p class="do">Click <b class="ui">Open in xschem</b> on the Schematic row.</p>
+    <button class="shot" type="button"><img src="img/e09_open_xschem.png" alt="Open in xschem boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e11_lib_line.png" data-title="Read the code block" data-do="The same circuit as in section 2: a sine-wave source and one memristor. The difference is in the code block at the bottom. The line boxed in red picks the corner.">
+    <div class="step-head"><span class="num">10</span><h3>Read the code block</h3></div>
+    <p class="do">The same circuit as in section 2: a sine-wave source and one memristor. The difference is in the code block at the bottom. The line boxed in red picks the corner.</p>
+    <button class="shot" type="button"><img src="img/e11_lib_line.png" alt="xschem with the corners testbench; the .lib line boxed in red" loading="lazy"></button>
+    <div class="file">
+      <div class="fname"><span>code block s1</span><span>what ngspice reads</span></div>
+<pre>* Process corner: TT (typical), FF (fast) or SS (slow).
+* To try another corner, change the last word of the .lib line.
+.lib /foss/designs/openMemristorPDK/data/openmemristorpdk/libs.tech/ngspice/models/openmemristorpdk_corners.lib TT
+.model mm memristor_tio2_au ron={ron_tio2_au} roff={roff_tio2_au} d=10n uv=1e-14 x0=0.3
+.control
+pre_osdi /foss/designs/openMemristorPDK/user_models/veriloga/memristor_tio2_au.osdi
+tran 300u 3.34
+let peak = maximum(-i(V1)) * 1e6
+echo Ron = $&amp;@mm[ron] Ohm   Roff = $&amp;@mm[roff] Ohm   peak current = $&amp;peak uA
+plot -i(V1) vs v(te) retraceplot ylimit -110u 110u title &#x27;Memristor I-V loop at one corner&#x27; xlabel &#x27;Voltage (V)&#x27; ylabel &#x27;Current (A)&#x27;
+.endc</pre>
+    </div>
+    <dl class="explain">
+      <dt>.lib ... TT</dt><dd>Read the corners file, but only the <b>TT</b> part. The last word is the corner.</dd>
+      <dt>ron={ron_tio2_au}</dt><dd>The curly brackets mean "use the value from the corner". With TT that is 100 Ω; with SS it would be 120 Ω.</dd>
+      <dt>echo</dt><dd>Prints Ron, Roff and the highest current in the ngspice window, so you can compare corners with numbers.</dd>
+      <dt>ylimit -110u 110u</dt><dd>Fixes the plot's height, so a smaller loop really looks smaller.</dd>
+    </dl>
+  </article>
+  <article class="step" data-img="img/e12_netlist.png" data-title="Click Netlist" data-do="Click Netlist and wait until it turns green.">
+    <div class="step-head"><span class="num">11</span><h3>Click Netlist</h3></div>
+    <p class="do">Click <b class="ui">Netlist</b> and wait until it turns green.</p>
+    <button class="shot" type="button"><img src="img/e12_netlist.png" alt="Netlist boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e13_simulate.png" data-title="Click Simulate" data-do="Click Simulate and wait about 10 seconds.">
+    <div class="step-head"><span class="num">12</span><h3>Click Simulate</h3></div>
+    <p class="do">Click <b class="ui">Simulate</b> and wait about 10 seconds.</p>
+    <button class="shot" type="button"><img src="img/e13_simulate.png" alt="Simulate boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e14_tt_result.png" data-title="The typical memristor" data-do="The plot shows the pinched loop of a typical device, and the last line in the ngspice window gives its numbers.">
+    <div class="step-head"><span class="num">13</span><h3>The typical memristor</h3></div>
+    <p class="do">The plot shows the pinched loop of a typical device, and the last line in the ngspice window gives its numbers.</p>
+    <button class="shot" type="button"><img src="img/e14_tt_result.png" alt="xschem, the ngspice window and the TT loop" loading="lazy"></button>
+    <div class="two">
+      <button class="shot" type="button"><img src="img/e15_tt_closeup.png" alt="Close-up of the TT loop, reaching about 79 uA at 1 V" loading="lazy"></button>
+      <div class="see"><strong>Write it down</strong>
+        <span>Ron = 100 Ω, Roff = 16 000 Ω.</span>
+        <span>Peak current: <b>78.9 µA</b> (µA = millionths of an ampere).</span>
+        <span>Remember this number: the next corner will beat it or lose to it.</span>
+      </div>
+    </div>
+    <button class="shot" type="button"><img src="img/e15b_tt_console.png" alt="ngspice: Ron = 100 Ohm Roff = 16000 Ohm peak current = 78.9166 uA" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e16_quit_plot.png" data-title="Close the plot" data-do="Click Quit in the plot window.">
+    <div class="step-head"><span class="num">14</span><h3>Close the plot</h3></div>
+    <p class="do">Click <b class="ui">Quit</b> in the plot window.</p>
+    <button class="shot" type="button"><img src="img/e16_quit_plot.png" alt="Quit in the plot window boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e17_quit_ngspice.png" data-title="Close the simulator" data-do="Click inside the white ngspice window, type quit and press Enter.">
+    <div class="step-head"><span class="num">15</span><h3>Close the simulator</h3></div>
+    <p class="do">Click inside the white ngspice window, type <code>quit</code> and press <kbd>Enter</kbd>.</p>
+    <button class="shot" type="button"><img src="img/e17_quit_ngspice.png" alt="The ngspice prompt boxed in red" loading="lazy"></button>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="ss">
+  <header>
+    <div class="eyebrow">Part 3 · about 3 minutes</div>
+    <h2>Switch to the slow corner</h2>
+    <p>Same testbench, one word changed: <code>TT</code> becomes <code>SS</code>.</p>
+  </header>
+  <article class="step" data-img="img/e18_edit_codeblock.png" data-title="Edit the code block" data-do="Double-click the code block text.">
+    <div class="step-head"><span class="num">16</span><h3>Edit the code block</h3></div>
+    <p class="do">Double-click the code block text.</p>
+    <button class="shot" type="button"><img src="img/e18_edit_codeblock.png" alt="The code block boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e19_edit_properties.png" data-title="Find the .lib line" data-do="The Edit Properties window opens. The .lib line is too long to see its end. Click anywhere on it.">
+    <div class="step-head"><span class="num">17</span><h3>Find the .lib line</h3></div>
+    <p class="do">The <b>Edit Properties</b> window opens. The <code>.lib</code> line is too long to see its end. Click anywhere on it.</p>
+    <button class="shot" type="button"><img src="img/e19_edit_properties.png" alt="Edit Properties with the .lib line boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e20_end_of_line.png" data-title="Go to the end of the line" data-do="Press End. The text slides left and the cursor stops right after TT.">
+    <div class="step-head"><span class="num">18</span><h3>Go to the end of the line</h3></div>
+    <p class="do">Press <kbd>End</kbd>. The text slides left and the cursor stops right after <code>TT</code>.</p>
+    <button class="shot" type="button"><img src="img/e20_end_of_line.png" alt="The end of the .lib line with TT boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e21_type_ss.png" data-title="TT becomes SS" data-do="Press Backspace twice, type SS (1) and click OK (2).">
+    <div class="step-head"><span class="num">19</span><h3>TT becomes SS</h3></div>
+    <p class="do">Press <kbd>Backspace</kbd> twice, type <code>SS</code> (1) and click <b class="ui">OK</b> (2).</p>
+    <button class="shot" type="button"><img src="img/e21_type_ss.png" alt="SS boxed as 1, OK boxed as 2" loading="lazy"></button>
+    <div class="oops"><strong>Capital letters</strong><span>Type <code>SS</code> in capitals: the corner names in the file are capitals.</span></div>
+  </article>
+  <article class="step" data-img="img/e22_netlist_simulate.png" data-title="Netlist, then Simulate" data-do="Click Netlist (1), wait for green, then Simulate (2).">
+    <div class="step-head"><span class="num">20</span><h3>Netlist, then Simulate</h3></div>
+    <p class="do">Click <b class="ui">Netlist</b> (1), wait for green, then <b class="ui">Simulate</b> (2).</p>
+    <button class="shot" type="button"><img src="img/e22_netlist_simulate.png" alt="Netlist boxed as 1, Simulate boxed as 2" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e23_ss_result.png" data-title="The slow memristor" data-do="A thinner loop: less current flows.">
+    <div class="step-head"><span class="num">21</span><h3>The slow memristor</h3></div>
+    <p class="do">A thinner loop: less current flows.</p>
+    <button class="shot" type="button"><img src="img/e23_ss_result.png" alt="xschem, the ngspice window and the SS loop" loading="lazy"></button>
+    <div class="two">
+      <button class="shot" type="button"><img src="img/e24_ss_closeup.png" alt="Close-up of the SS loop, reaching about 66 uA at 1 V" loading="lazy"></button>
+      <div class="see"><strong>Compare</strong>
+        <span>SS: Ron = 120 Ω, Roff = 19 200 Ω, peak <b>65.8 µA</b>.</span>
+        <span>TT gave 78.9 µA. Resistances 20 % higher, current about 17 % lower.</span>
+        <span>A circuit built with these memristors must still work with this weaker current.</span>
+      </div>
+    </div>
+    <button class="shot" type="button"><img src="img/e24b_ss_console.png" alt="ngspice: Ron = 120 Ohm Roff = 19200 Ohm peak current = 65.7638 uA" loading="lazy"></button>
+    <div class="see"><strong>Try FF yourself</strong><span>Close the plot and ngspice (steps 14–15), then repeat steps 16–20 with <code>FF</code>. You should get a peak of <b>98.6 µA</b>.</span></div>
+  </article>
+  <article class="step" data-title="Close plot and simulator" data-do="Same as before: Quit in the plot window, then quit + Enter in the ngspice window.">
+    <div class="step-head"><span class="num">22</span><h3>Close plot and simulator</h3></div>
+    <p class="do">Same as before: <b class="ui">Quit</b> in the plot window, then <code>quit</code> + <kbd>Enter</kbd> in the ngspice window.</p>
+  </article>
+  <article class="step" data-img="img/e25_close_xschem.png" data-title="Close xschem" data-do="Click the X at the top-right of the xschem window.">
+    <div class="step-head"><span class="num">23</span><h3>Close xschem</h3></div>
+    <p class="do">Click the <b class="ui">X</b> at the top-right of the xschem window.</p>
+    <button class="shot" type="button"><img src="img/e25_close_xschem.png" alt="xschem&#x27;s close button boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e26_dont_save.png" data-title="Don&#x27;t save" data-do="xschem asks UNSAVED data: want to exit? Click OK. The testbench keeps TT for next time.">
+    <div class="step-head"><span class="num">24</span><h3>Don't save</h3></div>
+    <p class="do">xschem asks <b>UNSAVED data: want to exit?</b> Click <b class="ui">OK</b>. The testbench keeps <code>TT</code> for next time.</p>
+    <button class="shot" type="button"><img src="img/e26_dont_save.png" alt="The UNSAVED data question with OK boxed in red" loading="lazy"></button>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="montecarlo">
+  <header>
+    <div class="eyebrow">Part 4 · about 4 minutes</div>
+    <h2>Monte Carlo: 20 different memristors</h2>
+    <p>Corners show the extremes. <b>Monte Carlo</b> shows what a real batch looks like: ngspice builds 20 memristors, each with its own random Ron, Roff and oxide thickness D, and simulates them one after another. The name comes from the casino in Monaco: it's all about random numbers.</p>
+  </header>
+  <article class="step" data-img="img/e27_click_mc_tb.png" data-title="The Monte Carlo testbench" data-do="In the Library Manager, click memristor_tio2_au_mc_tb.">
+    <div class="step-head"><span class="num">25</span><h3>The Monte Carlo testbench</h3></div>
+    <p class="do">In the Library Manager, click <b class="ui">memristor_tio2_au_mc_tb</b>.</p>
+    <button class="shot" type="button"><img src="img/e27_click_mc_tb.png" alt="memristor_tio2_au_mc_tb boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e28_open_xschem.png" data-title="Open it" data-do="Click Open in xschem.">
+    <div class="step-head"><span class="num">26</span><h3>Open it</h3></div>
+    <p class="do">Click <b class="ui">Open in xschem</b>.</p>
+    <button class="shot" type="button"><img src="img/e28_open_xschem.png" alt="Open in xschem boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e30_mc_params.png" data-title="Read the code block" data-do="Same circuit, a longer code block. The three lines boxed in red are where the randomness comes from.">
+    <div class="step-head"><span class="num">27</span><h3>Read the code block</h3></div>
+    <p class="do">Same circuit, a longer code block. The three lines boxed in red are where the randomness comes from.</p>
+    <button class="shot" type="button"><img src="img/e30_mc_params.png" alt="xschem with the Monte Carlo testbench; the three .param lines boxed in red" loading="lazy"></button>
+    <div class="file tall">
+      <div class="fname"><span>code block s1</span><span>what ngspice reads</span></div>
+<pre>* Monte Carlo: simulate 20 memristors, each one a little different,
+* like 20 devices from a real factory. agauss(typical, spread, 1)
+* draws a random value around the typical one (a bell curve).
+.param ron_mc  = agauss(100, 10, 1)
+.param roff_mc = agauss(16k, 1.6k, 1)
+.param d_mc    = agauss(10n, 0.5n, 1)
+.model mm memristor_tio2_au ron={ron_mc} roff={roff_mc} d={d_mc} uv=1e-14 x0=0.3
+.options interp
+.control
+pre_osdi /foss/designs/openMemristorPDK/user_models/veriloga/memristor_tio2_au.osdi
+* setseed: the same 20 random memristors every time (the ones in the guide)
+setseed 16
+let runs = 20
+let ron = vector(runs)
+let roff = vector(runs)
+let dnm = vector(runs)
+let peak = vector(runs)
+set curves = ( )
+let n = 0
+dowhile n &lt; runs
+  reset
+  tran 1m 3.34
+  let ron[n] = @mm[ron]
+  let roff[n] = @mm[roff]
+  let dnm[n] = @mm[d] * 1e9
+  let imem = -i(V1)
+  let peak[n] = maximum(imem) * 1e6
+  set curves = ( $curves {$curplot}.imem )
+  let n = n + 1
+end
+setplot const
+let n = 0
+dowhile n &lt; runs
+  let r1 = ron[n]
+  let r2 = roff[n]
+  let dd = dnm[n]
+  let pk = peak[n]
+  echo memristor $&amp;n :  Ron $&amp;r1  Roff $&amp;r2  D $&amp;dd nm  peak $&amp;pk uA
+  let n = n + 1
+end
+plot $curves vs tran1.v(te) retraceplot title &#x27;20 memristors (Monte Carlo)&#x27; xlabel &#x27;Voltage (V)&#x27; ylabel &#x27;Current (A)&#x27;
+.endc</pre>
+    </div>
+    <dl class="explain">
+      <dt>agauss(100, 10, 1)</dt><dd>A random number around 100, usually between 90 and 110 (a <em>bell curve</em>). Ron varies by about 10 %, Roff by 10 %, and D (normally 10 nm) by 5 %.</dd>
+      <dt>setseed 16</dt><dd>Random numbers start from a <em>seed</em>. With the same seed you get the same 20 memristors as in these screenshots. Change 16 to another number for a new batch.</dd>
+      <dt>dowhile n &lt; runs ... end</dt><dd>A loop: the lines inside run 20 times, with n = 0, 1, 2 ... 19.</dd>
+      <dt>reset</dt><dd>Loads the circuit again, which draws new random values: a new memristor.</dd>
+      <dt>let ron[n] = @mm[ron]</dt><dd>Writes down the Ron this memristor got. Same for Roff, D and the peak current.</dd>
+      <dt>echo memristor ...</dt><dd>At the end, prints one line per memristor: a table.</dd>
+      <dt>plot $curves ...</dt><dd>Draws all 20 loops in one plot.</dd>
+    </dl>
+  </article>
+  <article class="step" data-img="img/e31_netlist_simulate.png" data-title="Netlist, then Simulate" data-do="Click Netlist (1), wait for green, then Simulate (2). Twenty simulations take about 20 seconds.">
+    <div class="step-head"><span class="num">28</span><h3>Netlist, then Simulate</h3></div>
+    <p class="do">Click <b class="ui">Netlist</b> (1), wait for green, then <b class="ui">Simulate</b> (2). Twenty simulations take about <b>20 seconds</b>.</p>
+    <button class="shot" type="button"><img src="img/e31_netlist_simulate.png" alt="Netlist boxed as 1, Simulate boxed as 2" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e32_mc_result.png" data-title="One memristor is different" data-do="Nineteen loops are so small they lie flat along the zero line. One of them shoots up to almost 5 mA.">
+    <div class="step-head"><span class="num">29</span><h3>One memristor is different</h3></div>
+    <p class="do">Nineteen loops are so small they lie flat along the zero line. One of them shoots up to almost 5 mA.</p>
+    <button class="shot" type="button"><img src="img/e32_mc_result.png" alt="xschem, the ngspice window and the plot of 20 loops" loading="lazy"></button>
+    <div class="two">
+      <button class="shot" type="button"><img src="img/e33_mc_plot.png" alt="Close-up: one blue loop reaching 4.7 mA, all others flat near zero" loading="lazy"></button>
+      <div class="see"><strong>How to read it</strong>
+        <span>Each colour is one memristor. The legend calls them <code>tran1.imem</code> ... <code>tran20.imem</code>: run 1 to run 20.</span>
+        <span>The blue one, <code>tran2</code>, has <b>switched on</b>: the steep line through the middle is its low Ron.</span>
+        <span>The current is 60 times bigger than the others. The plot's scale is now mA (thousandths), not µA.</span>
+      </div>
+    </div>
+  </article>
+  <article class="step" data-img="img/e34_click_console.png" data-title="Bring the table to the front" data-do="The plot covers part of the ngspice window. Click the ngspice window&#x27;s title bar to bring it to the front.">
+    <div class="step-head"><span class="num">30</span><h3>Bring the table to the front</h3></div>
+    <p class="do">The plot covers part of the ngspice window. Click the ngspice window's title bar to bring it to the front.</p>
+    <button class="shot" type="button"><img src="img/e34_click_console.png" alt="The ngspice window&#x27;s title bar boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e35_mc_table.png" data-title="The table of 20 memristors" data-do="One line per memristor, numbered from 0. Memristor 0 is run 1, memristor 1 is run 2 (the blue one), and so on.">
+    <div class="step-head"><span class="num">31</span><h3>The table of 20 memristors</h3></div>
+    <p class="do">One line per memristor, numbered from 0. Memristor 0 is run 1, memristor 1 is run 2 (the blue one), and so on.</p>
+    <button class="shot" type="button"><img src="img/e35_mc_table.png" alt="ngspice window listing memristor 0 to 19 with Ron, Roff, D and peak" loading="lazy"></button>
+    <dl class="explain">
+      <dt>memristor 1</dt><dd>Peak <b>4748 µA</b>. It has the <b>lowest Roff</b> of the batch (12 073 Ω) <em>and</em> a thin oxide (9.45 nm). More current pushes the memory faster, and a thinner oxide needs less push to fill up, so it switched on.</dd>
+      <dt>memristor 4</dt><dd>The <b>thinnest oxide</b> (8.91 nm) but a high Roff (18 820 Ω): too little current, it didn't switch (67 µA).</dd>
+      <dt>memristor 2</dt><dd>Almost the same low Roff as memristor 1, but a thick oxide (10.5 nm): no switch either (117 µA).</dd>
+    </dl>
+    <div class="see"><strong>What it tells a designer</strong><span>Small differences between devices can change how a circuit behaves completely. A Monte Carlo run finds those surprises before the chip is made.</span></div>
+    <div class="oops"><strong>Warning: No job ... defined</strong><span>The last two lines are a harmless warning from xschem asking ngspice to run once more after the code block. All 20 simulations already ran. Ignore it.</span></div>
+  </article>
+  <article class="step" data-img="img/e36_quit_plot.png" data-title="Close the plot" data-do="Click Quit in the plot window.">
+    <div class="step-head"><span class="num">32</span><h3>Close the plot</h3></div>
+    <p class="do">Click <b class="ui">Quit</b> in the plot window.</p>
+    <button class="shot" type="button"><img src="img/e36_quit_plot.png" alt="Quit in the plot window boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e37_quit_ngspice.png" data-title="Close the simulator" data-do="Click inside the ngspice window, type quit and press Enter.">
+    <div class="step-head"><span class="num">33</span><h3>Close the simulator</h3></div>
+    <p class="do">Click inside the ngspice window, type <code>quit</code> and press <kbd>Enter</kbd>.</p>
+    <button class="shot" type="button"><img src="img/e37_quit_ngspice.png" alt="The ngspice prompt boxed in red" loading="lazy"></button>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="perfect">
+  <header>
+    <div class="eyebrow">Part 5 · about 3 minutes</div>
+    <h2>A perfect oxide</h2>
+    <p>What if the factory could make the oxide exactly 10 nm every time? Set D's spread to zero and run the batch again.</p>
+  </header>
+  <article class="step" data-img="img/e38_edit_codeblock.png" data-title="Edit the code block" data-do="Double-click the code block text.">
+    <div class="step-head"><span class="num">34</span><h3>Edit the code block</h3></div>
+    <p class="do">Double-click the code block text.</p>
+    <button class="shot" type="button"><img src="img/e38_edit_codeblock.png" alt="The code block boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e39_edit_properties.png" data-title="Find the spread of D" data-do="On the line .param d_mc = agauss(10n, 0.5n, 1), click right after 0.5n, before the comma.">
+    <div class="step-head"><span class="num">35</span><h3>Find the spread of D</h3></div>
+    <p class="do">On the line <code>.param d_mc = agauss(10n, 0.5n, 1)</code>, click right after <code>0.5n</code>, before the comma.</p>
+    <button class="shot" type="button"><img src="img/e39_edit_properties.png" alt="0.5n on the d_mc line boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e40_spread_zero.png" data-title="Make it zero" data-do="Press Backspace 4 times to delete 0.5n, type 0 (1). The line now reads agauss(10n, 0, 1). Click OK (2).">
+    <div class="step-head"><span class="num">36</span><h3>Make it zero</h3></div>
+    <p class="do">Press <kbd>Backspace</kbd> 4 times to delete <code>0.5n</code>, type <code>0</code> (1). The line now reads <code>agauss(10n, 0, 1)</code>. Click <b class="ui">OK</b> (2).</p>
+    <button class="shot" type="button"><img src="img/e40_spread_zero.png" alt="The 0 boxed as 1, OK boxed as 2" loading="lazy"></button>
+    <div class="oops"><strong>If the line looks wrong</strong><span>Click <b>Cancel</b> and start again from step 34. Nothing is changed until you click OK.</span></div>
+  </article>
+  <article class="step" data-img="img/e41_netlist_simulate.png" data-title="Netlist, then Simulate" data-do="Click Netlist (1), wait for green, then Simulate (2), and wait about 20 seconds.">
+    <div class="step-head"><span class="num">37</span><h3>Netlist, then Simulate</h3></div>
+    <p class="do">Click <b class="ui">Netlist</b> (1), wait for green, then <b class="ui">Simulate</b> (2), and wait about 20 seconds.</p>
+    <button class="shot" type="button"><img src="img/e41_netlist_simulate.png" alt="Netlist boxed as 1, Simulate boxed as 2" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e42_d0_plot.png" data-title="Twenty well-behaved memristors" data-do="Now every loop is visible: twenty pinched loops, all between about 60 and 130 µA. None switches on.">
+    <div class="step-head"><span class="num">38</span><h3>Twenty well-behaved memristors</h3></div>
+    <p class="do">Now every loop is visible: twenty pinched loops, all between about 60 and 130 µA. None switches on.</p>
+    <button class="shot" type="button"><img src="img/e42_d0_plot.png" alt="Twenty coloured pinched loops between about -130 and 130 uA" loading="lazy"></button>
+    <div class="see"><strong>What changed</strong><span>Every memristor has D = 10 nm. Ron and Roff still vary, which is why the loops fan out a little. The widest one, green, is the memristor with the lowest Roff.</span></div>
+    <button class="shot" type="button"><img src="img/e43_d0_table.png" alt="ngspice table: every memristor has D = 10 nm and a peak between 63 and 129 uA" loading="lazy"></button>
+    <div class="see"><strong>The lesson</strong><span>The oxide thickness was what made one memristor out of 20 behave completely differently. If you made memristor chips, controlling that thickness is where you'd spend your money.</span></div>
+  </article>
+  <article class="step" data-title="Close plot and simulator" data-do="Quit in the plot window, then quit + Enter in the ngspice window (bring it to the front first).">
+    <div class="step-head"><span class="num">39</span><h3>Close plot and simulator</h3></div>
+    <p class="do"><b class="ui">Quit</b> in the plot window, then <code>quit</code> + <kbd>Enter</kbd> in the ngspice window (bring it to the front first).</p>
+  </article>
+  <article class="step" data-img="img/e44_close_xschem.png" data-title="Close xschem" data-do="Click the X at the top-right of the xschem window.">
+    <div class="step-head"><span class="num">40</span><h3>Close xschem</h3></div>
+    <p class="do">Click the <b class="ui">X</b> at the top-right of the xschem window.</p>
+    <button class="shot" type="button"><img src="img/e44_close_xschem.png" alt="xschem&#x27;s close button boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/e45_dont_save.png" data-title="Don&#x27;t save" data-do="Click OK on UNSAVED data: want to exit? The testbench keeps the 0.5n spread.">
+    <div class="step-head"><span class="num">41</span><h3>Don't save</h3></div>
+    <p class="do">Click <b class="ui">OK</b> on <b>UNSAVED data: want to exit?</b> The testbench keeps the 0.5n spread.</p>
+    <button class="shot" type="button"><img src="img/e45_dont_save.png" alt="The UNSAVED data question with OK boxed in red" loading="lazy"></button>
+    <div class="see"><strong>What you did</strong><span>You read the PDK's process corners, simulated the typical and the slow corner, ran a Monte Carlo batch of 20 memristors and found out which manufacturing spread matters most. That's exactly what chip designers do before sending a design to the factory.</span></div>
+  </article>
+</section>

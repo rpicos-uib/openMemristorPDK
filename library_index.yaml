@@ -209,3 +209,11 @@ entries:
   cell: memristor_tio2_au_tb
   view_kind: xschem_schematic
   path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au_tb.sch
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au_corners_tb
+  view_kind: xschem_schematic
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au_corners_tb.sch
+- library: openmemristorpdk_pr
+  cell: memristor_tio2_au_mc_tb
+  view_kind: xschem_schematic
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au_mc_tb.sch

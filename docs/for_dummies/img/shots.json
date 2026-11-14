@@ -146,20 +146,6 @@
    1019
   ]
  },
- "explore_xprop": {
-  "note": "",
-  "size": [
-   1680,
-   1050
-  ]
- },
- "explore_save": {
-  "note": "",
-  "size": [
-   1680,
-   1050
-  ]
- },
  "m01_library_manager": {
   "note": "",
   "size": [
@@ -574,6 +560,321 @@
   ]
  },
  "d30_close_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e01_click_pdk": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e02_click_simulation": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e03_click_corners": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e04_corners": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e05_click_ff": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e06_ff_values": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e07_click_libman": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e08_click_corners_tb": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e09_open_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e11_lib_line": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e12_netlist": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e13_simulate": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e14_tt_result": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e15_tt_closeup": {
+  "note": "",
+  "size": [
+   714,
+   544
+  ]
+ },
+ "e15b_tt_console": {
+  "note": "",
+  "size": [
+   494,
+   65
+  ]
+ },
+ "e16_quit_plot": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e17_quit_ngspice": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e18_edit_codeblock": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e19_edit_properties": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e20_end_of_line": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e21_type_ss": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e22_netlist_simulate": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e23_ss_result": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e24_ss_closeup": {
+  "note": "",
+  "size": [
+   714,
+   544
+  ]
+ },
+ "e24b_ss_console": {
+  "note": "",
+  "size": [
+   494,
+   65
+  ]
+ },
+ "e25_close_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e26_dont_save": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e27_click_mc_tb": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e28_open_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e30_mc_params": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e31_netlist_simulate": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e32_mc_result": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e33_mc_plot": {
+  "note": "",
+  "size": [
+   714,
+   544
+  ]
+ },
+ "e34_click_console": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e35_mc_table": {
+  "note": "",
+  "size": [
+   494,
+   350
+  ]
+ },
+ "e36_quit_plot": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e37_quit_ngspice": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e38_edit_codeblock": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e39_edit_properties": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e40_spread_zero": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e41_netlist_simulate": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e42_d0_plot": {
+  "note": "",
+  "size": [
+   714,
+   544
+  ]
+ },
+ "e43_d0_table": {
+  "note": "",
+  "size": [
+   494,
+   350
+  ]
+ },
+ "e44_close_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e45_dont_save": {
   "note": "",
   "size": [
    1680,
