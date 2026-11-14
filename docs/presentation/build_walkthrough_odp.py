@@ -162,23 +162,22 @@ text_slide(
     "Goal",
     [
         "Build a genuinely minimum PDK for a two-terminal memristor device, using openPDKcreator's own GUI/CLI.",
-        "Independent of the IHP-based project: its own directory, its own git history, its own empty starting point -- nothing shared.",
+        "Separate from the IHP-based project: its own directory, its own git history, its own empty starting point -- only the openPDKcreator tool itself is shared.",
         "Every step documented here is a real GUI action, nothing staged.",
         "Capstone: a real openvaf/ngspice transient simulation of the memristor's own compact model, showing the classic pinched I-V hysteresis loop.",
     ],
 )
 
-# 3. Why a fresh copy of the tool
+# 3. A separate project, one shared tool
 text_slide(
-    "Why a fresh copy of the tool, not just a new --pdk-root",
+    "A separate project, one shared tool",
     [
-        "openPDKcreator tracks two different roots: pdk_root (the PDK data directory, freely overridable via --pdk-root) and PROJECT_ROOT (library_index.yaml/user_models//saves/, hard-coded to wherever the tool's own code physically sits -- not a CLI flag).",
-        "For genuine independence, the tool itself was copied into a new home:",
+        "openPDKcreator tracks two different roots, each its own flag: --pdk-root (the PDK data directory) and --project-root (saves/, user_models/, libraries/, library_index.yaml, export/ -- defaults to the openPDKcreator checkout itself).",
+        "So a new project is just a new directory -- no copy of the tool:",
         ("cd openPDKcreator", True),
-        ("cp -r openpdkcreator main.py LICENSE openMemristorPDK/", True),
         ("mkdir -p openMemristorPDK/data/openmemristorpdk", True),
         ("cd openMemristorPDK && git init", True),
-        "Reachable inside the already-running container at /foss/designs/openMemristorPDK/ -- no new container/mount needed.",
+        "openMemristorPDK/ is gitignored by openPDKcreator and reachable inside the already-running container at /foss/designs/openMemristorPDK/ -- no new container/mount needed.",
     ],
 )
 
@@ -186,9 +185,11 @@ text_slide(
 text_slide(
     "Launching against the new, empty project",
     [
-        ("python3 main.py --pdk-root data/openmemristorpdk inventory", True),
+        ("cd /foss/designs     # the openPDKcreator checkout", True),
+        ("python3 main.py --project-root openMemristorPDK --pdk-root openMemristorPDK/data/openmemristorpdk inventory", True),
         ("> Nothing found -- has ihp/fetch.py been run yet?", True),
-        ("python3 main.py --pdk-root data/openmemristorpdk gui", True),
+        ("python3 main.py --project-root openMemristorPDK --pdk-root openMemristorPDK/data/openmemristorpdk gui", True),
+        "From the host, ./start_eda_container.sh --gui-memristor runs that same gui command inside the container.",
         "Honest, real output for a genuinely empty deck -- confirming openPDKcreator really does support building up from nothing, not just editing an existing real PDK.",
     ],
 )

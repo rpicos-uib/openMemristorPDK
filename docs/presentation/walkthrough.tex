@@ -43,8 +43,9 @@
   \item Build a genuinely \textbf{minimum} PDK for a two-terminal memristor device,
         using \texttt{openPDKcreator}'s own GUI/CLI -- the same tool built and
         hardened over this session against IHP's real SG13G2 PDK.
-  \item \textbf{Independent} of that IHP-based project: its own directory,
-        its own git history, its own empty starting point -- nothing shared.
+  \item \textbf{Separate} from that IHP-based project: its own directory,
+        its own git history, its own empty starting point -- only the
+        \texttt{openPDKcreator} tool itself is shared.
   \item Every step documented here, real GUI actions throughout.
   \item Capstone: a real \texttt{openvaf}/\texttt{ngspice} transient
         simulation of the memristor's own compact model, showing the
@@ -53,36 +54,41 @@
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Why a fresh copy of the tool, not just a new \texttt{--pdk-root}}
-\texttt{openPDKcreator} tracks two different roots:
+\begin{frame}[fragile]{A separate project, one shared tool}
+\texttt{openPDKcreator} tracks two different roots, each its own flag:
 \begin{itemize}
-  \item \texttt{pdk\_root} -- the real (or, here, from-scratch) PDK data
-        directory. Freely overridable via \texttt{--pdk-root}.
-  \item \texttt{PROJECT\_ROOT} -- where \texttt{library\_index.yaml},
-        \texttt{user\_models/}, \texttt{saves/} live. Hard-coded to
-        \texttt{Path(\_\_file\_\_).resolve().parents[1]} -- wherever the
-        tool's own code physically sits. \textbf{Not} a CLI flag.
+  \item \texttt{--pdk-root} -- the real (or, here, from-scratch) PDK data
+        directory.
+  \item \texttt{--project-root} -- where \texttt{saves/},
+        \texttt{user\_models/}, \texttt{libraries/},
+        \texttt{library\_index.yaml} and \texttt{export/} live. Defaults
+        to the \texttt{openPDKcreator} checkout itself.
 \end{itemize}
 \vspace{0.5em}
-For genuine independence, the tool itself was copied into a new home:
+So a new project is just a new directory -- no copy of the tool:
 \begin{cli}
 cd openPDKcreator
-cp -r openpdkcreator main.py LICENSE openMemristorPDK/
 mkdir -p openMemristorPDK/data/openmemristorpdk
 cd openMemristorPDK && git init
 \end{cli}
-Reachable inside the already-running container at
+\texttt{openMemristorPDK/} is gitignored by \texttt{openPDKcreator} and
+reachable inside the already-running container at
 \texttt{/foss/designs/openMemristorPDK/} -- no new container/mount needed.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}{Launching against the new, empty project}
+\begin{frame}[fragile]{Launching against the new, empty project}
 \begin{cli}
-python3 main.py --pdk-root data/openmemristorpdk inventory
+cd /foss/designs     # the openPDKcreator checkout
+python3 main.py --project-root openMemristorPDK \
+    --pdk-root openMemristorPDK/data/openmemristorpdk inventory
 > Nothing found -- has ihp/fetch.py been run yet?
 
-python3 main.py --pdk-root data/openmemristorpdk gui
+python3 main.py --project-root openMemristorPDK \
+    --pdk-root openMemristorPDK/data/openmemristorpdk gui
 \end{cli}
+From the host, \texttt{./start\_eda\_container.sh --gui-memristor} runs
+that same \texttt{gui} command inside the container.
 \vspace{0.5em}
 Honest, real output for a genuinely empty deck -- confirming
 \texttt{openPDKcreator} really does support building up from nothing,

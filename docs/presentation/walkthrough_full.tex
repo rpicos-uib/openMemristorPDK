@@ -59,30 +59,31 @@ was taken -- nothing summarized away.
 \end{frame}
 
 % ---------------------------------------------------------------
-\begin{frame}[fragile]{Step 1 -- an independent project}
-\texttt{openPDKcreator} keeps two roots: \texttt{pdk\_root} (the PDK
-data itself, a free \texttt{--pdk-root} flag) and \texttt{PROJECT\_ROOT}
-(where \texttt{saves/}, \texttt{library\_index.yaml},
-\texttt{user\_models/} live -- fixed to wherever the tool's own code
-sits, not a flag). For a real, independent project, the tool itself
-is copied into a new home first:
+\begin{frame}[fragile]{Step 1 -- a separate project}
+\texttt{openPDKcreator} keeps two roots, each its own flag:
+\texttt{--pdk-root} (the PDK data itself) and \texttt{--project-root}
+(where \texttt{saves/}, \texttt{user\_models/}, \texttt{libraries/},
+\texttt{library\_index.yaml} and \texttt{export/} live; defaults to the
+\texttt{openPDKcreator} checkout). A new project is therefore just a
+new directory next to the tool -- no copy of the tool inside it:
 \begin{cli}
 cd openPDKcreator
-cp -r openpdkcreator main.py LICENSE openMemristorPDK/
 mkdir -p openMemristorPDK/data/openmemristorpdk
 cd openMemristorPDK && git init
 \end{cli}
-Reachable inside the running IIC-OSIC-TOOLS container at
-\texttt{/foss/designs/openMemristorPDK/} -- no new container or mount
-needed.
+Gitignored by \texttt{openPDKcreator}, and reachable inside the running
+IIC-OSIC-TOOLS container at \texttt{/foss/designs/openMemristorPDK/} --
+no new container or mount needed.
 \end{frame}
 
 % ---------------------------------------------------------------
 \begin{frame}[fragile]{Step 2 -- launching the real GUI}
 \begin{cli}
-cd /foss/designs/openMemristorPDK
-python3 main.py --pdk-root data/openmemristorpdk gui
+cd /foss/designs     # the openPDKcreator checkout
+python3 main.py --project-root openMemristorPDK \
+    --pdk-root openMemristorPDK/data/openmemristorpdk gui
 \end{cli}
+(From the host: \texttt{./start\_eda\_container.sh --gui-memristor}.)
 Every step from here on is a real action inside this exact real,
 running Tk application -- captured live over VNC, not a headless
 stand-in.
