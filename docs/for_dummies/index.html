@@ -178,7 +178,7 @@ footer { margin-top: 4rem; color: var(--muted); font-size: .92rem; border-top: 1
 <header class="hero">
   <div class="eyebrow">openMemristorPDK · beginner walkthrough</div>
   <h1>Your First Memristor Simulation</h1>
-  <p class="lede">From a closed laptop to a real simulated memristor curve on your screen (and a look at the chip itself), in 25 steps. Every step has a real screenshot from this exact setup. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
+  <p class="lede">From a closed laptop to a real simulated memristor curve on your screen (and a look at the chip itself), in 24 steps (plus a one-time install on a new computer). Every step has a real screenshot from this exact setup. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
   <div class="hero-row">
     <button class="btn" type="button" id="play-all">▶ Play as video</button>
     <span class="legend">
@@ -188,6 +188,73 @@ footer { margin-top: 4rem; color: var(--muted); font-size: .92rem; border-top: 1
     </span>
   </div>
 </header>
+
+<!-- ================================================================ -->
+<section class="chapter" id="install">
+  <header>
+    <div class="eyebrow">Part 0 · only once, on a new computer · 30–60 minutes, mostly waiting</div>
+    <h2>Install everything from scratch</h2>
+    <p>Skip this part if openPDKcreator already works on this computer. On a new Linux computer (Ubuntu or similar), these five steps download everything: two programs, the openPDKcreator tool, the memristor PDK, and the "container" with all the chip-design programs. You need an internet connection and about <b>35 GB</b> of free disk space. Do them in a terminal: press <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd> to open one.</p>
+  </header>
+
+  <article class="step" data-title="Install git and podman" data-do="Run: sudo apt update, then: sudo apt install -y git podman">
+    <div class="step-head"><span class="num">A</span><h3>Install git and podman</h3></div>
+    <p class="do">Type these two lines, pressing <kbd>Enter</kbd> after each. The computer asks for <b>your</b> password (the one you log in with). Nothing shows on screen while you type it, that's normal.</p>
+    <div class="cmd">
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt update</pre><button class="copy" type="button" data-copy="sudo apt update">Copy</button></div>
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y git podman</pre><button class="copy" type="button" data-copy="sudo apt install -y git podman">Copy</button></div>
+    </div>
+    <div class="see"><strong>What these are</strong><span><code>git</code> downloads projects from GitHub. <code>podman</code> runs the container, the separate computer-inside-the-computer where all the chip-design programs live.</span></div>
+  </article>
+
+  <article class="step" data-title="Download openPDKcreator" data-do="Run: mkdir -p ~/Documentos/rodrigo, cd ~/Documentos/rodrigo, then git clone https://github.com/rpicos-uib/openpdkcreator-toolkit.git openPDKcreator">
+    <div class="step-head"><span class="num">B</span><h3>Download openPDKcreator</h3></div>
+    <p class="do">This makes a folder and downloads the openPDKcreator tool into it, as <code>openPDKcreator</code>. It's the same folder step 2 uses later.</p>
+    <div class="cmd">
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>mkdir -p ~/Documentos/rodrigo</pre><button class="copy" type="button" data-copy="mkdir -p ~/Documentos/rodrigo">Copy</button></div>
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>cd ~/Documentos/rodrigo</pre><button class="copy" type="button" data-copy="cd ~/Documentos/rodrigo">Copy</button></div>
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>git clone https://github.com/rpicos-uib/openpdkcreator-toolkit.git openPDKcreator</pre><button class="copy" type="button" data-copy="git clone https://github.com/rpicos-uib/openpdkcreator-toolkit.git openPDKcreator">Copy</button></div>
+    </div>
+    <div class="see"><strong>You should see</strong><span>One line, in your computer's language. On a Spanish computer:</span></div>
+    <pre class="term"><span class="dim">Clonando en 'openPDKcreator'...</span></pre>
+  </article>
+
+  <article class="step" data-title="Download the memristor PDK" data-do="Run: cd openPDKcreator, then git clone https://github.com/rpicos-uib/openMemristorPDK.git">
+    <div class="step-head"><span class="num">C</span><h3>Download the memristor PDK</h3></div>
+    <p class="do">The memristor PDK goes <b>inside</b> the openPDKcreator folder, as <code>openMemristorPDK</code>:</p>
+    <div class="cmd">
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>cd openPDKcreator</pre><button class="copy" type="button" data-copy="cd openPDKcreator">Copy</button></div>
+      <div class="cmd-row"><pre class="term"><span class="p">$ </span>git clone https://github.com/rpicos-uib/openMemristorPDK.git</pre><button class="copy" type="button" data-copy="git clone https://github.com/rpicos-uib/openMemristorPDK.git">Copy</button></div>
+    </div>
+    <pre class="term"><span class="dim">Clonando en 'openMemristorPDK'...</span></pre>
+  </article>
+
+  <article class="step" data-title="Download the container launcher" data-do="Run: git clone --depth 1 https://github.com/iic-jku/IIC-OSIC-TOOLS.git ~/eda/IIC-OSIC-TOOLS">
+    <div class="step-head"><span class="num">D</span><h3>Download the container launcher</h3></div>
+    <p class="do">IIC-OSIC-TOOLS, from the university in Linz that builds the chip-design container, has the script that starts it. openPDKcreator looks for it in <code>~/eda/IIC-OSIC-TOOLS</code>:</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>git clone --depth 1 https://github.com/iic-jku/IIC-OSIC-TOOLS.git ~/eda/IIC-OSIC-TOOLS</pre><button class="copy" type="button" data-copy="git clone --depth 1 https://github.com/iic-jku/IIC-OSIC-TOOLS.git ~/eda/IIC-OSIC-TOOLS">Copy</button></div>
+  </article>
+
+  <article class="step" data-title="Start it for the first time" data-do="Run: ./start_eda_container.sh --gui-memristor and wait until it finishes. The first time downloads about 15 GB.">
+    <div class="step-head"><span class="num">E</span><h3>Start it for the first time</h3></div>
+    <p class="do">Still in the <code>openPDKcreator</code> folder, run the same start command as step 2:</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>./start_eda_container.sh --gui-memristor</pre><button class="copy" type="button" data-copy="./start_eda_container.sh --gui-memristor">Copy</button></div>
+    <p>The first time, it downloads the container, about <b>15 GB</b> (it can take half an hour or more), and then prepares it for a few more minutes with no progress shown. <b>Don't close the terminal</b> until it finishes. It ends like this:</p>
+    <pre class="term"><span class="dim">[INFO] iic-osic-tools_openpdkcreator_uid_1001 does not exist -- creating it.
+[INFO] Podman rootless mode detected.
+[INFO] Adding --userns=keep-id for Podman rootless mode.
+[INFO] Container does not exist, creating iic-osic-tools_openpdkcreator_uid_1001 ...
+[INFO] With --userns=keep-id, Podman makes an ID-mapped copy of the image on the first start of each image version.
+[INFO] This can take several minutes without any progress output and needs about as much disk space as the image. Do not interrupt it.
+[HINT] CONTAINER_USER=0 CONTAINER_GROUP=0 avoids the copy, see README section 5.1.
+[INFO] Verifying that the container stays up (up to 2s) ...
+[INFO] To access the VNC session, open a browser and navigate to http://localhost:8081/?password=abc123
+[INFO] VNC session: http://127.0.0.1:8081/?password=abc123&amp;autoconnect=true&amp;resize=scale  (NOT the 'localhost' form -- see header comment)
+[INFO] Launching the openMemristorPDK GUI inside the container ...</span></pre>
+    <div class="see"><strong>Done</strong><span>Everything is installed. Now carry on with <b>step 3</b> below (open the browser). From now on, starting it takes seconds: just do steps 1 and 2.</span></div>
+    <div class="oops"><strong>Two links?</strong><span>Use the <code>127.0.0.1</code> one (the same as step 3). The <code>localhost</code> one doesn't work with this setup.</span></div>
+  </article>
+</section>
 
 <!-- ================================================================ -->
 <section class="chapter" id="start">
@@ -236,6 +303,7 @@ footer { margin-top: 4rem; color: var(--muted); font-size: .92rem; border-top: 1
   <article class="step" data-img="img/s01_gui_opens.png" data-title="The program is ready" data-do="Nothing to click yet. This is the Wizard tab.">
     <div class="step-head"><span class="num">5</span><h3>The program is ready</h3></div>
     <p class="do">Nothing to click here, just a look around. The program opens on the <b>Wizard</b> tab: a map of everything the PDK contains. Green boxes are parts that are already finished. You don't need this map today.</p>
+    <p>While it starts, openPDKcreator also <em>compiles</em> the memristor recipes (step 10 shows one) into files the simulator can load. That happens by itself, there's nothing to click. The first time, the bar at the very bottom of the window says <b>Compilation performed correctly</b>.</p>
     <button class="shot" type="button"><img src="img/s01_gui_opens.png" alt="openPDKcreator filling the screen, showing the Wizard tab with green stage boxes" loading="lazy"></button>
     <div class="see"><strong>What's a PDK?</strong><span>A <em>Process Design Kit</em> is the instruction manual a chip factory gives to chip designers: which materials exist, how small things can be, and how each device behaves electrically. This one describes a made-up factory that builds <em>memristors</em>, resistors whose resistance depends on how much current has gone through them before. They "remember".</span></div>
   </article>
@@ -276,7 +344,7 @@ footer { margin-top: 4rem; color: var(--muted); font-size: .92rem; border-top: 1
 
   <article class="step" data-img="img/s06_veriloga_file.png" data-title="Read the behaviour file, then close it" data-do="Read the file, then click Close.">
     <div class="step-head"><span class="num">10</span><h3>Read the behaviour file, then close it</h3></div>
-    <p class="do">A window shows the file. This is the "recipe" the simulator uses to work out how much current flows through the memristor. When you've had a look, click <b class="ui">Close</b>. Closing the window also turns the recipe into a form the simulator can load (it "compiles" it), so the next step may show a message.</p>
+    <p class="do">A window shows the file. This is the "recipe" the simulator uses to work out how much current flows through the memristor. When you've had a look, click <b class="ui">Close</b>. Nothing else happens: the recipe was already compiled when the program started (step 5).</p>
     <button class="shot" type="button"><img src="img/s06_veriloga_file.png" alt="The file viewer showing memristor_tio2_au.va, with the Close button boxed in red" loading="lazy"></button>
     <div class="file">
       <div class="fname"><span>openMemristorPDK/user_models/veriloga/memristor_tio2_au.va</span><span>Verilog-A (the comment lines at the top are left out)</span></div>
@@ -310,16 +378,9 @@ endmodule</pre>
       <dt>Rmem</dt><dd>Today's resistance, a mix between <code>Roff</code> and <code>Ron</code> depending on <code>x</code>.</dd>
       <dt>I &lt;+ V / Rmem</dt><dd>Ohm's law: current = voltage ÷ resistance. The only twist is that the resistance keeps changing.</dd>
     </dl>
+    <div class="oops"><strong>Only if you change the recipe</strong><span>If you click <b>Edit</b>, change something and <b>Save</b>, closing the window compiles it again and tells you how it went: <b>Compilation performed correctly</b>, or the line with the mistake. Today you don't need to change anything.</span></div>
   </article>
 
-  <article class="step" data-img="img/s06b_compiled_ok.png" data-title="The recipe is compiled" data-do="If a box says Compilation performed correctly, click OK.">
-    <div class="step-head"><span class="num">11</span><h3>The recipe is compiled</h3></div>
-    <p class="do">A small box says <b>Compilation performed correctly</b>. Click <b class="ui">OK</b>.</p>
-    <button class="shot" type="button"><img src="img/s06b_compiled_ok.png" alt="A message box saying Compilation performed correctly, with the OK button boxed in red" loading="lazy"></button>
-    <div class="see"><strong>What just happened</strong><span>openPDKcreator ran OpenVAF, a compiler that turns the <code>.va</code> recipe from step 10 into <code>memristor_tio2_au.osdi</code>, saved right next to it in <code>user_models/veriloga/</code>. The simulator (ngspice) can't read <code>.va</code> files directly. It loads this compiled <code>.osdi</code> instead.</span></div>
-    <div class="oops"><strong>If no box appears</strong><span>That's fine. The recipe was already compiled and hasn't changed since, so there's nothing to do. Just carry on with step 12.</span></div>
-    <div class="oops"><strong>If a box says "Compilation errors"</strong><span>Someone has changed the recipe and broken it. Click <b>Close</b> and ask for help. The box lists the line with the mistake, and the simulation won't work until it's fixed.</span></div>
-  </article>
 </section>
 
 <!-- ================================================================ -->
@@ -331,21 +392,22 @@ endmodule</pre>
   </header>
 
   <article class="step" data-img="img/s07_click_tb_cell.png" data-title="Pick the test circuit" data-do="Click memristor_tio2_au_tb in the Cells list.">
-    <div class="step-head"><span class="num">12</span><h3>Pick the test circuit</h3></div>
+    <div class="step-head"><span class="num">11</span><h3>Pick the test circuit</h3></div>
     <p class="do">In the <b>Cells</b> list, click <b class="ui">memristor_tio2_au_tb (1 view(s))</b>. The <code>tb</code> stands for <em>testbench</em>, a circuit made for testing a part.</p>
     <button class="shot" type="button"><img src="img/s07_click_tb_cell.png" alt="The memristor_tio2_au_tb cell boxed in red" loading="lazy"></button>
   </article>
 
   <article class="step" data-img="img/s08_click_open_xschem.png" data-title="Open it in xschem" data-do="On the Schematic row, click Open in xschem.">
-    <div class="step-head"><span class="num">13</span><h3>Open it in xschem</h3></div>
+    <div class="step-head"><span class="num">12</span><h3>Open it in xschem</h3></div>
     <p class="do">On the <b>Schematic</b> row, click <b class="ui">Open in xschem</b>. xschem is the program for drawing circuits.</p>
     <button class="shot" type="button"><img src="img/s08_click_open_xschem.png" alt="The Open in xschem button on the Schematic row boxed in red" loading="lazy"></button>
   </article>
 
   <article class="step" data-img="img/s09_xschem_opens.png" data-title="Meet the test circuit" data-do="Nothing to click. Wait until the black xschem window is fully open.">
-    <div class="step-head"><span class="num">14</span><h3>Meet the test circuit</h3></div>
-    <p class="do">A black xschem window opens on top. Wait until you can see the drawing. The small box on the left is the memristor <code>n1</code>. The circle on the right is the sine-wave source <code>V1</code>. They're joined by a wire called <code>te</code>. The text below the circuit tells the simulator what to do.</p>
+    <div class="step-head"><span class="num">13</span><h3>Meet the test circuit</h3></div>
+    <p class="do">A black xschem window opens on top. Wait until you can see the drawing: the very first time it can take up to half a minute, so don't click anything else meanwhile. The small box on the left is the memristor <code>n1</code>. The circle on the right is the sine-wave source <code>V1</code>. They're joined by a wire called <code>te</code>. The text below the circuit tells the simulator what to do.</p>
     <button class="shot" type="button"><img src="img/s09_xschem_opens.png" alt="xschem showing the memristor testbench: the memristor, a wire labelled te, the V1 sine source, and a code block" loading="lazy"></button>
+    <div class="oops"><strong>If you can't see it</strong><span>It may have opened behind the openPDKcreator window. Click <b>xschem</b> in the bar at the very bottom of the screen to bring it to the front.</span></div>
     <div class="file">
       <div class="fname"><span>openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au_tb.sch</span><span>the whole file</span></div>
 <pre>v {xschem version=3.4.8RC file_version=1.3}
@@ -380,7 +442,7 @@ plot -i(V1) vs v(te) retraceplot title 'Memristor I-V loop' xlabel 'Voltage (V)'
       <dt>C {...}</dt><dd>A component placed on the drawing: the memristor, two ground symbols, the wire label, the source <code>V1</code>, and the code block.</dd>
       <dt>sin(0 1.0 0.6)</dt><dd>The source makes a sine wave around 0 V, going up to 1 V and down to −1 V, 0.6 times per second.</dd>
       <dt>.model mm ...</dt><dd>Which behaviour file to use for <code>n1</code>, and its numbers (the same ones from step 10). <code>x0=0.3</code> means the memory starts 30 % switched on.</dd>
-      <dt>pre_osdi ...</dt><dd>Loads the compiled version of the behaviour file (the <code>.osdi</code> made in step 11) into the simulator before anything else.</dd>
+      <dt>pre_osdi ...</dt><dd>Loads the compiled version of the behaviour file (<code>memristor_tio2_au.osdi</code>, made automatically when openPDKcreator started) into the simulator before anything else.</dd>
       <dt>tran 300u 3.34</dt><dd>Simulate 3.34 seconds of time (two full waves), taking a snapshot every 0.3 milliseconds.</dd>
       <dt>plot ...</dt><dd>When it's done, draw the current (up/down) against the voltage (left/right).</dd>
     </dl>
@@ -396,7 +458,7 @@ plot -i(V1) vs v(te) retraceplot title 'Memristor I-V loop' xlabel 'Voltage (V)'
   </header>
 
   <article class="step" data-img="img/s10_click_netlist.png" data-title="Click Netlist" data-do="In xschem's top bar, click Netlist.">
-    <div class="step-head"><span class="num">15</span><h3>Click Netlist</h3></div>
+    <div class="step-head"><span class="num">14</span><h3>Click Netlist</h3></div>
     <p class="do">In xschem's top menu bar, on the right, click <b class="ui">Netlist</b>. It turns green when it's done (it takes about a second).</p>
     <button class="shot" type="button"><img src="img/s10_click_netlist.png" alt="The Netlist button in xschem's menu bar boxed in red" loading="lazy"></button>
     <div class="file">
@@ -424,14 +486,14 @@ plot -i(V1) vs v(te) retraceplot title 'Memristor I-V loop' xlabel 'Voltage (V)'
   </article>
 
   <article class="step" data-img="img/s11_click_simulate.png" data-title="Click Simulate" data-do="Right next to it, click Simulate.">
-    <div class="step-head"><span class="num">16</span><h3>Click Simulate</h3></div>
+    <div class="step-head"><span class="num">15</span><h3>Click Simulate</h3></div>
     <p class="do">Now click <b class="ui">Simulate</b>, right next to Netlist. Wait about 10 seconds.</p>
     <button class="shot" type="button"><img src="img/s11_click_simulate.png" alt="The Simulate button in xschem's menu bar boxed in red; Netlist is green" loading="lazy"></button>
     <div class="oops"><strong>If nothing happens</strong><span>Click <b>Netlist</b> again, wait until it's green, then click <b>Simulate</b> once more.</span></div>
   </article>
 
   <article class="step" data-img="img/s12_simulation_result.png" data-title="The result: a memristor's fingerprint" data-do="Look at the plot window on the right: the pinched loop.">
-    <div class="step-head"><span class="num">17</span><h3>The result: a memristor's fingerprint</h3></div>
+    <div class="step-head"><span class="num">16</span><h3>The result: a memristor's fingerprint</h3></div>
     <p class="do">Two new windows appear. The small white one in the middle is the simulator (ngspice) reporting what it did. The black one on the right is the result.</p>
     <button class="shot" type="button"><img src="img/s12_simulation_result.png" alt="The ngspice terminal and the plot window showing the pinched I-V loop" loading="lazy"></button>
     <div class="two">
@@ -455,19 +517,19 @@ plot -i(V1) vs v(te) retraceplot title 'Memristor I-V loop' xlabel 'Voltage (V)'
   </header>
 
   <article class="step" data-img="img/s14_close_plot.png" data-title="Close the plot" data-do="Click Quit in the plot window.">
-    <div class="step-head"><span class="num">18</span><h3>Close the plot</h3></div>
+    <div class="step-head"><span class="num">17</span><h3>Close the plot</h3></div>
     <p class="do">In the plot window, click the small orange <b class="ui">Quit</b> button at the top-right.</p>
     <button class="shot" type="button"><img src="img/s14_close_plot.png" alt="The Quit button of the plot window boxed in red" loading="lazy"></button>
   </article>
 
   <article class="step" data-img="img/s15_quit_ngspice.png" data-title="Close the simulator" data-do="Click inside the white ngspice window, type quit and press Enter.">
-    <div class="step-head"><span class="num">19</span><h3>Close the simulator</h3></div>
+    <div class="step-head"><span class="num">18</span><h3>Close the simulator</h3></div>
     <p class="do">Click once inside the white ngspice window, where it says <code>ngspice 1 -&gt;</code>. Then type <code>quit</code> and press <kbd>Enter</kbd>. The window closes by itself.</p>
     <button class="shot" type="button"><img src="img/s15_quit_ngspice.png" alt="The ngspice prompt line boxed in red" loading="lazy"></button>
   </article>
 
   <article class="step" data-img="img/s16_close_xschem.png" data-title="Close xschem" data-do="Click the X at the top-right of the xschem window.">
-    <div class="step-head"><span class="num">20</span><h3>Close xschem</h3></div>
+    <div class="step-head"><span class="num">19</span><h3>Close xschem</h3></div>
     <p class="do">Click the <b class="ui">X</b> at the top-right of the black xschem window. You're back in the Library Manager, with the test circuit still selected.</p>
     <button class="shot" type="button"><img src="img/s16_close_xschem.png" alt="The close button of the xschem window boxed in red" loading="lazy"></button>
   </article>
@@ -483,19 +545,19 @@ plot -i(V1) vs v(te) retraceplot title 'Memristor I-V loop' xlabel 'Voltage (V)'
   </header>
 
   <article class="step" data-img="img/s17_layout_click_cell.png" data-title="Pick the memristor again" data-do="Click memristor_tio2_au in the Cells list.">
-    <div class="step-head"><span class="num">21</span><h3>Pick the memristor again</h3></div>
+    <div class="step-head"><span class="num">20</span><h3>Pick the memristor again</h3></div>
     <p class="do">In the <b>Cells</b> list, click <b class="ui">memristor_tio2_au (9 view(s))</b>, the same part as in step 8.</p>
     <button class="shot" type="button"><img src="img/s17_layout_click_cell.png" alt="The memristor_tio2_au cell boxed in red in the Cells list" loading="lazy"></button>
   </article>
 
   <article class="step" data-img="img/s18_layout_click_klayout.png" data-title="Open the layout in KLayout" data-do="On the GDS/Layout row, click Open in KLayout.">
-    <div class="step-head"><span class="num">22</span><h3>Open the layout in KLayout</h3></div>
+    <div class="step-head"><span class="num">21</span><h3>Open the layout in KLayout</h3></div>
     <p class="do">On the <b>GDS/Layout</b> row, click <b class="ui">Open in KLayout</b>. KLayout is the program for looking at chip layouts. It takes a few seconds to appear, at the top-left of the screen.</p>
     <button class="shot" type="button"><img src="img/s18_layout_click_klayout.png" alt="The Open in KLayout button on the GDS/Layout row boxed in red" loading="lazy"></button>
   </article>
 
   <article class="step" data-img="img/s19_layout_klayout.png" data-title="Look at the chip from above" data-do="Nothing to click. Look at the square and the Layers list on the right.">
-    <div class="step-head"><span class="num">23</span><h3>Look at the chip from above</h3></div>
+    <div class="step-head"><span class="num">22</span><h3>Look at the chip from above</h3></div>
     <p class="do">Nothing to click. The big hatched square is the memristor seen from above. It's 1 µm on each side, a thousandth of a millimetre, so about 80 of them would fit across one human hair. The little ruler at the bottom-left shows 0.2 µm.</p>
     <button class="shot" type="button"><img src="img/s19_layout_klayout.png" alt="KLayout open at the top-left, showing the memristor_tio2_au layout as a hatched square" loading="lazy"></button>
     <div class="two">
@@ -619,7 +681,7 @@ plot -i(V1) vs v(te) retraceplot title 'Memristor I-V loop' xlabel 'Voltage (V)'
   </article>
 
   <article class="step" data-img="img/s21_layout_close.png" data-title="Close KLayout" data-do="Click the X at the top-right of the KLayout window.">
-    <div class="step-head"><span class="num">24</span><h3>Close KLayout</h3></div>
+    <div class="step-head"><span class="num">23</span><h3>Close KLayout</h3></div>
     <p class="do">Click the <b class="ui">X</b> at the top-right of the KLayout window. It closes straight away. Nothing was changed, so there's nothing to save.</p>
     <button class="shot" type="button"><img src="img/s21_layout_close.png" alt="The close button of the KLayout window boxed in red" loading="lazy"></button>
   </article>
@@ -632,10 +694,10 @@ plot -i(V1) vs v(te) retraceplot title 'Memristor I-V loop' xlabel 'Voltage (V)'
     <h2>Switch it all off</h2>
     <p>When you're done for the day.</p>
   </header>
-  <article class="step" data-title="Switch it all off" data-do="Close the openPDKcreator window, then run: podman stop iic-osic-tools_openpdkcreator_uid_1001">
-    <div class="step-head"><span class="num">25</span><h3>Switch it all off</h3></div>
+  <article class="step" data-title="Switch it all off" data-do="Close the openPDKcreator window, then run: podman stop iic-osic-tools_openpdkcreator_uid_$(id -u)">
+    <div class="step-head"><span class="num">24</span><h3>Switch it all off</h3></div>
     <p class="do">When you're done for the day, close the openPDKcreator window with its <b>X</b> and close the browser tab. Then, back in the laptop's terminal from step 1, type:</p>
-    <div class="cmd-row"><pre class="term"><span class="p">$ </span>podman stop iic-osic-tools_openpdkcreator_uid_1001</pre><button class="copy" type="button" data-copy="podman stop iic-osic-tools_openpdkcreator_uid_1001">Copy</button></div>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>podman stop iic-osic-tools_openpdkcreator_uid_$(id -u)</pre><button class="copy" type="button" data-copy="podman stop iic-osic-tools_openpdkcreator_uid_$(id -u)">Copy</button></div>
     <div class="see"><strong>Next time</strong><span>Start again from step 1. Nothing you looked at today was changed, so you'll get exactly the same result.</span></div>
   </article>
 </section>
