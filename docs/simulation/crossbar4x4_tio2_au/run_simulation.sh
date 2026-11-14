@@ -11,13 +11,15 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 PROJECT_ROOT=/foss/designs/openMemristorPDK
+# openPDKcreator itself: the checkout this project lives inside.
+TOOL_ROOT=/foss/designs
 MAG=$PROJECT_ROOT/libraries/openmemristorpdk_pr/crossbar4x4_tio2_au.mag
 TECH=$PROJECT_ROOT/export/openmemristorpdk/libs.tech/magic/openmemristorpdk.tech
 
 echo "[1/6] Extracting the real, patched layout netlist (memristor_extract.py)..."
 python3 - <<PYEOF
 import sys
-sys.path.insert(0, "$PROJECT_ROOT")
+sys.path.insert(0, "$TOOL_ROOT")
 from pathlib import Path
 from openpdkcreator.pdklib import extraction as ext_mod
 from openpdkcreator.pdklib import memristor_extract as mx_mod

@@ -25,8 +25,9 @@ from pathlib import Path
 PROJECT = Path("/foss/designs/openMemristorPDK")
 OUT = PROJECT / "docs" / "for_dummies" / "img"
 DRV = Path("/tmp/drv")
+TOOL = Path("/foss/designs")  # openPDKcreator itself: the checkout this project lives inside
 os.chdir(PROJECT)
-sys.path.insert(0, str(PROJECT))
+sys.path.insert(0, str(TOOL))
 
 import tkinter as tk  # noqa: E402
 from tkinter import ttk  # noqa: E402
@@ -222,6 +223,9 @@ def windows():
 
 # ---------------------------------------------------------- the app
 from openpdkcreator.gui.app import App  # noqa: E402
+from main import use_project_root  # noqa: E402
+
+use_project_root(PROJECT)  # same as main.py --project-root openMemristorPDK
 
 root = tk.Tk()
 app = App(root, Path("data/openmemristorpdk"))

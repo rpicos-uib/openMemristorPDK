@@ -9,13 +9,15 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 PROJECT_ROOT=/foss/designs/openMemristorPDK
+# openPDKcreator itself: the checkout this project lives inside.
+TOOL_ROOT=/foss/designs
 MAG=$PROJECT_ROOT/libraries/openmemristorpdk_pr/memristor_tio2_au.mag
 TECH=$PROJECT_ROOT/export/openmemristorpdk/libs.tech/magic/openmemristorpdk.tech
 
 echo "[1/4] Extracting the real Magic layout via openpdkcreator's own real Extract to SPICE..."
 python3 - <<PYEOF
 import sys
-sys.path.insert(0, "$PROJECT_ROOT")
+sys.path.insert(0, "$TOOL_ROOT")
 from pathlib import Path
 from openpdkcreator.pdklib import extraction as ex
 r = ex.run_extract(Path("$MAG"), Path("$TECH"), "magic", mode="parasitic")

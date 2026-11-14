@@ -38,17 +38,8 @@ ensure_installed() {
 
 ensure_installed "${CONTAINER_ENGINE}"
 
-# Starts (or reattaches to) the shared container; prints its VNC URL.
-# Deliberately run WITHOUT --gui -- that flag launches the outer
-# repo's own main.py gui against ihp-sg13g2, not this PDK.
-"$OUTER_REPO/start_eda_container.sh"
-
-if "${CONTAINER_ENGINE}" exec "${CONTAINER_NAME}" pgrep -f "main.py --pdk-root data/openmemristorpdk gui" > /dev/null 2>&1; then
-    echo "[INFO] main.py gui is already running against data/openmemristorpdk."
-else
-    echo "[INFO] Launching main.py gui against data/openmemristorpdk ..."
-    # bash -l so the container's PATH includes /foss/tools/... --
-    # otherwise the GUI finds none of the EDA tools.
-    "${CONTAINER_ENGINE}" exec -d -e DISPLAY=:1 -w /foss/designs/openMemristorPDK "${CONTAINER_NAME}" \
-        bash -lc 'exec python3 main.py --pdk-root data/openmemristorpdk gui'
-fi
+# Starts (or reattaches to) the shared container and launches this
+# PDK's GUI there -- with the openPDKcreator checkout this project lives
+# inside (no copy of the tool in here):
+#   main.py --project-root openMemristorPDK --pdk-root openMemristorPDK/data/openmemristorpdk gui
+exec "$OUTER_REPO/start_eda_container.sh" --gui-memristor

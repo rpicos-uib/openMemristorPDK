@@ -20,7 +20,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-sys.path.insert(0, "/foss/designs/openMemristorPDK")
+# openPDKcreator itself: the checkout this project lives inside.
+sys.path.insert(0, "/foss/designs")
 from openpdkcreator.pdklib import tool_env
 from openpdkcreator.pdklib import xschem_view_switch as xvs_mod
 
