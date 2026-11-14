@@ -307,6 +307,7 @@ plot -i(V1) vs v(te) retraceplot title 'Memristor I-V loop' xlabel 'Voltage (V)'
         <span>The memristor is a sandwich of three squares stacked exactly on top of each other, so from above they look like one square.</span>
         <span>The <b>Layers</b> list (red box) names them. The <b>bold</b> ones are used by this part: <code>BE_Au</code> is the gold bottom electrode, <code>MEM_TiO2</code> the 10 nm titanium-dioxide layer in the middle, and <code>TE_Au</code> the gold top electrode.</span>
         <span>The grey names are layers the other memristors in this PDK use: hafnium dioxide, titanium and aluminium.</span>
+        <span><code>VIA1</code> (solid red) is the <em>via</em> layer: a hole that joins a bottom-electrode wire straight to a top-electrode wire elsewhere on the chip, only where someone draws one. A memristor has none: its current has to go through the oxide.</span>
         <span>Each layer has its own colour and hatch pattern, which is why you can see the lines of all three layers crossing.</span>
       </div>
     </div>
@@ -361,6 +362,22 @@ plot -i(V1) vs v(te) retraceplot title 'Memristor I-V loop' xlabel 'Voltage (V)'
     &lt;animation&gt;0&lt;/animation&gt;
     &lt;name&gt;MEM_HfO2.drawing&lt;/name&gt;
     &lt;source&gt;12/0&lt;/source&gt;
+  &lt;/properties&gt;
+  &lt;properties&gt;
+    &lt;frame-color&gt;#b0221a&lt;/frame-color&gt;
+    &lt;fill-color&gt;#e2483d&lt;/fill-color&gt;
+    &lt;frame-brightness&gt;0&lt;/frame-brightness&gt;
+    &lt;fill-brightness&gt;0&lt;/fill-brightness&gt;
+    &lt;dither-pattern&gt;I0&lt;/dither-pattern&gt;
+    &lt;line-style&gt;C0&lt;/line-style&gt;
+    &lt;valid&gt;true&lt;/valid&gt;
+    &lt;visible&gt;true&lt;/visible&gt;
+    &lt;transparent&gt;false&lt;/transparent&gt;
+    &lt;width&gt;1&lt;/width&gt;
+    &lt;marked&gt;false&lt;/marked&gt;
+    &lt;animation&gt;0&lt;/animation&gt;
+    &lt;name&gt;VIA1.drawing&lt;/name&gt;
+    &lt;source&gt;15/0&lt;/source&gt;
   &lt;/properties&gt;
   &lt;properties&gt;
     &lt;frame-color&gt;#a07800&lt;/frame-color&gt;

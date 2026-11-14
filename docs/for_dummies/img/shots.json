@@ -114,22 +114,22 @@
  "s17_layout_click_cell": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s18_layout_click_klayout": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s19_layout_klayout": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s20_layout_closeup": {
@@ -142,8 +142,8 @@
  "s21_layout_close": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "explore_xprop": {
@@ -336,6 +336,244 @@
   ]
  },
  "m25_exit_without_saving": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d01_select_device": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d02_click_delete": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d03_confirm_delete_raw": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d03_tmp": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d03_confirm_delete": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d04_deleted": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d05_new_cell": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d06_name": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d07_choose_veriloga": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d08_view_model": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d09_model_file": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d10_compiled": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d11_create_symbol": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d12_open_symbol": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d13_symbol_in_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d14_close_symbol": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d15_create_layout": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d16_run_drc": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d17_tmp": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d17_drc_clean": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d18_open_klayout": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d19_klayout": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d19b_klayout_closeup": {
+  "note": "",
+  "size": [
+   810,
+   634
+  ]
+ },
+ "d20_close_klayout": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d21_create_testbench": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d22_open_testbench": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d23_testbench": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d24_netlist": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d25_simulate": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d26_result": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d27_plot_closeup": {
+  "note": "",
+  "size": [
+   714,
+   544
+  ]
+ },
+ "d28_quit_plot": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d29_quit_ngspice": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "d30_close_xschem": {
   "note": "",
   "size": [
    1680,

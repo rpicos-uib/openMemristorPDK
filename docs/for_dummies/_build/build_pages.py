@@ -64,8 +64,12 @@ SECTIONS = [
         "slug": "add-device",
         "title": "Add a new device",
         "short": "Add a device",
-        "status": "soon",
-        "time": "",
+        "status": "ready",
+        "time": "about 15 min · 33 steps",
+        "lede": "Delete the Au/HfO₂/Al memristor completely, then rebuild every piece of it: its model, "
+                "its symbol, its layout and a testbench, and watch it switch on and off.",
+        "prereq": 'Do <a href="add-model.html">Add a model</a> first: this section uses the same moves '
+                  '(New Cell, a terminal command, View and Close). Start with openPDKcreator open in the Library Manager.',
         "desc": "Delete the Au/HfO₂/Al memristor and rebuild it from nothing: layers, layout, "
                 "symbol, model and testbench.",
     },

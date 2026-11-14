@@ -15,7 +15,8 @@ topmetal,tm
 end
 
 types
-botmetal be_au,via1
+botmetal be_au
+botmetal via1
 topmetal te_au
 topmetal te_ti
 topmetal te_al
@@ -41,10 +42,10 @@ te_ti metal2
 te_al metal2
 mem_tio2 via1
 mem_hfo2 via1
+via1 via2
 end
 
 compose
-  compose  active_tio2  te_au  mem_tio2
 end
 
 connect
@@ -79,6 +80,8 @@ style gdsii
 	calma 21 0
  layer TE_Al te_al
 	calma 22 0
+ layer VIA1 via1
+	calma 15 0
 end
 
 extract

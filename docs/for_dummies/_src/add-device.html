@@ -1,0 +1,544 @@
+<section class="chapter" id="delete">
+  <header>
+    <div class="eyebrow">Part 1 · about 2 minutes</div>
+    <h2>Delete the device</h2>
+    <p>A <em>device</em> is everything the PDK knows about one component: its model (how it behaves), its symbol (how it looks in a circuit drawing), its layout (how it is built on the chip) and a testbench to try it. You'll delete the Au/HfO₂/Al memristor completely, then build it back piece by piece.</p>
+  </header>
+  <article class="step" data-img="img/d01_select_device.png" data-title="Pick the device" data-do="In the Library Manager, with openmemristorpdk_pr selected (steps 1–2 of Add a model), click memristor_hfo2_al in the Cells list.">
+    <div class="step-head"><span class="num">1</span><h3>Pick the device</h3></div>
+    <p class="do">In the Library Manager, with <b>openmemristorpdk_pr</b> selected (steps 1–2 of <a href="add-model.html">Add a model</a>), click <b class="ui">memristor_hfo2_al</b> in the Cells list.</p>
+    <button class="shot" type="button"><img src="img/d01_select_device.png" alt="memristor_hfo2_al boxed in red in the Cells list" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d02_click_delete.png" data-title="Delete it" data-do="Click Delete Cell..., above the Cells list.">
+    <div class="step-head"><span class="num">2</span><h3>Delete it</h3></div>
+    <p class="do">Click <b class="ui">Delete Cell...</b>, above the Cells list.</p>
+    <button class="shot" type="button"><img src="img/d02_click_delete.png" alt="The Delete Cell button boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d03_confirm_delete.png" data-title="Confirm" data-do="openPDKcreator lists every file it will delete: model, symbol, layout, chip file, netlists. Click Yes.">
+    <div class="step-head"><span class="num">3</span><h3>Confirm</h3></div>
+    <p class="do">openPDKcreator lists every file it will delete: model, symbol, layout, chip file, netlists. Click <b class="ui">Yes</b>.</p>
+    <button class="shot" type="button"><img src="img/d03_confirm_delete.png" alt="The Delete Cell question listing ten files, with Yes boxed in red" loading="lazy"></button>
+    <div class="oops"><strong>Careful</strong><span>This really deletes the files. That's fine here, because you'll rebuild the device in the next parts, and the original is safe in git. Don't delete devices you haven't saved somewhere.</span></div>
+  </article>
+  <article class="step" data-img="img/d04_deleted.png" data-title="It&#x27;s gone" data-do="The bar at the bottom says Deleted cell &#x27;memristor_hfo2_al&#x27;, and the cell has disappeared from the list.">
+    <div class="step-head"><span class="num">4</span><h3>It's gone</h3></div>
+    <p class="do">The bar at the bottom says <b>Deleted cell 'memristor_hfo2_al'</b>, and the cell has disappeared from the list.</p>
+    <button class="shot" type="button"><img src="img/d04_deleted.png" alt="The Cells list without memristor_hfo2_al" loading="lazy"></button>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="model">
+  <header>
+    <div class="eyebrow">Part 2 · about 3 minutes</div>
+    <h2>Rebuild the model</h2>
+    <p>Same as in <a href="add-model.html">Add a model</a>: a new cell with the same name, an empty Verilog-A model, then the real equations from one terminal command.</p>
+  </header>
+  <article class="step" data-img="img/d05_new_cell.png" data-title="New cell" data-do="Click New Cell....">
+    <div class="step-head"><span class="num">5</span><h3>New cell</h3></div>
+    <p class="do">Click <b class="ui">New Cell...</b>.</p>
+    <button class="shot" type="button"><img src="img/d05_new_cell.png" alt="New Cell boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d06_name.png" data-title="Same name as before" data-do="Type memristor_hfo2_al and click OK.">
+    <div class="step-head"><span class="num">6</span><h3>Same name as before</h3></div>
+    <p class="do">Type <code>memristor_hfo2_al</code> and click <b class="ui">OK</b>.</p>
+    <button class="shot" type="button"><img src="img/d06_name.png" alt="The cell-name box with memristor_hfo2_al typed and OK boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d07_choose_veriloga.png" data-title="Verilog-A first" data-do="Click Verilog-A.">
+    <div class="step-head"><span class="num">7</span><h3>Verilog-A first</h3></div>
+    <p class="do">Click <b class="ui">Verilog-A</b>.</p>
+    <button class="shot" type="button"><img src="img/d07_choose_veriloga.png" alt="Verilog-A boxed in red in the list of views" loading="lazy"></button>
+  </article>
+  <article class="step" data-title="Write the model" data-do="In the laptop&#x27;s terminal, paste this command (Ctrl + Shift + V) and press Enter:">
+    <div class="step-head"><span class="num">8</span><h3>Write the model</h3></div>
+    <p class="do">In the <b>laptop's terminal</b>, paste this command (<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd>) and press <kbd>Enter</kbd>:</p>
+    <div class="cmd-row"><pre class="term">cat &gt; ~/Documentos/rodrigo/openPDKcreator/openMemristorPDK/user_models/veriloga/memristor_hfo2_al.va &lt;&lt;&#x27;EOF&#x27;
+// A real, minimal *bipolar threshold-switching* memristor compact
+// model -- deliberately a genuinely different real model from
+// memristor_tio2_au.va/memristor_tio2_ti.va&#x27;s linear ion-drift form,
+// not just a renamed copy with different parameters (per direct
+// request: &quot;two different verilog models... [for] material1... [and]
+// material2&quot;). HfO2-based RRAM is real, widely reported to switch by
+// *filamentary* conduction (a real, localized conductive filament of
+// oxygen vacancies forming/rupturing through the oxide), not the
+// linear-drift *boundary-motion* picture the classical HP TiO2 model
+// uses -- a real, qualitatively different physical picture, so a
+// qualitatively different real model structure: a state variable that
+// only moves once the real terminal voltage crosses a real threshold
+// (SET/RESET), and an exponential (tunneling-like) state-to-resistance
+// mapping instead of a linear one. This is a real, simplified,
+// illustrative form of the general real threshold-switching structure
+// widely used for filamentary RRAM compact models -- see e.g.
+// Kvatinsky et al., &quot;TEAM: ThrEshold Adaptive Memristor Model&quot;, IEEE
+// TCAS-I 60(1), 211-221 (2013), and Yakopcic et al., &quot;A Memristor
+// Device Model&quot;, IEEE EDL 32(10), 1436-1438 (2011), for the real,
+// general lineage this borrows its threshold-switching + exponential-
+// conduction structure from -- not a literal reimplementation of
+// either (both are considerably more elaborate; this stays a bare-
+// minimum, from-scratch teaching model, same real scope as its TiO2
+// sibling). Al top electrode: a real, common RRAM top-electrode metal
+// choice (its own native oxide is itself sometimes exploited as part
+// of a real bilayer RRAM stack elsewhere in the literature; here it&#x27;s
+// simply the third, distinct real top-electrode metal this PDK&#x27;s own
+// task called for, bottom electrode still always Au).
+`include &quot;disciplines.vams&quot;
+
+module memristor_hfo2_al(BE, TE);
+inout BE, TE;
+electrical BE, TE;
+
+parameter real Ron = 500 from (0:inf);
+parameter real Roff = 50e3 from (0:inf);
+parameter real Von = 0.8;
+parameter real Voff = -0.6 from (-inf:0);
+parameter real tau = 5n from (0:inf);
+parameter real x0 = 0.1 from [0:1];
+
+real x;
+real dxdt;
+real Rmem;
+
+analog begin
+  dxdt = 0.0;
+  if (V(BE, TE) &gt; Von)
+    dxdt = (V(BE, TE) - Von) / tau;
+  else if (V(BE, TE) &lt; Voff)
+    dxdt = (V(BE, TE) - Voff) / tau;
+  x = min(max(idt(dxdt, x0), 0.0), 1.0);
+  Rmem = Roff * exp(-x * ln(Roff / Ron));
+  I(BE, TE) &lt;+ V(BE, TE) / Rmem;
+end
+endmodule
+EOF</pre><button class="copy" type="button" data-copy="cat &gt; ~/Documentos/rodrigo/openPDKcreator/openMemristorPDK/user_models/veriloga/memristor_hfo2_al.va &lt;&lt;&#x27;EOF&#x27;
+// A real, minimal *bipolar threshold-switching* memristor compact
+// model -- deliberately a genuinely different real model from
+// memristor_tio2_au.va/memristor_tio2_ti.va&#x27;s linear ion-drift form,
+// not just a renamed copy with different parameters (per direct
+// request: &quot;two different verilog models... [for] material1... [and]
+// material2&quot;). HfO2-based RRAM is real, widely reported to switch by
+// *filamentary* conduction (a real, localized conductive filament of
+// oxygen vacancies forming/rupturing through the oxide), not the
+// linear-drift *boundary-motion* picture the classical HP TiO2 model
+// uses -- a real, qualitatively different physical picture, so a
+// qualitatively different real model structure: a state variable that
+// only moves once the real terminal voltage crosses a real threshold
+// (SET/RESET), and an exponential (tunneling-like) state-to-resistance
+// mapping instead of a linear one. This is a real, simplified,
+// illustrative form of the general real threshold-switching structure
+// widely used for filamentary RRAM compact models -- see e.g.
+// Kvatinsky et al., &quot;TEAM: ThrEshold Adaptive Memristor Model&quot;, IEEE
+// TCAS-I 60(1), 211-221 (2013), and Yakopcic et al., &quot;A Memristor
+// Device Model&quot;, IEEE EDL 32(10), 1436-1438 (2011), for the real,
+// general lineage this borrows its threshold-switching + exponential-
+// conduction structure from -- not a literal reimplementation of
+// either (both are considerably more elaborate; this stays a bare-
+// minimum, from-scratch teaching model, same real scope as its TiO2
+// sibling). Al top electrode: a real, common RRAM top-electrode metal
+// choice (its own native oxide is itself sometimes exploited as part
+// of a real bilayer RRAM stack elsewhere in the literature; here it&#x27;s
+// simply the third, distinct real top-electrode metal this PDK&#x27;s own
+// task called for, bottom electrode still always Au).
+`include &quot;disciplines.vams&quot;
+
+module memristor_hfo2_al(BE, TE);
+inout BE, TE;
+electrical BE, TE;
+
+parameter real Ron = 500 from (0:inf);
+parameter real Roff = 50e3 from (0:inf);
+parameter real Von = 0.8;
+parameter real Voff = -0.6 from (-inf:0);
+parameter real tau = 5n from (0:inf);
+parameter real x0 = 0.1 from [0:1];
+
+real x;
+real dxdt;
+real Rmem;
+
+analog begin
+  dxdt = 0.0;
+  if (V(BE, TE) &gt; Von)
+    dxdt = (V(BE, TE) - Von) / tau;
+  else if (V(BE, TE) &lt; Voff)
+    dxdt = (V(BE, TE) - Voff) / tau;
+  x = min(max(idt(dxdt, x0), 0.0), 1.0);
+  Rmem = Roff * exp(-x * ln(Roff / Ron));
+  I(BE, TE) &lt;+ V(BE, TE) / Rmem;
+end
+endmodule
+EOF">Copy</button></div>
+    <div class="see"><strong>What it does</strong><span>Writes the file <code>user_models/veriloga/memristor_hfo2_al.va</code>, replacing the empty one. Nothing is printed: that means it worked.</span></div>
+  </article>
+  <article class="step" data-img="img/d08_view_model.png" data-title="Open the model" data-do="Back in openPDKcreator, click View on the Verilog-A row.">
+    <div class="step-head"><span class="num">9</span><h3>Open the model</h3></div>
+    <p class="do">Back in openPDKcreator, click <b class="ui">View</b> on the Verilog-A row.</p>
+    <button class="shot" type="button"><img src="img/d08_view_model.png" alt="View on the Verilog-A row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d09_model_file.png" data-title="Read it, then close it" data-do="This model works differently from the TiO₂ one: its memory only moves when the voltage crosses a threshold. Click Close when you have read it.">
+    <div class="step-head"><span class="num">10</span><h3>Read it, then close it</h3></div>
+    <p class="do">This model works differently from the TiO₂ one: its memory only moves when the voltage crosses a <b>threshold</b>. Click <b class="ui">Close</b> when you have read it.</p>
+    <button class="shot" type="button"><img src="img/d09_model_file.png" alt="The model file shown, with Close boxed in red" loading="lazy"></button>
+    <div class="file tall">
+      <div class="fname"><span>user_models/veriloga/memristor_hfo2_al.va</span><span>the whole file</span></div>
+<pre>// A real, minimal *bipolar threshold-switching* memristor compact
+// model -- deliberately a genuinely different real model from
+// memristor_tio2_au.va/memristor_tio2_ti.va&#x27;s linear ion-drift form,
+// not just a renamed copy with different parameters (per direct
+// request: &quot;two different verilog models... [for] material1... [and]
+// material2&quot;). HfO2-based RRAM is real, widely reported to switch by
+// *filamentary* conduction (a real, localized conductive filament of
+// oxygen vacancies forming/rupturing through the oxide), not the
+// linear-drift *boundary-motion* picture the classical HP TiO2 model
+// uses -- a real, qualitatively different physical picture, so a
+// qualitatively different real model structure: a state variable that
+// only moves once the real terminal voltage crosses a real threshold
+// (SET/RESET), and an exponential (tunneling-like) state-to-resistance
+// mapping instead of a linear one. This is a real, simplified,
+// illustrative form of the general real threshold-switching structure
+// widely used for filamentary RRAM compact models -- see e.g.
+// Kvatinsky et al., &quot;TEAM: ThrEshold Adaptive Memristor Model&quot;, IEEE
+// TCAS-I 60(1), 211-221 (2013), and Yakopcic et al., &quot;A Memristor
+// Device Model&quot;, IEEE EDL 32(10), 1436-1438 (2011), for the real,
+// general lineage this borrows its threshold-switching + exponential-
+// conduction structure from -- not a literal reimplementation of
+// either (both are considerably more elaborate; this stays a bare-
+// minimum, from-scratch teaching model, same real scope as its TiO2
+// sibling). Al top electrode: a real, common RRAM top-electrode metal
+// choice (its own native oxide is itself sometimes exploited as part
+// of a real bilayer RRAM stack elsewhere in the literature; here it&#x27;s
+// simply the third, distinct real top-electrode metal this PDK&#x27;s own
+// task called for, bottom electrode still always Au).
+`include &quot;disciplines.vams&quot;
+
+module memristor_hfo2_al(BE, TE);
+inout BE, TE;
+electrical BE, TE;
+
+parameter real Ron = 500 from (0:inf);
+parameter real Roff = 50e3 from (0:inf);
+parameter real Von = 0.8;
+parameter real Voff = -0.6 from (-inf:0);
+parameter real tau = 5n from (0:inf);
+parameter real x0 = 0.1 from [0:1];
+
+real x;
+real dxdt;
+real Rmem;
+
+analog begin
+  dxdt = 0.0;
+  if (V(BE, TE) &gt; Von)
+    dxdt = (V(BE, TE) - Von) / tau;
+  else if (V(BE, TE) &lt; Voff)
+    dxdt = (V(BE, TE) - Voff) / tau;
+  x = min(max(idt(dxdt, x0), 0.0), 1.0);
+  Rmem = Roff * exp(-x * ln(Roff / Ron));
+  I(BE, TE) &lt;+ V(BE, TE) / Rmem;
+end
+endmodule</pre>
+    </div>
+    <dl class="explain">
+      <dt>Von, Voff</dt><dd>The thresholds: above +0.8 V the memory turns <b>on</b> (SET), below −0.6 V it turns <b>off</b> (RESET). In between, nothing changes.</dd>
+      <dt>dxdt</dt><dd>How fast the memory moves: zero between the thresholds, faster the further past them.</dd>
+      <dt>tau</dt><dd>How quickly it switches once past a threshold (the testbench uses 1 ms).</dd>
+      <dt>Rmem = Roff * exp(...)</dt><dd>The resistance falls exponentially from Roff (50 kΩ, off) to Ron (500 Ω, on) as the memory goes from 0 to 1: a thin conducting filament growing through the HfO₂.</dd>
+    </dl>
+  </article>
+  <article class="step" data-img="img/d10_compiled.png" data-title="It compiles" data-do="A box says Compilation performed correctly. Click OK.">
+    <div class="step-head"><span class="num">11</span><h3>It compiles</h3></div>
+    <p class="do">A box says <b>Compilation performed correctly</b>. Click <b class="ui">OK</b>.</p>
+    <button class="shot" type="button"><img src="img/d10_compiled.png" alt="Compilation performed correctly, OK boxed in red" loading="lazy"></button>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="symbol">
+  <header>
+    <div class="eyebrow">Part 3 · about 2 minutes</div>
+    <h2>Rebuild the symbol</h2>
+    <p>The symbol is what you place in a circuit drawing in xschem: a box with two pins, BE and TE.</p>
+  </header>
+  <article class="step" data-img="img/d11_create_symbol.png" data-title="Create the symbol" data-do="On the Symbol row, click Create. openPDKcreator makes an empty symbol file.">
+    <div class="step-head"><span class="num">12</span><h3>Create the symbol</h3></div>
+    <p class="do">On the <b>Symbol</b> row, click <b class="ui">Create</b>. openPDKcreator makes an empty symbol file.</p>
+    <button class="shot" type="button"><img src="img/d11_create_symbol.png" alt="Create on the Symbol row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-title="Draw it with a command" data-do="In the laptop&#x27;s terminal, paste and press Enter:">
+    <div class="step-head"><span class="num">13</span><h3>Draw it with a command</h3></div>
+    <p class="do">In the laptop's terminal, paste and press <kbd>Enter</kbd>:</p>
+    <div class="cmd-row"><pre class="term">cat &gt; ~/Documentos/rodrigo/openPDKcreator/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_hfo2_al.sym &lt;&lt;&#x27;EOF&#x27;
+v {xschem version=3.4.6 file_version=1.2}
+G {}
+K {type=n
+format=&quot;@name @pinlist @model&quot;
+template=&quot;name=n1 model=mm&quot;}
+V {}
+S {}
+E {}
+B 5 -42 -2 -38 2 {name=BE dir=inout}
+B 5 38 -2 42 2 {name=TE dir=inout}
+L 4 -40 0 -20 0 {}
+L 4 20 0 40 0 {}
+L 4 -20 -10 20 -10 {}
+L 4 20 -10 20 10 {}
+L 4 20 10 -20 10 {}
+L 4 -20 10 -20 -10 {}
+EOF</pre><button class="copy" type="button" data-copy="cat &gt; ~/Documentos/rodrigo/openPDKcreator/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_hfo2_al.sym &lt;&lt;&#x27;EOF&#x27;
+v {xschem version=3.4.6 file_version=1.2}
+G {}
+K {type=n
+format=&quot;@name @pinlist @model&quot;
+template=&quot;name=n1 model=mm&quot;}
+V {}
+S {}
+E {}
+B 5 -42 -2 -38 2 {name=BE dir=inout}
+B 5 38 -2 42 2 {name=TE dir=inout}
+L 4 -40 0 -20 0 {}
+L 4 20 0 40 0 {}
+L 4 -20 -10 20 -10 {}
+L 4 20 -10 20 10 {}
+L 4 20 10 -20 10 {}
+L 4 -20 10 -20 -10 {}
+EOF">Copy</button></div>
+    <div class="see"><strong>What it does</strong><span>Writes the file <code>libraries/openmemristorpdk_pr/memristor_hfo2_al.sym</code>, replacing the empty one. Nothing is printed: that means it worked.</span></div>
+    <dl class="explain">
+      <dt>K {type=n ...}</dt><dd>How the symbol turns into a netlist line, <code>n1 BE TE mm</code>. The <code>n</code> tells ngspice it's a compiled model.</dd>
+      <dt>B 5 ... {name=BE}</dt><dd>The two pins: BE on the left, TE on the right.</dd>
+      <dt>L 4 ...</dt><dd>Six straight lines: the two leads and the four sides of the box.</dd>
+    </dl>
+  </article>
+  <article class="step" data-img="img/d12_open_symbol.png" data-title="Look at it in xschem" data-do="On the Symbol row, click Open in xschem and wait for the window.">
+    <div class="step-head"><span class="num">14</span><h3>Look at it in xschem</h3></div>
+    <p class="do">On the Symbol row, click <b class="ui">Open in xschem</b> and wait for the window.</p>
+    <button class="shot" type="button"><img src="img/d12_open_symbol.png" alt="Open in xschem on the Symbol row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d13_symbol_in_xschem.png" data-title="The new symbol" data-do="Here it is: a box with a lead and a red pin square on each side. Nothing to change.">
+    <div class="step-head"><span class="num">15</span><h3>The new symbol</h3></div>
+    <p class="do">Here it is: a box with a lead and a red pin square on each side. Nothing to change.</p>
+    <button class="shot" type="button"><img src="img/d13_symbol_in_xschem.png" alt="xschem showing the symbol: a green box with two leads and red pin squares" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d14_close_symbol.png" data-title="Close xschem" data-do="Click the X at the top-right of the xschem window.">
+    <div class="step-head"><span class="num">16</span><h3>Close xschem</h3></div>
+    <p class="do">Click the <b class="ui">X</b> at the top-right of the xschem window.</p>
+    <button class="shot" type="button"><img src="img/d14_close_symbol.png" alt="xschem&#x27;s close button boxed in red" loading="lazy"></button>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="layout">
+  <header>
+    <div class="eyebrow">Part 4 · about 4 minutes</div>
+    <h2>Rebuild the layout</h2>
+    <p>The layout is the device as the factory builds it, seen from above: three 1 µm squares stacked on top of each other, gold, then HfO₂, then aluminium.</p>
+  </header>
+  <article class="step" data-img="img/d15_create_layout.png" data-title="Create the layout" data-do="On the Magic Layout row, click Create.">
+    <div class="step-head"><span class="num">17</span><h3>Create the layout</h3></div>
+    <p class="do">On the <b>Magic Layout</b> row, click <b class="ui">Create</b>.</p>
+    <button class="shot" type="button"><img src="img/d15_create_layout.png" alt="Create on the Magic Layout row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-title="Draw it with a command" data-do="In the laptop&#x27;s terminal, paste and press Enter:">
+    <div class="step-head"><span class="num">18</span><h3>Draw it with a command</h3></div>
+    <p class="do">In the laptop's terminal, paste and press <kbd>Enter</kbd>:</p>
+    <div class="cmd-row"><pre class="term">cat &gt; ~/Documentos/rodrigo/openPDKcreator/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_hfo2_al.mag &lt;&lt;&#x27;EOF&#x27;
+magic
+tech openmemristorpdk
+magscale 1 2
+timestamp 1787310491
+&lt;&lt; checkpaint &gt;&gt;
+rect 0 0 1 1
+&lt;&lt; be_au &gt;&gt;
+rect 0 0 1 1
+&lt;&lt; te_al &gt;&gt;
+rect 0 0 1 1
+&lt;&lt; mem_hfo2 &gt;&gt;
+rect 0 0 1 1
+&lt;&lt; labels &gt;&gt;
+rlabel be_au 0 0 1 1 0 BE
+port 0 nsew
+rlabel te_al 0 0 1 1 0 TE
+port 1 nsew
+&lt;&lt; end &gt;&gt;
+EOF</pre><button class="copy" type="button" data-copy="cat &gt; ~/Documentos/rodrigo/openPDKcreator/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_hfo2_al.mag &lt;&lt;&#x27;EOF&#x27;
+magic
+tech openmemristorpdk
+magscale 1 2
+timestamp 1787310491
+&lt;&lt; checkpaint &gt;&gt;
+rect 0 0 1 1
+&lt;&lt; be_au &gt;&gt;
+rect 0 0 1 1
+&lt;&lt; te_al &gt;&gt;
+rect 0 0 1 1
+&lt;&lt; mem_hfo2 &gt;&gt;
+rect 0 0 1 1
+&lt;&lt; labels &gt;&gt;
+rlabel be_au 0 0 1 1 0 BE
+port 0 nsew
+rlabel te_al 0 0 1 1 0 TE
+port 1 nsew
+&lt;&lt; end &gt;&gt;
+EOF">Copy</button></div>
+    <div class="see"><strong>What it does</strong><span>Writes the file <code>libraries/openmemristorpdk_pr/memristor_hfo2_al.mag</code>, replacing the empty one. Nothing is printed: that means it worked.</span></div>
+    <dl class="explain">
+      <dt>&lt;&lt; be_au &gt;&gt;</dt><dd>The gold bottom electrode: one rectangle, <code>rect 0 0 1 1</code>.</dd>
+      <dt>&lt;&lt; mem_hfo2 &gt;&gt;</dt><dd>The HfO₂ switching layer, exactly on top of it.</dd>
+      <dt>&lt;&lt; te_al &gt;&gt;</dt><dd>The aluminium top electrode, on top of that.</dd>
+      <dt>rlabel ... BE / TE</dt><dd>The two connection points, matching the symbol's pins.</dd>
+    </dl>
+  </article>
+  <article class="step" data-img="img/d16_run_drc.png" data-title="Check it: Run DRC" data-do="On the Magic Layout row, click Run DRC. DRC (Design Rule Check) makes the chip file (GDS) and checks the factory&#x27;s rules, like minimum sizes. It takes about 10 seconds.">
+    <div class="step-head"><span class="num">19</span><h3>Check it: Run DRC</h3></div>
+    <p class="do">On the Magic Layout row, click <b class="ui">Run DRC</b>. DRC (Design Rule Check) makes the chip file (GDS) and checks the factory's rules, like minimum sizes. It takes about 10 seconds.</p>
+    <button class="shot" type="button"><img src="img/d16_run_drc.png" alt="Run DRC on the Magic Layout row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d17_drc_clean.png" data-title="It&#x27;s clean" data-do="The window title says CLEAN: no rule broken. Click Close.">
+    <div class="step-head"><span class="num">20</span><h3>It's clean</h3></div>
+    <p class="do">The window title says <b>CLEAN</b>: no rule broken. Click <b class="ui">Close</b>.</p>
+    <button class="shot" type="button"><img src="img/d17_drc_clean.png" alt="The DRC result window titled CLEAN, with Close boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d18_open_klayout.png" data-title="Open the chip file" data-do="A new GDS/Layout row appeared with the chip file. Click Open in KLayout.">
+    <div class="step-head"><span class="num">21</span><h3>Open the chip file</h3></div>
+    <p class="do">A new <b>GDS/Layout</b> row appeared with the chip file. Click <b class="ui">Open in KLayout</b>.</p>
+    <button class="shot" type="button"><img src="img/d18_open_klayout.png" alt="Open in KLayout on the GDS/Layout row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d19b_klayout_closeup.png" data-title="The rebuilt device" data-do="In the Layers list (red box), the three layers this device uses are bold: BE_Au, MEM_HfO2 and TE_Al.">
+    <div class="step-head"><span class="num">22</span><h3>The rebuilt device</h3></div>
+    <p class="do">In the <b>Layers</b> list (red box), the three layers this device uses are bold: <b>BE_Au</b>, <b>MEM_HfO2</b> and <b>TE_Al</b>.</p>
+    <button class="shot" type="button"><img src="img/d19b_klayout_closeup.png" alt="KLayout with BE_Au, MEM_HfO2 and TE_Al in bold in the Layers list" loading="lazy"></button>
+    <div class="see"><strong>And VIA1?</strong><span><code>VIA1</code> (solid red) is the <em>via</em> layer: a hole that joins a bottom-electrode wire straight to a top-electrode wire somewhere else on the chip. It only exists where someone draws one. A memristor has none: its current has to go through the oxide.</span></div>
+  </article>
+  <article class="step" data-img="img/d20_close_klayout.png" data-title="Close KLayout" data-do="Click the X at the top-right of the KLayout window.">
+    <div class="step-head"><span class="num">23</span><h3>Close KLayout</h3></div>
+    <p class="do">Click the <b class="ui">X</b> at the top-right of the KLayout window.</p>
+    <button class="shot" type="button"><img src="img/d20_close_klayout.png" alt="KLayout&#x27;s close button boxed in red" loading="lazy"></button>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="testbench">
+  <header>
+    <div class="eyebrow">Part 5 · about 4 minutes</div>
+    <h2>Test it</h2>
+    <p>Last piece: a testbench that drives the rebuilt device with a sine wave and plots its current.</p>
+  </header>
+  <article class="step" data-img="img/d21_create_testbench.png" data-title="Create the testbench" data-do="On the Schematic row, click Create.">
+    <div class="step-head"><span class="num">24</span><h3>Create the testbench</h3></div>
+    <p class="do">On the <b>Schematic</b> row, click <b class="ui">Create</b>.</p>
+    <button class="shot" type="button"><img src="img/d21_create_testbench.png" alt="Create on the Schematic row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-title="Draw it with a command" data-do="In the laptop&#x27;s terminal, paste and press Enter:">
+    <div class="step-head"><span class="num">25</span><h3>Draw it with a command</h3></div>
+    <p class="do">In the laptop's terminal, paste and press <kbd>Enter</kbd>:</p>
+    <div class="cmd-row"><pre class="term">cat &gt; ~/Documentos/rodrigo/openPDKcreator/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_hfo2_al.sch &lt;&lt;&#x27;EOF&#x27;
+v {xschem version=3.4.8RC file_version=1.3}
+G {}
+K {}
+V {}
+S {}
+F {}
+E {}
+T {HfO2 memristor testbench} -60 -300 0 0 0.6 0.6 {}
+T {Press &quot;Netlist&quot;, then &quot;Simulate&quot; (top-right of the menu bar).} -60 -240 0 0 0.3 0.3 {}
+T {V1 swings between +1.2 V and -1.2 V, 25 times per second.} -60 -210 0 0 0.3 0.3 {}
+N 40 -100 400 -100 {lab=te}
+N 400 -40 400 -20 {lab=0}
+C {/foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_hfo2_al.sym} 0 -100 0 1 {name=n1 model=mm}
+C {gnd.sym} -40 -100 0 0 {name=l1 lab=0}
+C {lab_wire.sym} 220 -100 0 0 {name=p1 sig_type=std_logic lab=te}
+C {vsource.sym} 400 -70 0 0 {name=V1 value=&quot;dc 0 sin(0 1.2 25)&quot; savecurrent=false}
+C {gnd.sym} 400 -20 0 0 {name=l2 lab=0}
+C {code_shown.sym} -60 40 0 0 {name=s1 only_toplevel=false value=&quot;
+.model mm memristor_hfo2_al ron=500 roff=50k von=0.8 voff=-0.6 tau=1m x0=0.1
+.control
+pre_osdi /foss/designs/openMemristorPDK/user_models/veriloga/memristor_hfo2_al.osdi
+tran 20u 0.08
+plot -i(V1) vs v(te) retraceplot title &#x27;HfO2 memristor I-V loop&#x27; xlabel &#x27;Voltage (V)&#x27; ylabel &#x27;Current (A)&#x27;
+.endc
+&quot;}
+EOF</pre><button class="copy" type="button" data-copy="cat &gt; ~/Documentos/rodrigo/openPDKcreator/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_hfo2_al.sch &lt;&lt;&#x27;EOF&#x27;
+v {xschem version=3.4.8RC file_version=1.3}
+G {}
+K {}
+V {}
+S {}
+F {}
+E {}
+T {HfO2 memristor testbench} -60 -300 0 0 0.6 0.6 {}
+T {Press &quot;Netlist&quot;, then &quot;Simulate&quot; (top-right of the menu bar).} -60 -240 0 0 0.3 0.3 {}
+T {V1 swings between +1.2 V and -1.2 V, 25 times per second.} -60 -210 0 0 0.3 0.3 {}
+N 40 -100 400 -100 {lab=te}
+N 400 -40 400 -20 {lab=0}
+C {/foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_hfo2_al.sym} 0 -100 0 1 {name=n1 model=mm}
+C {gnd.sym} -40 -100 0 0 {name=l1 lab=0}
+C {lab_wire.sym} 220 -100 0 0 {name=p1 sig_type=std_logic lab=te}
+C {vsource.sym} 400 -70 0 0 {name=V1 value=&quot;dc 0 sin(0 1.2 25)&quot; savecurrent=false}
+C {gnd.sym} 400 -20 0 0 {name=l2 lab=0}
+C {code_shown.sym} -60 40 0 0 {name=s1 only_toplevel=false value=&quot;
+.model mm memristor_hfo2_al ron=500 roff=50k von=0.8 voff=-0.6 tau=1m x0=0.1
+.control
+pre_osdi /foss/designs/openMemristorPDK/user_models/veriloga/memristor_hfo2_al.osdi
+tran 20u 0.08
+plot -i(V1) vs v(te) retraceplot title &#x27;HfO2 memristor I-V loop&#x27; xlabel &#x27;Voltage (V)&#x27; ylabel &#x27;Current (A)&#x27;
+.endc
+&quot;}
+EOF">Copy</button></div>
+    <div class="see"><strong>What it does</strong><span>Writes the file <code>libraries/openmemristorpdk_pr/memristor_hfo2_al.sch</code>, replacing the empty one. Nothing is printed: that means it worked.</span></div>
+    <dl class="explain">
+      <dt>C {.../memristor_hfo2_al.sym}</dt><dd>Places the symbol you made in part 3, as <code>n1</code>.</dd>
+      <dt>sin(0 1.2 25)</dt><dd>A sine wave between +1.2 V and −1.2 V, 25 times per second: past both thresholds.</dd>
+      <dt>.model mm ...</dt><dd>The model from part 2 and its numbers.</dd>
+      <dt>tran 20u 0.08</dt><dd>Simulate 0.08 seconds (two waves).</dd>
+    </dl>
+  </article>
+  <article class="step" data-img="img/d22_open_testbench.png" data-title="Open it" data-do="On the Schematic row, click Open in xschem.">
+    <div class="step-head"><span class="num">26</span><h3>Open it</h3></div>
+    <p class="do">On the Schematic row, click <b class="ui">Open in xschem</b>.</p>
+    <button class="shot" type="button"><img src="img/d22_open_testbench.png" alt="Open in xschem on the Schematic row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d23_testbench.png" data-title="The testbench" data-do="Your symbol, wired to the sine source, with the simulation code below. Nothing to change.">
+    <div class="step-head"><span class="num">27</span><h3>The testbench</h3></div>
+    <p class="do">Your symbol, wired to the sine source, with the simulation code below. Nothing to change.</p>
+    <button class="shot" type="button"><img src="img/d23_testbench.png" alt="xschem showing the HfO2 testbench" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d24_netlist.png" data-title="Click Netlist" data-do="Click Netlist and wait until it turns green.">
+    <div class="step-head"><span class="num">28</span><h3>Click Netlist</h3></div>
+    <p class="do">Click <b class="ui">Netlist</b> and wait until it turns green.</p>
+    <button class="shot" type="button"><img src="img/d24_netlist.png" alt="Netlist boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d25_simulate.png" data-title="Click Simulate" data-do="Click Simulate and wait about 10 seconds.">
+    <div class="step-head"><span class="num">29</span><h3>Click Simulate</h3></div>
+    <p class="do">Click <b class="ui">Simulate</b> and wait about 10 seconds.</p>
+    <button class="shot" type="button"><img src="img/d25_simulate.png" alt="Simulate boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d26_result.png" data-title="The HfO₂ memristor at work" data-do="The plot window shows the rebuilt device switching on and off.">
+    <div class="step-head"><span class="num">30</span><h3>The HfO₂ memristor at work</h3></div>
+    <p class="do">The plot window shows the rebuilt device switching on and off.</p>
+    <button class="shot" type="button"><img src="img/d26_result.png" alt="xschem, the ngspice window and the plot" loading="lazy"></button>
+    <div class="two">
+      <button class="shot" type="button"><img src="img/d27_plot_closeup.png" alt="Close-up of the HfO2 loop: flat, then a jump to 2.4 mA at +1.2 V, a straight line back, then a drop at -1.2 V" loading="lazy"></button>
+      <div class="see"><strong>How to read it</strong>
+        <span>Starting at 0 V the device is <b>off</b>: almost no current (the flat part).</span>
+        <span>Past +0.8 V it switches <b>on</b> (SET) and the current jumps to about 2.4 mA.</span>
+        <span>It stays on all the way back through 0 V (the straight line through the middle) until, past −0.6 V, it switches <b>off</b> again (RESET).</span>
+        <span>Sharp jumps instead of the smooth TiO₂ loop: a different material, a different model.</span>
+      </div>
+    </div>
+  </article>
+  <article class="step" data-img="img/d28_quit_plot.png" data-title="Close the plot" data-do="Click Quit in the plot window.">
+    <div class="step-head"><span class="num">31</span><h3>Close the plot</h3></div>
+    <p class="do">Click <b class="ui">Quit</b> in the plot window.</p>
+    <button class="shot" type="button"><img src="img/d28_quit_plot.png" alt="Quit in the plot window boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d29_quit_ngspice.png" data-title="Close the simulator" data-do="Click inside the white ngspice window, type quit and press Enter.">
+    <div class="step-head"><span class="num">32</span><h3>Close the simulator</h3></div>
+    <p class="do">Click inside the white ngspice window, type <code>quit</code> and press <kbd>Enter</kbd>.</p>
+    <button class="shot" type="button"><img src="img/d29_quit_ngspice.png" alt="The ngspice prompt boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/d30_close_xschem.png" data-title="Close xschem" data-do="Click the X at the top-right of the xschem window. You changed nothing in it, so it closes straight away.">
+    <div class="step-head"><span class="num">33</span><h3>Close xschem</h3></div>
+    <p class="do">Click the <b class="ui">X</b> at the top-right of the xschem window. You changed nothing in it, so it closes straight away.</p>
+    <button class="shot" type="button"><img src="img/d30_close_xschem.png" alt="xschem&#x27;s close button boxed in red" loading="lazy"></button>
+    <div class="see"><strong>What you rebuilt</strong><span>The model, symbol, layout, chip file and testbench of <code>memristor_hfo2_al</code>. The old CDL/SPICE netlists, Liberty and Verilog views were for layout checks (LVS) and digital tools; you don't need them to simulate the device.</span></div>
+  </article>
+</section>

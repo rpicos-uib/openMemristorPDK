@@ -49,6 +49,22 @@
     <source>12/0</source>
   </properties>
   <properties>
+    <frame-color>#b0221a</frame-color>
+    <fill-color>#e2483d</fill-color>
+    <frame-brightness>0</frame-brightness>
+    <fill-brightness>0</fill-brightness>
+    <dither-pattern>I0</dither-pattern>
+    <line-style>C0</line-style>
+    <valid>true</valid>
+    <visible>true</visible>
+    <transparent>false</transparent>
+    <width>1</width>
+    <marked>false</marked>
+    <animation>0</animation>
+    <name>VIA1.drawing</name>
+    <source>15/0</source>
+  </properties>
+  <properties>
     <frame-color>#a07800</frame-color>
     <fill-color>#f0c419</fill-color>
     <frame-brightness>0</frame-brightness>
