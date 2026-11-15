@@ -1,0 +1,105 @@
+<section class="chapter" id="two">
+  <header>
+    <div class="eyebrow">Before you start</div>
+    <h2>Two PDKs side by side</h2>
+    <p>openMemristorPDK only has memristors, on purpose. Real chips also need <b>transistors</b>, and for those you borrow a second PDK: <b>IHP SG13G2</b>, a real, open 130 nm process from the IHP research institute in Germany, with transistors, logic gates and memories. The two PDKs stay separate; a circuit can simply use parts from both.</p>
+  </header>
+  <article class="step">
+    <div class="step-head"><span class="num">?</span><h3>Two copies of IHP's PDK</h3></div>
+    <div class="tablewrap"><table class="views">
+      <thead><tr><th>Copy</th><th>Where</th><th>Used for</th><th>Install</th></tr></thead>
+      <tbody>
+        <tr><td>The container's</td><td><code>/foss/pdks/ihp-sg13g2</code></td><td>Simulating with xschem and ngspice: transistor symbols and models</td><td>Nothing to do: it comes with the container (part 1)</td></tr>
+        <tr><td>openPDKcreator's</td><td><code>openPDKcreator/data/ihp-sg13g2</code></td><td>Opening IHP's PDK in openPDKcreator to look inside it</td><td>One command, about a minute (part 2)</td></tr>
+      </tbody>
+    </table></div>
+    <div class="see"><strong>Our PDK is untouched</strong><span>Nothing here changes openMemristorPDK. IHP's files live in their own folders, and openPDKcreator opens each PDK in its own window.</span></div>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="container">
+  <header>
+    <div class="eyebrow">Part 1 · 2 minutes</div>
+    <h2>It's already in the container</h2>
+    <p>The IIC-OSIC-TOOLS container from <a href="install.html">Install from scratch</a> comes with several PDKs, IHP's among them. Check it's there.</p>
+  </header>
+  <article class="step" data-img="img/v01_open_terminal.png" data-title="Open a terminal" data-do="In the container desktop (the browser window), click the terminal icon in the bottom panel.">
+    <div class="step-head"><span class="num">1</span><h3>Open a terminal</h3></div>
+    <p class="do">In the container desktop (the browser window), click the <b class="ui">terminal icon</b> in the bottom panel.</p>
+    <button class="shot" type="button"><img src="img/v01_open_terminal.png" alt="The whole container desktop with the terminal icon in the bottom panel boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/h01_container_pdks.png" data-title="List the container&#x27;s PDKs" data-do="Click inside the terminal, type this and press Enter:">
+    <div class="step-head"><span class="num">2</span><h3>List the container's PDKs</h3></div>
+    <p class="do">Click inside the terminal, type this and press <kbd>Enter</kbd>:</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>ls /foss/pdks</pre><button class="copy" type="button" data-copy="ls /foss/pdks">Copy</button></div>
+    <button class="shot" type="button"><img src="img/h01_container_pdks.png" alt="The terminal listing ciel, gf180mcuD, ihp-sg13cmos5l, ihp-sg13g2, sky130A and versions.txt" loading="lazy"></button>
+    <div class="see"><strong>What you see</strong><span><code>ihp-sg13g2</code> is the one we use. The others are other open processes: <code>sky130A</code> (SkyWater, 130 nm), <code>gf180mcuD</code> (GlobalFoundries, 180 nm) and a second IHP flavour. Nothing to install for simulating with IHP's transistors.</span></div>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="fetch">
+  <header>
+    <div class="eyebrow">Part 2 · about 2 minutes</div>
+    <h2>Give openPDKcreator its own copy</h2>
+    <p>To open IHP's PDK in openPDKcreator, it needs its own copy, in <code>openPDKcreator/data/ihp-sg13g2</code>. One command downloads it (about 1.2 GB) from IHP's GitHub page.</p>
+  </header>
+  <article class="step" data-img="img/h02_fetch.png" data-title="Download it" data-do="In the same terminal (it starts in /foss/designs, which is your openPDKcreator folder), type this and press Enter. Wait until the prompt comes back, about a minute.">
+    <div class="step-head"><span class="num">3</span><h3>Download it</h3></div>
+    <p class="do">In the same terminal (it starts in <code>/foss/designs</code>, which is your openPDKcreator folder), type this and press <kbd>Enter</kbd>. Wait until the prompt comes back, about a minute.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>python3 main.py fetch</pre><button class="copy" type="button" data-copy="python3 main.py fetch">Copy</button></div>
+    <button class="shot" type="button"><img src="img/h02_fetch.png" alt="The terminal at the end of the download: Done. Real content lands under /foss/designs/data/ihp-sg13g2/ihp-sg13g2/libs.doc, libs.qa, libs.ref and libs.tech" loading="lazy"></button>
+    <div class="see"><strong>Done</strong><span>The last lines list the four folders it downloaded: documentation, test data, cell libraries (<code>libs.ref</code>) and tool files (<code>libs.tech</code>).</span></div>
+    <div class="oops"><strong>"already exists"?</strong><span>Then you already have the copy and nothing was downloaded. That's fine: go on.</span></div>
+  </article>
+  <article class="step" data-title="Close the terminal" data-do="Type exit and press Enter.">
+    <div class="step-head"><span class="num">4</span><h3>Close the terminal</h3></div>
+    <p class="do">Type <code>exit</code> and press <kbd>Enter</kbd>.</p>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="open">
+  <header>
+    <div class="eyebrow">Part 3 · about 3 minutes</div>
+    <h2>Open IHP's PDK next to ours</h2>
+    <p>The same start command as always, with <code>--gui</code> instead of <code>--gui-memristor</code>, opens a second openPDKcreator window on IHP's PDK. Your memristor window stays open behind it.</p>
+  </header>
+  <article class="step" data-title="Start it" data-do="In the laptop&#x27;s terminal (the one from step 1 of Your first simulation, not the browser), in the openPDKcreator folder, type:">
+    <div class="step-head"><span class="num">5</span><h3>Start it</h3></div>
+    <p class="do">In the <b>laptop's terminal</b> (the one from step 1 of <a href="first-simulation.html">Your first simulation</a>, not the browser), in the <code>openPDKcreator</code> folder, type:</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>./start_eda_container.sh --gui</pre><button class="copy" type="button" data-copy="./start_eda_container.sh --gui">Copy</button></div>
+    <pre class="term"><span class="dim">[INFO] iic-osic-tools_openpdkcreator_uid_1001 is already running.
+[INFO] VNC session: http://127.0.0.1:8081/?password=abc123&amp;autoconnect=true&amp;resize=scale  (NOT the 'localhost' form -- see header comment)
+[INFO] Launching the IHP SG13G2 GUI inside the container ...</span></pre>
+    <div class="see"><strong>Then</strong><span>A last line of letters and numbers (an ID for the started program). Go back to the browser.</span></div>
+  </article>
+  <article class="step" data-img="img/h03_ihp_gui.png" data-title="A second window" data-do="A new openPDKcreator window opens at the top left. Its title ends in data/ihp-sg13g2/ihp-sg13g2: that is how you tell it from the memristor one.">
+    <div class="step-head"><span class="num">6</span><h3>A second window</h3></div>
+    <p class="do">A new openPDKcreator window opens at the top left. Its title ends in <code>data/ihp-sg13g2/ihp-sg13g2</code>: that is how you tell it from the memristor one.</p>
+    <button class="shot" type="button"><img src="img/h03_ihp_gui.png" alt="A second openPDKcreator window with data/ihp-sg13g2/ihp-sg13g2 in its title boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/h04_ihp_libman.png" data-title="IHP&#x27;s Library Manager" data-do="In the new window, click the Library Manager tab.">
+    <div class="step-head"><span class="num">7</span><h3>IHP's Library Manager</h3></div>
+    <p class="do">In the new window, click the <b class="ui">Library Manager</b> tab.</p>
+    <button class="shot" type="button"><img src="img/h04_ihp_libman.png" alt="The Library Manager tab of the IHP window boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/h05_ihp_stdcells.png" data-title="IHP&#x27;s libraries" data-do="Click sg13g2_stdcell (box 1). The Cells list (box 2) fills with IHP&#x27;s standard cells: the logic gates (and, or, flip-flops…) a digital chip is built from.">
+    <div class="step-head"><span class="num">8</span><h3>IHP's libraries</h3></div>
+    <p class="do">Click <b class="ui">sg13g2_stdcell</b> (box 1). The Cells list (box 2) fills with IHP's <b>standard cells</b>: the logic gates (and, or, flip-flops…) a digital chip is built from.</p>
+    <button class="shot" type="button"><img src="img/h05_ihp_stdcells.png" alt="The sg13g2_stdcell library boxed as 1 and its list of cells (sg13g2_a21o_1, sg13g2_and2_1 and more) boxed as 2" loading="lazy"></button>
+    <dl class="explain">
+      <dt>sg13g2_stdcell</dt><dd>Logic gates, ready to place on a chip.</dd>
+      <dt>sg13g2_io</dt><dd>The pads that connect the chip to the outside world.</dd>
+      <dt>sg13g2_sram</dt><dd>Ready-made memories (SRAM).</dd>
+      <dt>sg13g2_pr</dt><dd>Single devices: transistors, resistors, capacitors. openPDKcreator shows this list empty, because these devices have no cell files of their own; you use them straight from xschem, as in <a href="digital.html#t1r">The digital side</a>.</dd>
+    </dl>
+    <div class="oops"><strong>A different list?</strong><span>If you made your own libraries in this window, they show up too, marked <b>(project)</b>.</span></div>
+  </article>
+  <article class="step" data-img="img/h06_close_ihp.png" data-title="Close the IHP window" data-do="Click the X at the top-right of the IHP window. The memristor window is still open behind it.">
+    <div class="step-head"><span class="num">9</span><h3>Close the IHP window</h3></div>
+    <p class="do">Click the <b class="ui">X</b> at the top-right of the IHP window. The memristor window is still open behind it.</p>
+    <button class="shot" type="button"><img src="img/h06_close_ihp.png" alt="The close button of the IHP window boxed in red" loading="lazy"></button>
+  </article>
+</section>

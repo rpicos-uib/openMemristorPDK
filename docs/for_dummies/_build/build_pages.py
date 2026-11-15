@@ -91,20 +91,32 @@ SECTIONS = [
                   'same moves (Netlist, Simulate, Quit, quit). Start with openPDKcreator open.',
     },
     {
+        "slug": "ihp",
+        "title": "Add IHP's PDK",
+        "short": "IHP PDK",
+        "status": "ready",
+        "time": "about 7 min · 9 steps",
+        "desc": "Use IHP's open SG13G2 PDK, with real transistors and logic gates, next to the memristor PDK.",
+        "lede": "openMemristorPDK has no transistors, on purpose. Borrow them from IHP's open SG13G2 PDK: "
+                "check it is in the container, give openPDKcreator its own copy, and open it next to ours.",
+        "prereq": 'Do <a href="install.html">Install from scratch</a> first, and start with openPDKcreator open '
+                  '(steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).',
+    },
+    {
         "slug": "digital",
         "title": "The digital side",
         "short": "Digital",
         "status": "draft",
-        "time": "about 30 min · 56 steps · draft",
+        "time": "about 40 min · 69 steps · draft",
         "desc": "Store a bit in a memristor, see a write that is too weak fail, write a pattern into a "
-                "2 × 2 crossbar and simulate a digital twin in Verilog.",
+                "2 × 2 crossbar, simulate a digital twin in Verilog and build a real 1T1R bit-cell.",
         "lede": "A memristor can store a bit with no power at all. Write a 1 into the Au/HfO₂/Al memristor, "
                 "read it back, erase it, find out why a write that is too weak does nothing, "
                 "then store four bits in a crossbar without disturbing the neighbours, and simulate "
-                "the same memory the way digital designers do, in Verilog.",
+                "the same memory the way digital designers do, in Verilog, and add IHP's transistor to make a real 1T1R cell.",
         "prereq": 'Easier after <a href="add-device.html">Add a new device</a>: it uses the Au/HfO₂/Al memristor. '
                   'Start with openPDKcreator open (steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).',
-        "draftnote": 'Parts 1–5 are finished, with a real screenshot for every click. Parts 6 and 7 are still a '
+        "draftnote": 'Parts 1–6 are finished, with a real screenshot for every click. Parts 7 and 8 are still a '
                      'first draft we are working on together: ideas, a plan and open questions.',
     },
 ]

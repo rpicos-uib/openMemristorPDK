@@ -225,3 +225,15 @@ entries:
   cell: memristor_hfo2_al_crossbar2x2_tb
   view_kind: xschem_schematic
   path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_hfo2_al_crossbar2x2_tb.sch
+- library: openmemristorpdk_pr
+  cell: memristor_hfo2_al_1t1r_tb
+  view_kind: xschem_schematic
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_hfo2_al_1t1r_tb.sch
+- library: openmemristorpdk_pr
+  cell: memristor_bit
+  view_kind: verilog
+  path: /foss/designs/openMemristorPDK/digital/memristor_bit/memristor_bit.v
+- library: openmemristorpdk_pr
+  cell: memristor_bit_tb
+  view_kind: verilog
+  path: /foss/designs/openMemristorPDK/digital/memristor_bit/memristor_bit_tb.v

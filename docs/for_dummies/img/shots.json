@@ -885,7 +885,7 @@
   "note": "",
   "size": [
    1680,
-   1050
+   1019
   ]
  },
  "b01_click_libman": {
@@ -1278,6 +1278,146 @@
   "size": [
    830,
    520
+  ]
+ },
+ "h01_container_pdks": {
+  "note": "",
+  "size": [
+   830,
+   520
+  ]
+ },
+ "h02_fetch": {
+  "note": "",
+  "size": [
+   830,
+   520
+  ]
+ },
+ "h03_ihp_gui": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "h04_ihp_libman": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "h05_ihp_pr": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "h05_ihp_stdcells": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "h06_close_ihp": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "t01_click_1t1r_tb": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "t02_open_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "t03_raw": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "t03_testbench": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "t04_netlist_simulate": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "t05_result": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "t07_current": {
+  "note": "",
+  "size": [
+   714,
+   544
+  ]
+ },
+ "t06_voltages": {
+  "note": "",
+  "size": [
+   714,
+   544
+  ]
+ },
+ "t08_console": {
+  "note": "",
+  "size": [
+   373,
+   80
+  ]
+ },
+ "t09_quit_current": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "t10_quit_voltages": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "t11_quit_ngspice": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "t12_close_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
   ]
  }
 }
