@@ -107,16 +107,18 @@ SECTIONS = [
         "title": "The digital side",
         "short": "Digital",
         "status": "draft",
-        "time": "about 40 min · 69 steps · draft",
+        "time": "about 50 min · 76 steps · draft",
         "desc": "Store a bit in a memristor, see a write that is too weak fail, write a pattern into a "
-                "2 × 2 crossbar, simulate a digital twin in Verilog and build a real 1T1R bit-cell.",
+                "2 × 2 crossbar, simulate a digital twin in Verilog, synthesize a controller into IHP gates "
+                "and build a real 1T1R bit-cell.",
         "lede": "A memristor can store a bit with no power at all. Write a 1 into the Au/HfO₂/Al memristor, "
                 "read it back, erase it, find out why a write that is too weak does nothing, "
                 "then store four bits in a crossbar without disturbing the neighbours, and simulate "
-                "the same memory the way digital designers do, in Verilog, and add IHP's transistor to make a real 1T1R cell.",
+                "the same memory the way digital designers do, in Verilog, turn its controller into real "
+                "logic gates, and add IHP's transistor to make a real 1T1R cell.",
         "prereq": 'Easier after <a href="add-device.html">Add a new device</a>: it uses the Au/HfO₂/Al memristor. '
                   'Start with openPDKcreator open (steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).',
-        "draftnote": 'Parts 1–6 are finished, with a real screenshot for every click. Parts 7 and 8 are still a '
+        "draftnote": 'Parts 1–7 are finished, with a real screenshot for every click. Parts 8 and 9 are still a '
                      'first draft we are working on together: ideas, a plan and open questions.',
     },
 ]

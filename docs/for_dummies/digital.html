@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>The digital side · openMemristorPDK Guide</title>
-<meta name="description" content="Store a bit in a memristor, see a write that is too weak fail, write a pattern into a 2 × 2 crossbar, simulate a digital twin in Verilog and build a real 1T1R bit-cell.">
+<meta name="description" content="Store a bit in a memristor, see a write that is too weak fail, write a pattern into a 2 × 2 crossbar, simulate a digital twin in Verilog, synthesize a controller into IHP gates and build a real 1T1R bit-cell.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -18,11 +18,11 @@
 </div></header>
 <div class="wrap">
 <header class="hero">
-  <div class="crumbs"><a href="index.html">Guide</a> · Section 7 · about 40 min · 69 steps · draft</div>
+  <div class="crumbs"><a href="index.html">Guide</a> · Section 7 · about 50 min · 76 steps · draft</div>
   <h1>The digital side</h1>
-  <p class="lede">A memristor can store a bit with no power at all. Write a 1 into the Au/HfO₂/Al memristor, read it back, erase it, find out why a write that is too weak does nothing, then store four bits in a crossbar without disturbing the neighbours, and simulate the same memory the way digital designers do, in Verilog, and add IHP's transistor to make a real 1T1R cell. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
+  <p class="lede">A memristor can store a bit with no power at all. Write a 1 into the Au/HfO₂/Al memristor, read it back, erase it, find out why a write that is too weak does nothing, then store four bits in a crossbar without disturbing the neighbours, and simulate the same memory the way digital designers do, in Verilog, turn its controller into real logic gates, and add IHP's transistor to make a real 1T1R cell. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
   <p class="prereq">Easier after <a href="add-device.html">Add a new device</a>: it uses the Au/HfO₂/Al memristor. Start with openPDKcreator open (steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).</p>
-  <p class="draftnote"><strong>Draft</strong> Parts 1–6 are finished, with a real screenshot for every click. Parts 7 and 8 are still a first draft we are working on together: ideas, a plan and open questions.</p>
+  <p class="draftnote"><strong>Draft</strong> Parts 1–7 are finished, with a real screenshot for every click. Parts 8 and 9 are still a first draft we are working on together: ideas, a plan and open questions.</p>
   <div class="hero-row">
     <button class="btn" type="button" id="play-all">▶ Play as video</button>
     <span class="legend">
@@ -31,7 +31,7 @@
       <span>Keys in the player: <kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd> <kbd>Esc</kbd></span>
     </span>
   </div>
-  <nav class="onpage" aria-label="On this page"><span>On this page:</span><a href="#bit">One memristor, one bit</a><a href="#store">Store a bit and read it back</a><a href="#weak">A write that is too weak</a><a href="#crossbar">Write a pattern into a crossbar</a><a href="#twin">A digital twin in Verilog</a><a href="#t1r">A real bit-cell: one transistor, one memristor</a><a href="#views">The memristor seen by digital tools</a><a href="#plan">What this section could become</a><a href="#questions">Open questions</a><a href="#words">Words you'll meet</a></nav>
+  <nav class="onpage" aria-label="On this page"><span>On this page:</span><a href="#bit">One memristor, one bit</a><a href="#store">Store a bit and read it back</a><a href="#weak">A write that is too weak</a><a href="#crossbar">Write a pattern into a crossbar</a><a href="#twin">A digital twin in Verilog</a><a href="#ctrl">A controller made of real logic gates</a><a href="#t1r">A real bit-cell: one transistor, one memristor</a><a href="#views">The memristor seen by digital tools</a><a href="#plan">What this section could become</a><a href="#questions">Open questions</a><a href="#words">Words you'll meet</a></nav>
 </header>
 
 <section class="chapter" id="bit">
@@ -487,14 +487,158 @@ endmodule</pre>
 </section>
 
 <!-- ================================================================ -->
-<section class="chapter" id="t1r">
+<section class="chapter" id="ctrl">
   <header>
     <div class="eyebrow">Part 6 · about 10 minutes</div>
+    <h2>A controller made of real logic gates</h2>
+    <p>A memory needs a little circuit that says "write a 1 into cell 3" or "read cell 0" and makes the right pulses, long enough for a memristor to switch. That circuit is ordinary digital logic: you write it in Verilog, and <b>Yosys</b> turns it into real logic gates from IHP's standard-cell library.</p>
+  </header>
+  <article class="step" id="step-57">
+    <div class="step-head"><span class="num">57</span><h3>The controller</h3></div>
+    <p class="do">Four files in <code>openMemristorPDK/digital/memory2x2/</code>, all ready (you can also open each one from the Library Manager: cells <b>mem_ctrl</b>, <b>memory2x2</b>, <b>memory2x2_tb</b>, Verilog row):</p>
+    <dl class="explain">
+      <dt>mem_ctrl.v</dt><dd>The controller, below. This is the part that becomes gates.</dd>
+      <dt>memory2x2.v</dt><dd>A 4-bit memory: the controller plus four copies of the memristor twin from part 5.</dd>
+      <dt>memory2x2_tb.v</dt><dd>The test: write 1 0 0 1 into cells 0 to 3, read them back, then write a 0 into cell 0 and read it.</dd>
+      <dt>Makefile, synth.ys</dt><dd>The commands, so you only have to type <code>make sim</code>, <code>make synth</code> or <code>make gates</code>.</dd>
+    </dl>
+    <div class="file tall">
+      <div class="fname"><span>mem_ctrl.v</span><span>Verilog</span></div>
+<pre>// mem_ctrl.v -- a tiny controller for a 4-bit memristor memory.
+// It turns &quot;write a 1 into cell 2&quot; or &quot;read cell 3&quot; into the right
+// pulses, long enough for a memristor to switch:
+//   write: PULSE clock cycles of set or reset on one cell,
+//   read:  READ  clock cycles of read on one cell, then it keeps the bit.
+// With a 10 ns clock, PULSE = 8 gives an 80 ns pulse, like the xschem
+// testbenches. This file is real logic: Yosys turns it into gates.
+`timescale 1ns/1ps
+
+module mem_ctrl #(parameter PULSE = 8, parameter READ = 4) (
+  input  wire       clk,
+  input  wire       rst,       // 1: stop and start over
+  input  wire       start,     // 1 for one clock: begin an operation
+  input  wire [1:0] op,        // 0 = read, 1 = write 1, 2 = write 0
+  input  wire [1:0] addr,      // which cell: 0, 1, 2 or 3
+  input  wire [3:0] q,         // what the cells show while being read
+  output wire [3:0] set,       // write-1 pulse, one wire per cell
+  output wire [3:0] reset,     // write-0 pulse, one wire per cell
+  output wire [3:0] read,      // read pulse, one wire per cell
+  output reg        data_out,  // the last bit read
+  output reg        busy       // 1 while an operation is going on
+);
+  reg [1:0] cur_op;
+  reg [1:0] cur_addr;
+  reg [3:0] count;
+
+  // Only the chosen cell gets a pulse: 1 shifted to its position.
+  wire [3:0] chosen = 4&#x27;b0001 &lt;&lt; cur_addr;
+
+  assign set   = (busy &amp;&amp; cur_op == 2&#x27;d1) ? chosen : 4&#x27;b0000;
+  assign reset = (busy &amp;&amp; cur_op == 2&#x27;d2) ? chosen : 4&#x27;b0000;
+  assign read  = (busy &amp;&amp; cur_op == 2&#x27;d0) ? chosen : 4&#x27;b0000;
+
+  always @(posedge clk) begin
+    if (rst) begin
+      busy     &lt;= 1&#x27;b0;
+      count    &lt;= 4&#x27;d0;
+      data_out &lt;= 1&#x27;b0;
+      cur_op   &lt;= 2&#x27;d0;
+      cur_addr &lt;= 2&#x27;d0;
+    end else if (!busy) begin
+      if (start) begin              // remember what to do, then start
+        busy     &lt;= 1&#x27;b1;
+        cur_op   &lt;= op;
+        cur_addr &lt;= addr;
+        count    &lt;= 4&#x27;d0;
+      end
+    end else begin
+      count &lt;= count + 4&#x27;d1;
+      if (cur_op == 2&#x27;d0 &amp;&amp; count == READ - 1) begin
+        data_out &lt;= q[cur_addr];    // the end of a read: keep the bit
+        busy     &lt;= 1&#x27;b0;
+      end else if (cur_op != 2&#x27;d0 &amp;&amp; count == PULSE - 1) begin
+        busy     &lt;= 1&#x27;b0;           // the end of a write
+      end
+    end
+  end
+endmodule</pre>
+    </div>
+    <dl class="explain">
+      <dt>clk</dt><dd>The clock: a signal that ticks every 10 ns. The controller does one small step per tick.</dd>
+      <dt>busy, count</dt><dd>While <code>busy</code> is 1, <code>count</code> counts the ticks: 8 for a write (80 ns), 4 for a read.</dd>
+      <dt>chosen</dt><dd>A 1 shifted to the chosen cell's position: only that cell gets the pulse.</dd>
+      <dt>always @(posedge clk)</dt><dd>"At every clock tick". The <code>reg</code>s changed here (<code>busy</code>, <code>count</code>, ...) become <b>flip-flops</b>: tiny memories inside the logic.</dd>
+    </dl>
+  </article>
+  <article class="step" id="step-58" data-img="img/v01_open_terminal.png" data-title="Open a terminal" data-do="In the container desktop, click the terminal icon in the bottom panel.">
+    <div class="step-head"><span class="num">58</span><h3>Open a terminal</h3></div>
+    <p class="do">In the container desktop, click the <b class="ui">terminal icon</b> in the bottom panel.</p>
+    <button class="shot" type="button"><img src="img/v01_open_terminal.png" alt="The whole container desktop with the terminal icon in the bottom panel boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-59" data-img="img/y02_cd.png" data-title="Go to the memory&#x27;s folder" data-do="Type these two commands, pressing Enter after each.">
+    <div class="step-head"><span class="num">59</span><h3>Go to the memory's folder</h3></div>
+    <p class="do">Type these two commands, pressing <kbd>Enter</kbd> after each.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>cd openMemristorPDK/digital/memory2x2</pre><button class="copy" type="button" data-copy="cd openMemristorPDK/digital/memory2x2">Copy</button></div>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>ls</pre><button class="copy" type="button" data-copy="ls">Copy</button></div>
+    <button class="shot" type="button"><img src="img/y02_cd.png" alt="The terminal after cd and ls: Makefile, mem_ctrl.v, memory2x2_tb.v, memory2x2.v, synth.ys" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-60" data-img="img/y03_make_sim.png" data-title="Simulate the memory" data-do="make sim compiles and runs the test with Icarus Verilog, as in part 5. Type clear and Enter first if you want an empty terminal.">
+    <div class="step-head"><span class="num">60</span><h3>Simulate the memory</h3></div>
+    <p class="do"><code>make sim</code> compiles and runs the test with Icarus Verilog, as in part 5. Type <code>clear</code> and <kbd>Enter</kbd> first if you want an empty terminal.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>make sim</pre><button class="copy" type="button" data-copy="make sim">Copy</button></div>
+    <button class="shot" type="button"><img src="img/y03_make_sim.png" alt="The terminal after make sim: wrote 1 into cell 0, wrote 1 into cell 3, read cell 0 1, cell 1 0, cell 2 0, cell 3 1, wrote 0 into cell 0, read cell 0 0" loading="lazy"></button>
+    <div class="see"><strong>What it shows</strong><span>The controller wrote 1 0 0 1 into the four memristors and read it back, then changed cell 0 to 0. The same pattern as the crossbar of part 4, now driven by a circuit instead of by hand-made voltage pulses.</span></div>
+  </article>
+  <article class="step" id="step-61" data-img="img/y04_make_synth.png" data-title="Turn it into gates" data-do="make synth runs Yosys on the controller.">
+    <div class="step-head"><span class="num">61</span><h3>Turn it into gates</h3></div>
+    <p class="do"><code>make synth</code> runs Yosys on the controller.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>make synth</pre><button class="copy" type="button" data-copy="make synth">Copy</button></div>
+    <button class="shot" type="button"><img src="img/y04_make_synth.png" alt="The terminal after make synth: 65 cells, a list of sg13g2 gates such as 10 sg13g2_dfrbpq_1, 11 sg13g2_nand2_1, 12 sg13g2_nor2_1, and a chip area of 996" loading="lazy"></button>
+    <div class="see"><strong>How to read it</strong>
+      <span>The controller became <b>65 gates</b>, all from IHP's library: <code>sg13g2_nand2_1</code> is a 2-input NAND gate, <code>sg13g2_nor2_1</code> a 2-input NOR, and so on.</span>
+      <span>The 10 <code>sg13g2_dfrbpq_1</code> are flip-flops: busy (1), count (4), the operation (2), the address (2) and data_out (1). 10 bits, 10 flip-flops.</span>
+      <span>Chip area: 996 µm², a square about 32 µm wide, thinner than a hair. Half of it is the flip-flops.</span>
+      <span>Only the controller becomes gates. The memristors stay memristors: they aren't logic.</span>
+    </div>
+    <div class="file">
+      <div class="fname"><span>mem_ctrl_gates.v (two of the 65 gates)</span><span>Verilog, made by Yosys</span></div>
+<pre>  sg13g2_nand2_1 _049_ (
+    .A(busy),
+    .B(_020_),
+    .Y(_022_)
+  );
+  sg13g2_dfrbpq_1 _098_ (
+    .CLK(clk),
+    .D(_004_),
+    .Q(cur_op[0]),
+    .RESET_B(1'h1)
+  );</pre>
+    </div>
+  </article>
+  <article class="step" id="step-62" data-img="img/y05_make_gates.png" data-title="Simulate the gates" data-do="make gates synthesizes again, then runs the same test with the 65 gates instead of the original Verilog, using IHP&#x27;s own models of each gate.">
+    <div class="step-head"><span class="num">62</span><h3>Simulate the gates</h3></div>
+    <p class="do"><code>make gates</code> synthesizes again, then runs the same test with the 65 gates instead of the original Verilog, using IHP's own models of each gate.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>make gates</pre><button class="copy" type="button" data-copy="make gates">Copy</button></div>
+    <button class="shot" type="button"><img src="img/y05_make_gates.png" alt="The terminal after make gates: the gate list, then the same reads as make sim: 1 0 0 1, then 0" loading="lazy"></button>
+    <div class="see"><strong>The same answers</strong><span>1 0 0 1, then 0: the gates do exactly what the Verilog said. This check is a normal step in real chip design.</span></div>
+  </article>
+  <article class="step" id="step-63" data-title="Clean up and close" data-do="make clean deletes everything the other commands made. Then close the terminal.">
+    <div class="step-head"><span class="num">63</span><h3>Clean up and close</h3></div>
+    <p class="do"><code>make clean</code> deletes everything the other commands made. Then close the terminal.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>make clean</pre><button class="copy" type="button" data-copy="make clean">Copy</button></div>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>exit</pre><button class="copy" type="button" data-copy="exit">Copy</button></div>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="t1r">
+  <header>
+    <div class="eyebrow">Part 7 · about 10 minutes</div>
     <h2>A real bit-cell: one transistor, one memristor</h2>
     <p>Real memory chips put a <b>transistor</b> in series with every memristor: the <b>1T1R</b> cell. The transistor is a door: only the cells whose door is open can be written or read, so neighbours are safe and sneak paths are blocked. openMemristorPDK has no transistors, so this cell borrows one from IHP's SG13G2 PDK.</p>
   </header>
-  <article class="step" id="step-57">
-    <div class="step-head"><span class="num">57</span><h3>Three wires</h3></div>
+  <article class="step" id="step-64">
+    <div class="step-head"><span class="num">64</span><h3>Three wires</h3></div>
     <p class="do">Do <a href="ihp.html">Add IHP's PDK</a> first if you haven't: it explains where IHP's PDK lives. This part only uses the copy that comes with the container.</p>
     <dl class="explain">
       <dt>word line (wl)</dt><dd>Goes to the transistor's gate. 3.3 V opens the door, 0 V shuts it.</dd>
@@ -514,18 +658,18 @@ endmodule</pre>
       </tbody>
     </table></div>
   </article>
-  <article class="step" id="step-58" data-img="img/t01_click_1t1r_tb.png" data-title="Pick the 1T1R testbench" data-do="In the memristor window’s Library Manager, with openmemristorpdk_pr selected, click memristor_hfo2_al_1t1r_tb.">
-    <div class="step-head"><span class="num">58</span><h3>Pick the 1T1R testbench</h3></div>
+  <article class="step" id="step-65" data-img="img/t01_click_1t1r_tb.png" data-title="Pick the 1T1R testbench" data-do="In the memristor window’s Library Manager, with openmemristorpdk_pr selected, click memristor_hfo2_al_1t1r_tb.">
+    <div class="step-head"><span class="num">65</span><h3>Pick the 1T1R testbench</h3></div>
     <p class="do">In the memristor window’s Library Manager, with <b>openmemristorpdk_pr</b> selected, click <b class="ui">memristor_hfo2_al_1t1r_tb</b>.</p>
     <button class="shot" type="button"><img src="img/t01_click_1t1r_tb.png" alt="memristor_hfo2_al_1t1r_tb boxed in red in the Cells list" loading="lazy"></button>
   </article>
-  <article class="step" id="step-59" data-img="img/t02_open_xschem.png" data-title="Open it in xschem" data-do="On the Schematic row, click Open in xschem.">
-    <div class="step-head"><span class="num">59</span><h3>Open it in xschem</h3></div>
+  <article class="step" id="step-66" data-img="img/t02_open_xschem.png" data-title="Open it in xschem" data-do="On the Schematic row, click Open in xschem.">
+    <div class="step-head"><span class="num">66</span><h3>Open it in xschem</h3></div>
     <p class="do">On the <b>Schematic</b> row, click <b class="ui">Open in xschem</b>.</p>
     <button class="shot" type="button"><img src="img/t02_open_xschem.png" alt="Open in xschem on the Schematic row boxed in red" loading="lazy"></button>
   </article>
-  <article class="step" id="step-60" data-img="img/t03_testbench.png" data-title="The 1T1R cell" data-do="Box 1 is the cell: the memristor on top, IHP’s transistor sg13_hv_nmos below it. Box 2 holds the three voltages.">
-    <div class="step-head"><span class="num">60</span><h3>The 1T1R cell</h3></div>
+  <article class="step" id="step-67" data-img="img/t03_testbench.png" data-title="The 1T1R cell" data-do="Box 1 is the cell: the memristor on top, IHP’s transistor sg13_hv_nmos below it. Box 2 holds the three voltages.">
+    <div class="step-head"><span class="num">67</span><h3>The 1T1R cell</h3></div>
     <p class="do">Box 1 is the cell: the memristor on top, IHP’s transistor <code>sg13_hv_nmos</code> below it. Box 2 holds the three voltages.</p>
     <button class="shot" type="button"><img src="img/t03_testbench.png" alt="xschem with the memristor and the IHP transistor boxed as 1 and the vwl, vset and vreset lines boxed as 2" loading="lazy"></button>
     <dl class="explain">
@@ -534,18 +678,18 @@ endmodule</pre>
       <dt>pre_osdi ... psp103.osdi</dt><dd>IHP's compiled transistor model (PSP 103), loaded next to our compiled memristor model.</dd>
     </dl>
   </article>
-  <article class="step" id="step-61" data-img="img/t04_netlist_simulate.png" data-title="Netlist, then Simulate" data-do="Click Netlist (1), then Simulate (2), and wait about 10 seconds.">
-    <div class="step-head"><span class="num">61</span><h3>Netlist, then Simulate</h3></div>
+  <article class="step" id="step-68" data-img="img/t04_netlist_simulate.png" data-title="Netlist, then Simulate" data-do="Click Netlist (1), then Simulate (2), and wait about 10 seconds.">
+    <div class="step-head"><span class="num">68</span><h3>Netlist, then Simulate</h3></div>
     <p class="do">Click <b class="ui">Netlist</b> (1), then <b class="ui">Simulate</b> (2), and wait about 10 seconds.</p>
     <button class="shot" type="button"><img src="img/t04_netlist_simulate.png" alt="Netlist boxed as 1, Simulate boxed as 2" loading="lazy"></button>
   </article>
-  <article class="step" id="step-62" data-img="img/t05_result.png" data-title="Two plots and the console" data-do="Two plot windows and the ngspice window open.">
-    <div class="step-head"><span class="num">62</span><h3>Two plots and the console</h3></div>
+  <article class="step" id="step-69" data-img="img/t05_result.png" data-title="Two plots and the console" data-do="Two plot windows and the ngspice window open.">
+    <div class="step-head"><span class="num">69</span><h3>Two plots and the console</h3></div>
     <p class="do">Two plot windows and the ngspice window open.</p>
     <button class="shot" type="button"><img src="img/t05_result.png" alt="xschem, the ngspice window and two plot windows" loading="lazy"></button>
   </article>
-  <article class="step" id="step-63" data-img="img/t07_current.png" data-title="The current" data-do="The top plot is the current into the bit line, in mA.">
-    <div class="step-head"><span class="num">63</span><h3>The current</h3></div>
+  <article class="step" id="step-70" data-img="img/t07_current.png" data-title="The current" data-do="The top plot is the current into the bit line, in mA.">
+    <div class="step-head"><span class="num">70</span><h3>The current</h3></div>
     <p class="do">The top plot is the current into the bit line, in mA.</p>
     <button class="shot" type="button"><img src="img/t07_current.png" alt="Current into the bit line: nothing until 300 ns, 1.7 mA from 300 to 400 ns, 0.25 mA from 400 to 500 ns, a dip to -1.3 mA at 510 ns, then almost zero" loading="lazy"></button>
     <div class="see"><strong>How to read it</strong>
@@ -554,35 +698,35 @@ endmodule</pre>
       <span>400–500 ns: read 3 gives 0.25 mA, a 1. 500 ns: the write 0 pulls current backwards (the dip) and switches it off.</span>
     </div>
   </article>
-  <article class="step" id="step-64" data-img="img/t08_console.png" data-title="The four reads" data-do="Look at the end of the ngspice window.">
-    <div class="step-head"><span class="num">64</span><h3>The four reads</h3></div>
+  <article class="step" id="step-71" data-img="img/t08_console.png" data-title="The four reads" data-do="Look at the end of the ngspice window.">
+    <div class="step-head"><span class="num">71</span><h3>The four reads</h3></div>
     <p class="do">Look at the end of the ngspice window.</p>
     <button class="shot" type="button"><img src="img/t08_console.png" alt="ngspice: read 1 3.98 uA, read 2 after write 1 door shut 3.98 uA, read 3 after write 1 door open 254.62 uA, read 4 after write 0 3.98 uA" loading="lazy"></button>
     <div class="see"><strong>The bits</strong><span>0, then still <b>0</b> after the write with the door shut, then 1, then 0. The read with the door open gives 255 µA instead of 400 µA: the transistor adds a little resistance, but it's still far above the 100 µA line.</span></div>
   </article>
-  <article class="step" id="step-65" data-img="img/t09_quit_current.png" data-title="Close the current plot" data-do="Click Quit in the top plot window.">
-    <div class="step-head"><span class="num">65</span><h3>Close the current plot</h3></div>
+  <article class="step" id="step-72" data-img="img/t09_quit_current.png" data-title="Close the current plot" data-do="Click Quit in the top plot window.">
+    <div class="step-head"><span class="num">72</span><h3>Close the current plot</h3></div>
     <p class="do">Click <b class="ui">Quit</b> in the top plot window.</p>
     <button class="shot" type="button"><img src="img/t09_quit_current.png" alt="Quit in the current plot window boxed in red" loading="lazy"></button>
   </article>
-  <article class="step" id="step-66" data-img="img/t06_voltages.png" data-title="The three wires" data-do="Now the other plot is fully visible: the three wire voltages over time.">
-    <div class="step-head"><span class="num">66</span><h3>The three wires</h3></div>
+  <article class="step" id="step-73" data-img="img/t06_voltages.png" data-title="The three wires" data-do="Now the other plot is fully visible: the three wire voltages over time.">
+    <div class="step-head"><span class="num">73</span><h3>The three wires</h3></div>
     <p class="do">Now the other plot is fully visible: the three wire voltages over time.</p>
     <button class="shot" type="button"><img src="img/t06_voltages.png" alt="Voltages: wl (red) at 3.3 V except 0 V from 100 to 200 ns, bl (blue) with 0.2 V reads and 1.5 V pulses at 100 and 300 ns, sl (orange) at 2 V from 500 to 600 ns" loading="lazy"></button>
     <div class="see"><strong>How to read it</strong><span>The red word line drops to 0 V exactly while the first write pulse (blue) is on: the door is shut. The orange source line only moves for the write 0.</span></div>
   </article>
-  <article class="step" id="step-67" data-img="img/t10_quit_voltages.png" data-title="Close the voltage plot" data-do="Click Quit in this plot window too.">
-    <div class="step-head"><span class="num">67</span><h3>Close the voltage plot</h3></div>
+  <article class="step" id="step-74" data-img="img/t10_quit_voltages.png" data-title="Close the voltage plot" data-do="Click Quit in this plot window too.">
+    <div class="step-head"><span class="num">74</span><h3>Close the voltage plot</h3></div>
     <p class="do">Click <b class="ui">Quit</b> in this plot window too.</p>
     <button class="shot" type="button"><img src="img/t10_quit_voltages.png" alt="Quit in the voltage plot window boxed in red" loading="lazy"></button>
   </article>
-  <article class="step" id="step-68" data-img="img/t11_quit_ngspice.png" data-title="Close the simulator" data-do="Click inside the white ngspice window, type quit and press Enter.">
-    <div class="step-head"><span class="num">68</span><h3>Close the simulator</h3></div>
+  <article class="step" id="step-75" data-img="img/t11_quit_ngspice.png" data-title="Close the simulator" data-do="Click inside the white ngspice window, type quit and press Enter.">
+    <div class="step-head"><span class="num">75</span><h3>Close the simulator</h3></div>
     <p class="do">Click inside the white ngspice window, type <code>quit</code> and press <kbd>Enter</kbd>.</p>
     <button class="shot" type="button"><img src="img/t11_quit_ngspice.png" alt="The ngspice prompt boxed in red" loading="lazy"></button>
   </article>
-  <article class="step" id="step-69" data-img="img/t12_close_xschem.png" data-title="Close xschem" data-do="Click the X at the top-right of the xschem window. You changed nothing, so it closes straight away.">
-    <div class="step-head"><span class="num">69</span><h3>Close xschem</h3></div>
+  <article class="step" id="step-76" data-img="img/t12_close_xschem.png" data-title="Close xschem" data-do="Click the X at the top-right of the xschem window. You changed nothing, so it closes straight away.">
+    <div class="step-head"><span class="num">76</span><h3>Close xschem</h3></div>
     <p class="do">Click the <b class="ui">X</b> at the top-right of the xschem window. You changed nothing, so it closes straight away.</p>
     <button class="shot" type="button"><img src="img/t12_close_xschem.png" alt="xschem&#x27;s close button boxed in red" loading="lazy"></button>
     <div class="oops"><strong>Try it</strong><span>Edit the code block and set <code>vwl = 1.2</code>, the gate voltage of IHP's ordinary low-voltage transistors: the door barely opens. Read 3 gives only about 47 µA, which counts as a 0 even though a 1 was written, and the write 0 can't change anything. Each time: Netlist, Simulate, close the plots and ngspice, and don't save when you close xschem.</span></div>
@@ -592,12 +736,12 @@ endmodule</pre>
 <!-- ================================================================ -->
 <section class="chapter" id="views">
   <header>
-    <div class="eyebrow">Part 7 · what digital tools need</div>
+    <div class="eyebrow">Part 8 · what digital tools need</div>
     <h2>The memristor seen by digital tools</h2>
     <p>Digital chip tools don't simulate currents. They work with blocks that have pins, a size and a speed. For them a memristor is a <b>black box</b> with two pins, BE and TE. The PDK already has every file they would ask for, made with the Library Manager (see the second slide deck, <code>digital_aspects.tex</code>).</p>
   </header>
-  <article class="step" id="step-70">
-    <div class="step-head"><span class="num">70</span><h3>Five files, five readers</h3></div>
+  <article class="step" id="step-77">
+    <div class="step-head"><span class="num">77</span><h3>Five files, five readers</h3></div>
     <div class="tablewrap"><table class="views">
       <thead><tr><th>View</th><th>File (for memristor_hfo2_al)</th><th>Who reads it</th><th>In this PDK</th></tr></thead>
       <tbody>
@@ -638,7 +782,7 @@ endmodule</pre>
 <!-- ================================================================ -->
 <section class="chapter" id="plan">
   <header>
-    <div class="eyebrow">Part 8 · the plan (draft)</div>
+    <div class="eyebrow">Part 9 · the plan (draft)</div>
     <h2>What this section could become</h2>
     <p>A proposal, in the order a beginner would meet it. Each item would get the same click-by-click treatment as parts 2 and 3.</p>
   </header>
@@ -656,11 +800,11 @@ endmodule</pre>
   </article>
   <article class="step" id="step-d">
     <div class="step-head"><span class="num">D</span><h3>A memory controller with Yosys</h3></div>
-    <p class="do">A small Verilog block that decides which row and column to drive. Synthesize it with Yosys to see it become logic gates.</p>
+    <p class="do"><b>Done:</b> part 6 above, with <code>digital/memory2x2/</code>: 65 IHP gates. Still open: placing and wiring those gates into a real layout (place and route, with LibreLane).</p>
   </article>
   <article class="step" id="step-e">
     <div class="step-head"><span class="num">E</span><h3>The real bit-cell: 1T1R</h3></div>
-    <p class="do"><b>Done:</b> part 6 above, with the testbench <code>memristor_hfo2_al_1t1r_tb</code> and IHP's <code>sg13_hv_nmos</code>. See <a href="ihp.html">Add IHP's PDK</a>.</p>
+    <p class="do"><b>Done:</b> part 7 above, with the testbench <code>memristor_hfo2_al_1t1r_tb</code> and IHP's <code>sg13_hv_nmos</code>. See <a href="ihp.html">Add IHP's PDK</a>.</p>
   </article>
 </section>
 
@@ -674,7 +818,7 @@ endmodule</pre>
   <article class="step" id="step-?">
     <div class="step-head"><span class="num">?</span><h3>Questions</h3></div>
     <dl class="explain">
-      <dt>Goal</dt><dd>Items A, B, C and E are done above. Item D (a controller synthesized with Yosys, maybe placed and routed with IHP's standard cells) is the step into a real digital flow: do it next?</dd>
+      <dt>Goal</dt><dd>Items A to E are all done above. Next step into a real digital flow: place and route the controller with LibreLane and IHP's standard cells, to get its real layout?</dd>
       <dt>Models</dt><dd>The HfO₂ model is fixed: its memory now starts at <code>x0</code> and stops at 0 and 1. The TiO₂ models still have the old problem. Fixing them changes nothing in sections 2, 3 and 5 if their testbenches start at <code>x0=0</code>, but about 60 screenshots show <code>x0=0.3</code> in xschem and would need re-shooting. When?</dd>
       <dt>Liberty</dt><dd>Leave the memristor's Liberty view as pins only, or invent a simple "memory macro" (e.g. the 2 × 2 crossbar plus its drivers) with real Verilog and Liberty views?</dd>
       <dt>Crossbar</dt><dd>Part 4 uses a drawing of an HfO₂ crossbar, not a real layout. The PDK's crossbar layouts (<code>crossbar2x2_tio2_au</code>, <code>crossbar4x4_tio2_au</code>) use the TiO₂ device. Make an HfO₂ crossbar layout too?</dd>
@@ -700,6 +844,8 @@ endmodule</pre>
       <dt>1T1R</dt><dd>One transistor, one resistor (memristor): the usual RRAM bit-cell.</dd>
       <dt>digital twin</dt><dd>A simple digital model that behaves like the real device for ones and zeros, without the physics.</dd>
       <dt>waveform</dt><dd>A picture of signals changing over time, as GTKWave draws them.</dd>
+      <dt>flip-flop</dt><dd>A one-bit memory inside digital logic, updated at each clock tick.</dd>
+      <dt>standard cell</dt><dd>One ready-made logic gate from a PDK's library, like <code>sg13g2_nand2_1</code>.</dd>
       <dt>crossbar</dt><dd>A grid of row and column wires with a memristor at every crossing: one bit per crossing.</dd>
       <dt>write disturb</dt><dd>Writing one cell changes a neighbour by accident, because the neighbour got too much voltage.</dd>
       <dt>sneak path</dt><dd>An unwanted route for current through neighbouring cells of a crossbar.</dd>

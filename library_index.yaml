@@ -237,3 +237,15 @@ entries:
   cell: memristor_bit_tb
   view_kind: verilog
   path: /foss/designs/openMemristorPDK/digital/memristor_bit/memristor_bit_tb.v
+- library: openmemristorpdk_pr
+  cell: mem_ctrl
+  view_kind: verilog
+  path: /foss/designs/openMemristorPDK/digital/memory2x2/mem_ctrl.v
+- library: openmemristorpdk_pr
+  cell: memory2x2
+  view_kind: verilog
+  path: /foss/designs/openMemristorPDK/digital/memory2x2/memory2x2.v
+- library: openmemristorpdk_pr
+  cell: memory2x2_tb
+  view_kind: verilog
+  path: /foss/designs/openMemristorPDK/digital/memory2x2/memory2x2_tb.v

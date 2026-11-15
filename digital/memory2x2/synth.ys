@@ -1,0 +1,10 @@
+# synth.ys -- turn mem_ctrl.v into real logic gates of IHP's SG13G2
+# standard-cell library (typical corner, 1.2 V, 25 C).
+# Run it with:   yosys -s synth.ys
+read_verilog mem_ctrl.v
+synth -top mem_ctrl
+dfflibmap -liberty /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib
+abc -liberty /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib
+opt_clean
+tee -o mem_ctrl_stats.txt stat -liberty /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib
+write_verilog -noattr mem_ctrl_gates.v
