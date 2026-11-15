@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>Add IHP&#x27;s PDK · openMemristorPDK Guide</title>
-<meta name="description" content="Use IHP&#x27;s open SG13G2 PDK, with real transistors and logic gates, next to the memristor PDK.">
+<meta name="description" content="Use IHP&#x27;s open SG13G2 PDK, with real transistors and logic gates, next to the memristor PDK. Needed for the last digital parts.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -14,11 +14,11 @@
 <body>
 <header class="topbar"><div class="inner">
   <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span>openMemristorPDK Guide</a>
-  <nav class="topnav" aria-label="Guide sections"><a href="index.html">Overview</a><a href="install.html">Install</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html">Monte Carlo</a><a href="ihp.html" aria-current="page">IHP PDK</a><a href="digital.html">Digital</a></nav>
+  <nav class="topnav" aria-label="Guide sections"><a href="index.html">Overview</a><a href="install.html">Install</a><a href="ihp.html" aria-current="page">IHP PDK</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html">Monte Carlo</a><a href="digital.html">Digital</a></nav>
 </div></header>
 <div class="wrap">
 <header class="hero">
-  <div class="crumbs"><a href="index.html">Guide</a> · Section 6 · about 7 min · 9 steps</div>
+  <div class="crumbs"><a href="index.html">Guide</a> · Section 2 · about 7 min · 9 steps</div>
   <h1>Add IHP's PDK</h1>
   <p class="lede">openMemristorPDK has no transistors, on purpose. Borrow them from IHP's open SG13G2 PDK: check it is in the container, give openPDKcreator its own copy, and open it next to ours. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
   <p class="prereq">Do <a href="install.html">Install from scratch</a> first, and start with openPDKcreator open (steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).</p>
@@ -139,7 +139,7 @@
   </article>
 </section>
 
-<nav class="pager" aria-label="Previous and next section"><a class="prev" href="corners-montecarlo.html"><span class="dir">← Previous</span><span class="t">Corners and Monte Carlo</span></a><a class="next" href="digital.html"><span class="dir">Next →</span><span class="t">The digital side</span></a></nav>
+<nav class="pager" aria-label="Previous and next section"><a class="prev" href="install.html"><span class="dir">← Previous</span><span class="t">Install from scratch</span></a><a class="next" href="first-simulation.html"><span class="dir">Next →</span><span class="t">Your first simulation</span></a></nav>
 <footer>
   <p>Every screenshot was taken from the real programs with real mouse clicks: openPDKcreator, xschem, ngspice with OpenVAF-compiled models and KLayout, inside the IIC-OSIC-TOOLS container. The capture scripts are in <code>docs/for_dummies/_capture/</code>.</p>
   <p>Created by R. Picos (<a href="mailto:rpicos.uib@gmail.com">rpicos.uib@gmail.com</a> / <a href="mailto:rodrigo.picos@uib.es">rodrigo.picos@uib.es</a>), as part of the research project <b>MemFRAME</b>.</p>

@@ -29,6 +29,7 @@ GUIDE_TITLE = "openMemristorPDK Guide"
 SECTIONS = [
     {
         "slug": "install",
+        "group": "install",
         "title": "Install from scratch",
         "short": "Install",
         "status": "ready",
@@ -41,7 +42,22 @@ SECTIONS = [
         "prereq": "",
     },
     {
+        "slug": "ihp",
+        "group": "install",
+        "title": "Add IHP's PDK",
+        "short": "IHP PDK",
+        "status": "ready",
+        "time": "about 7 min · 9 steps",
+        "desc": "Use IHP's open SG13G2 PDK, with real transistors and logic gates, next to the memristor PDK. "
+                "Needed for the last digital parts.",
+        "lede": "openMemristorPDK has no transistors, on purpose. Borrow them from IHP's open SG13G2 PDK: "
+                "check it is in the container, give openPDKcreator its own copy, and open it next to ours.",
+        "prereq": 'Do <a href="install.html">Install from scratch</a> first, and start with openPDKcreator open '
+                  '(steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).',
+    },
+    {
         "slug": "first-simulation",
+        "group": "analog",
         "title": "Your first simulation",
         "short": "First simulation",
         "status": "ready",
@@ -54,6 +70,7 @@ SECTIONS = [
     },
     {
         "slug": "add-model",
+        "group": "analog",
         "title": "Add a model",
         "short": "Add a model",
         "status": "ready",
@@ -67,6 +84,7 @@ SECTIONS = [
     },
     {
         "slug": "add-device",
+        "group": "analog",
         "title": "Add a new device",
         "short": "Add a device",
         "status": "ready",
@@ -80,6 +98,7 @@ SECTIONS = [
     },
     {
         "slug": "corners-montecarlo",
+        "group": "analog",
         "title": "Corners and Monte Carlo",
         "short": "Monte Carlo",
         "status": "ready",
@@ -93,19 +112,8 @@ SECTIONS = [
                   'same moves (Netlist, Simulate, Quit, quit). Start with openPDKcreator open.',
     },
     {
-        "slug": "ihp",
-        "title": "Add IHP's PDK",
-        "short": "IHP PDK",
-        "status": "ready",
-        "time": "about 7 min · 9 steps",
-        "desc": "Use IHP's open SG13G2 PDK, with real transistors and logic gates, next to the memristor PDK.",
-        "lede": "openMemristorPDK has no transistors, on purpose. Borrow them from IHP's open SG13G2 PDK: "
-                "check it is in the container, give openPDKcreator its own copy, and open it next to ours.",
-        "prereq": 'Do <a href="install.html">Install from scratch</a> first, and start with openPDKcreator open '
-                  '(steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).',
-    },
-    {
         "slug": "digital",
+        "group": "digital",
         "title": "The digital side",
         "short": "Digital",
         "status": "ready",
@@ -183,6 +191,17 @@ SECTIONS = [
             },
         ],
     },
+]
+
+GROUPS = [
+    {"id": "install", "title": "Installing",
+     "intro": "Get the tools and the PDKs onto your computer. You do this once per computer."},
+    {"id": "analog", "title": "Analog",
+     "intro": "Memristors as analog devices: simulate their currents and voltages, write new models, build a new "
+              "device and see how a factory's spread changes them."},
+    {"id": "digital", "title": "Digital",
+     "intro": "Memristors as bits: store them, fill a small memory, describe it in Verilog, and turn its controller "
+              "into real logic gates and a chip layout."},
 ]
 
 FONTS = (
@@ -407,27 +426,39 @@ def hub_page(s: dict) -> str:
     return page(f'{s["title"]} · {GUIDE_TITLE}', s["desc"], s["slug"], f"{hero}\n\n{src}\n{pager(s)}", player=False)
 
 
+def section_card(n: int, s: dict, label: str | None = None) -> str:
+    label = label or f"SECTION {n}"
+    if s["status"] in ("ready", "draft"):
+        pill = '<span class="pill draft">Draft</span>' if s["status"] == "draft" else '<span class="pill ready">Ready</span>'
+        return (f'  <a class="card" href="{s["slug"]}.html">\n'
+                f'    <span class="no">{label}</span><h3>{s["title"]}</h3><p>{s["desc"]}</p>\n'
+                f'    <span class="meta">{pill}{s["time"]}</span>\n  </a>')
+    return (f'  <div class="card soon">\n'
+            f'    <span class="no">{label}</span><h3>{s["title"]}</h3><p>{s["desc"]}</p>\n'
+            f'    <span class="meta"><span class="pill soon">In preparation</span></span>\n  </div>')
+
+
 def index_page() -> str:
-    cards = []
-    for n, s in enumerate(SECTIONS, 1):
-        if s["status"] == "draft":
-            cards.append(
-                f'  <a class="card" href="{s["slug"]}.html">\n'
-                f'    <span class="no">SECTION {n}</span><h3>{s["title"]}</h3><p>{s["desc"]}</p>\n'
-                f'    <span class="meta"><span class="pill draft">Draft</span>{s["time"]}</span>\n  </a>'
-            )
-        elif s["status"] == "ready":
-            cards.append(
-                f'  <a class="card" href="{s["slug"]}.html">\n'
-                f'    <span class="no">SECTION {n}</span><h3>{s["title"]}</h3><p>{s["desc"]}</p>\n'
-                f'    <span class="meta"><span class="pill ready">Ready</span>{s["time"]}</span>\n  </a>'
-            )
-        else:
-            cards.append(
-                f'  <div class="card soon">\n'
-                f'    <span class="no">SECTION {n}</span><h3>{s["title"]}</h3><p>{s["desc"]}</p>\n'
-                f'    <span class="meta"><span class="pill soon">In preparation</span></span>\n  </div>'
-            )
+    chapters = []
+    for g in GROUPS:
+        cards = []
+        for s in SECTIONS:
+            if s.get("group") != g["id"]:
+                continue
+            n = SECTIONS.index(s) + 1
+            if s.get("children"):
+                cards.append(section_card(n, dict(s, title=s["title"] + ": overview"), f"SECTION {n}"))
+                for k, c in enumerate(s["children"], 1):
+                    if c["status"] in ("ready", "draft"):
+                        c = dict(c, time=f'{c["time"]} · {count_steps(c["slug"])} steps')
+                    cards.append(section_card(n, c, f"SECTION {n} · PART {k}"))
+            else:
+                cards.append(section_card(n, s))
+        chapters.append(
+            f'<section class="chapter" id="{g["id"]}">\n  <header>\n    <div class="eyebrow">Sections</div>\n'
+            f'    <h2>{g["title"]}</h2>\n    <p>{g["intro"]}</p>\n  </header>\n'
+            f'  <div class="cards">\n' + "\n".join(cards) + '\n  </div>\n</section>'
+        )
     first = ready()[0]
     body = f'''<header class="hero">
   {FUNDING}
@@ -443,23 +474,14 @@ def index_page() -> str:
     <h2>What this guide is about</h2>
   </header>
   <div class="intro-grid">
-    <div><h3>What is a memristor?</h3><p>A resistor with a memory. Its resistance depends on how much current has flowed through it before, so it "remembers". Its fingerprint is the <b>pinched hysteresis loop</b> you will simulate in section 2.</p></div>
+    <div><h3>What is a memristor?</h3><p>A resistor with a memory. Its resistance depends on how much current has flowed through it before, so it "remembers". Its fingerprint is the <b>pinched hysteresis loop</b> you will simulate in Your first simulation.</p></div>
     <div><h3>What is a PDK?</h3><p>A <em>Process Design Kit</em>: the instruction manual a chip factory gives designers. It says which materials and layers exist, how small things can be, and how each device behaves. openMemristorPDK describes a made-up factory that builds memristors.</p></div>
     <div><h3>How to read the steps</h3><ul><li>Click what is inside the <b class="ui">red box</b>.</li><li>Type exactly what is in a black box (or use its <b>Copy</b> button).</li><li><b>Play as video</b> walks through a section on its own.</li><li>Click a screenshot to see it full size.</li></ul></div>
     <div><h3>What you need</h3><ul><li>A Linux computer (Ubuntu or similar).</li><li>About 35 GB of free disk space and an internet connection, the first time.</li><li>No programming: every command is given.</li></ul></div>
   </div>
 </section>
 
-<section class="chapter" id="sections">
-  <header>
-    <div class="eyebrow">Sections</div>
-    <h2>Pick where to start</h2>
-    <p>Do the sections in order the first time. Later ones build on the earlier ones.</p>
-  </header>
-  <div class="cards">
-{chr(10).join(cards)}
-  </div>
-</section>'''
+{chr(10).join(chapters)}'''
     return page(GUIDE_TITLE, "A step-by-step beginner's guide to openMemristorPDK: install the tools, "
                 "simulate a memristor and look at its chip layout.", None, body, player=False)
 

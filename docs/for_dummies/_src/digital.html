@@ -72,7 +72,7 @@ endmodule</pre>
       <dt>Sneak paths</dt><dd>Read the crossbar with the unused wires left unconnected, to see a sneak path turn a 0 into a 1.</dd>
       <dt>Liberty</dt><dd>Leave the memristor's Liberty view as pins only, or invent a simple "memory macro" (e.g. the 2 × 2 crossbar plus its drivers) with real Verilog and Liberty views?</dd>
       <dt>Crossbar</dt><dd>The crossbar part uses a drawing of an HfO₂ crossbar, not a real layout. The PDK's crossbar layouts (<code>crossbar2x2_tio2_au</code>, <code>crossbar4x4_tio2_au</code>) use the TiO₂ device. Make an HfO₂ crossbar layout too?</dd>
-      <dt>Models</dt><dd>The HfO₂ model is fixed: its memory starts at <code>x0</code> and stops at 0 and 1. The TiO₂ models still have the old problem. Fixing them changes nothing in sections 2, 3 and 5 if their testbenches start at <code>x0=0</code>, but about 60 screenshots show <code>x0=0.3</code> in xschem and would need re-shooting. When?</dd>
+      <dt>Models</dt><dd>The HfO₂ model is fixed: its memory starts at <code>x0</code> and stops at 0 and 1. The TiO₂ models still have the old problem. Fixing them changes nothing in Your first simulation, Add a model and Corners and Monte Carlo if their testbenches start at <code>x0=0</code>, but about 60 screenshots show <code>x0=0.3</code> in xschem and would need re-shooting. When?</dd>
     </dl>
   </article>
 </section>

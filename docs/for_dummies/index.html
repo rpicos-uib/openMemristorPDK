@@ -14,7 +14,7 @@
 <body>
 <header class="topbar"><div class="inner">
   <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span>openMemristorPDK Guide</a>
-  <nav class="topnav" aria-label="Guide sections"><a href="index.html" aria-current="page">Overview</a><a href="install.html">Install</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html">Monte Carlo</a><a href="ihp.html">IHP PDK</a><a href="digital.html">Digital</a></nav>
+  <nav class="topnav" aria-label="Guide sections"><a href="index.html" aria-current="page">Overview</a><a href="install.html">Install</a><a href="ihp.html">IHP PDK</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html">Monte Carlo</a><a href="digital.html">Digital</a></nav>
 </div></header>
 <div class="wrap">
 <header class="hero">
@@ -31,47 +31,89 @@
     <h2>What this guide is about</h2>
   </header>
   <div class="intro-grid">
-    <div><h3>What is a memristor?</h3><p>A resistor with a memory. Its resistance depends on how much current has flowed through it before, so it "remembers". Its fingerprint is the <b>pinched hysteresis loop</b> you will simulate in section 2.</p></div>
+    <div><h3>What is a memristor?</h3><p>A resistor with a memory. Its resistance depends on how much current has flowed through it before, so it "remembers". Its fingerprint is the <b>pinched hysteresis loop</b> you will simulate in Your first simulation.</p></div>
     <div><h3>What is a PDK?</h3><p>A <em>Process Design Kit</em>: the instruction manual a chip factory gives designers. It says which materials and layers exist, how small things can be, and how each device behaves. openMemristorPDK describes a made-up factory that builds memristors.</p></div>
     <div><h3>How to read the steps</h3><ul><li>Click what is inside the <b class="ui">red box</b>.</li><li>Type exactly what is in a black box (or use its <b>Copy</b> button).</li><li><b>Play as video</b> walks through a section on its own.</li><li>Click a screenshot to see it full size.</li></ul></div>
     <div><h3>What you need</h3><ul><li>A Linux computer (Ubuntu or similar).</li><li>About 35 GB of free disk space and an internet connection, the first time.</li><li>No programming: every command is given.</li></ul></div>
   </div>
 </section>
 
-<section class="chapter" id="sections">
+<section class="chapter" id="install">
   <header>
     <div class="eyebrow">Sections</div>
-    <h2>Pick where to start</h2>
-    <p>Do the sections in order the first time. Later ones build on the earlier ones.</p>
+    <h2>Installing</h2>
+    <p>Get the tools and the PDKs onto your computer. You do this once per computer.</p>
   </header>
   <div class="cards">
   <a class="card" href="install.html">
     <span class="no">SECTION 1</span><h3>Install from scratch</h3><p>Get a new Linux computer ready: two programs, openPDKcreator, the memristor PDK and the container with all the chip-design tools.</p>
     <span class="meta"><span class="pill ready">Ready</span>30–60 min, mostly waiting · once per computer</span>
   </a>
+  <a class="card" href="ihp.html">
+    <span class="no">SECTION 2</span><h3>Add IHP's PDK</h3><p>Use IHP's open SG13G2 PDK, with real transistors and logic gates, next to the memristor PDK. Needed for the last digital parts.</p>
+    <span class="meta"><span class="pill ready">Ready</span>about 7 min · 9 steps</span>
+  </a>
+  </div>
+</section>
+<section class="chapter" id="analog">
+  <header>
+    <div class="eyebrow">Sections</div>
+    <h2>Analog</h2>
+    <p>Memristors as analog devices: simulate their currents and voltages, write new models, build a new device and see how a factory's spread changes them.</p>
+  </header>
+  <div class="cards">
   <a class="card" href="first-simulation.html">
-    <span class="no">SECTION 2</span><h3>Your first simulation</h3><p>Start the tools, read the memristor's model, simulate its pinched hysteresis loop in xschem and ngspice, then look at its chip layout in KLayout.</p>
+    <span class="no">SECTION 3</span><h3>Your first simulation</h3><p>Start the tools, read the memristor's model, simulate its pinched hysteresis loop in xschem and ngspice, then look at its chip layout in KLayout.</p>
     <span class="meta"><span class="pill ready">Ready</span>about 10 min · 24 steps</span>
   </a>
   <a class="card" href="add-model.html">
-    <span class="no">SECTION 3</span><h3>Add a model</h3><p>Write a new Verilog-A memristor model, let openPDKcreator compile it, and try it in the testbench in place of the old one.</p>
+    <span class="no">SECTION 4</span><h3>Add a model</h3><p>Write a new Verilog-A memristor model, let openPDKcreator compile it, and try it in the testbench in place of the old one.</p>
     <span class="meta"><span class="pill ready">Ready</span>about 15 min · 24 steps</span>
   </a>
   <a class="card" href="add-device.html">
-    <span class="no">SECTION 4</span><h3>Add a new device</h3><p>Delete the Au/HfO₂/Al memristor and rebuild it from nothing: layers, layout, symbol, model and testbench.</p>
+    <span class="no">SECTION 5</span><h3>Add a new device</h3><p>Delete the Au/HfO₂/Al memristor and rebuild it from nothing: layers, layout, symbol, model and testbench.</p>
     <span class="meta"><span class="pill ready">Ready</span>about 15 min · 33 steps</span>
   </a>
   <a class="card" href="corners-montecarlo.html">
-    <span class="no">SECTION 5</span><h3>Corners and Monte Carlo</h3><p>Simulate the TT/FF/SS process corners, then a Monte Carlo run where Ron, Roff and the oxide thickness vary from device to device.</p>
+    <span class="no">SECTION 6</span><h3>Corners and Monte Carlo</h3><p>Simulate the TT/FF/SS process corners, then a Monte Carlo run where Ron, Roff and the oxide thickness vary from device to device.</p>
     <span class="meta"><span class="pill ready">Ready</span>about 15 min · 41 steps</span>
   </a>
-  <a class="card" href="ihp.html">
-    <span class="no">SECTION 6</span><h3>Add IHP's PDK</h3><p>Use IHP's open SG13G2 PDK, with real transistors and logic gates, next to the memristor PDK.</p>
-    <span class="meta"><span class="pill ready">Ready</span>about 7 min · 9 steps</span>
-  </a>
+  </div>
+</section>
+<section class="chapter" id="digital">
+  <header>
+    <div class="eyebrow">Sections</div>
+    <h2>Digital</h2>
+    <p>Memristors as bits: store them, fill a small memory, describe it in Verilog, and turn its controller into real logic gates and a chip layout.</p>
+  </header>
+  <div class="cards">
   <a class="card" href="digital.html">
-    <span class="no">SECTION 7</span><h3>The digital side</h3><p>Use memristors as bits: store one, fill a 2 × 2 crossbar, describe it in Verilog, turn its controller into IHP logic gates and a chip layout, and build a real 1T1R bit-cell.</p>
+    <span class="no">SECTION 7</span><h3>The digital side: overview</h3><p>Use memristors as bits: store one, fill a 2 × 2 crossbar, describe it in Verilog, turn its controller into IHP logic gates and a chip layout, and build a real 1T1R bit-cell.</p>
     <span class="meta"><span class="pill ready">Ready</span>6 parts · about 1 hour</span>
+  </a>
+  <a class="card" href="digital-bit.html">
+    <span class="no">SECTION 7 · PART 1</span><h3>Store a bit</h3><p>Write a 1 into one memristor, read it back, erase it, and see a write that is too weak fail.</p>
+    <span class="meta"><span class="pill ready">Ready</span>about 10 min · 26 steps</span>
+  </a>
+  <a class="card" href="digital-crossbar.html">
+    <span class="no">SECTION 7 · PART 2</span><h3>Write a pattern into a crossbar</h3><p>Four memristors in a 2 × 2 grid: write 1 0 0 1 without disturbing the neighbours, then see a careless write overwrite them.</p>
+    <span class="meta"><span class="pill ready">Ready</span>about 10 min · 21 steps</span>
+  </a>
+  <a class="card" href="digital-twin.html">
+    <span class="no">SECTION 7 · PART 3</span><h3>A digital twin in Verilog</h3><p>Describe the memristor bit the way digital designers do, simulate it with Icarus Verilog and look at the waveforms in GTKWave.</p>
+    <span class="meta"><span class="pill ready">Ready</span>about 10 min · 9 steps</span>
+  </a>
+  <a class="card" href="digital-gates.html">
+    <span class="no">SECTION 7 · PART 4</span><h3>A controller made of real logic gates</h3><p>Write a small memory controller in Verilog and let Yosys turn it into 65 logic gates from IHP's library.</p>
+    <span class="meta"><span class="pill ready">Ready</span>about 10 min · 7 steps</span>
+  </a>
+  <a class="card" href="digital-layout.html">
+    <span class="no">SECTION 7 · PART 5</span><h3>From gates to a chip layout</h3><p>Place and wire the controller's gates with LibreLane and IHP's standard cells, and look at the result in KLayout.</p>
+    <span class="meta"><span class="pill ready">Ready</span>about 10 min · 12 steps</span>
+  </a>
+  <a class="card" href="digital-1t1r.html">
+    <span class="no">SECTION 7 · PART 6</span><h3>A real bit-cell: 1T1R</h3><p>Put IHP's transistor in series with the memristor: a door that blocks writes to the cells you don't want to change.</p>
+    <span class="meta"><span class="pill ready">Ready</span>about 10 min · 13 steps</span>
   </a>
   </div>
 </section>

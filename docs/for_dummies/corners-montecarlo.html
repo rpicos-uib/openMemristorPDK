@@ -14,11 +14,11 @@
 <body>
 <header class="topbar"><div class="inner">
   <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span>openMemristorPDK Guide</a>
-  <nav class="topnav" aria-label="Guide sections"><a href="index.html">Overview</a><a href="install.html">Install</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html" aria-current="page">Monte Carlo</a><a href="ihp.html">IHP PDK</a><a href="digital.html">Digital</a></nav>
+  <nav class="topnav" aria-label="Guide sections"><a href="index.html">Overview</a><a href="install.html">Install</a><a href="ihp.html">IHP PDK</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html" aria-current="page">Monte Carlo</a><a href="digital.html">Digital</a></nav>
 </div></header>
 <div class="wrap">
 <header class="hero">
-  <div class="crumbs"><a href="index.html">Guide</a> · Section 5 · about 15 min · 41 steps</div>
+  <div class="crumbs"><a href="index.html">Guide</a> · Section 6 · about 15 min · 41 steps</div>
   <h1>Corners and Monte Carlo</h1>
   <p class="lede">No two devices from a factory are exactly alike. Read the PDK's process corners, simulate the typical and the slow memristor, then build 20 random memristors in one Monte Carlo run and find out which manufacturing spread matters most. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
   <p class="prereq">Do <a href="first-simulation.html">Your first simulation</a> first: this section uses the same moves (Netlist, Simulate, Quit, quit). Start with openPDKcreator open.</p>
@@ -99,9 +99,9 @@
     <p class="do">Click <b class="ui">Open in xschem</b> on the Schematic row.</p>
     <button class="shot" type="button"><img src="img/e09_open_xschem.png" alt="Open in xschem boxed in red" loading="lazy"></button>
   </article>
-  <article class="step" id="step-10" data-img="img/e11_lib_line.png" data-title="Read the code block" data-do="The same circuit as in section 2: a sine-wave source and one memristor. The difference is in the code block at the bottom. The line boxed in red picks the corner.">
+  <article class="step" id="step-10" data-img="img/e11_lib_line.png" data-title="Read the code block" data-do="The same circuit as in Your first simulation: a sine-wave source and one memristor. The difference is in the code block at the bottom. The line boxed in red picks the corner.">
     <div class="step-head"><span class="num">10</span><h3>Read the code block</h3></div>
-    <p class="do">The same circuit as in section 2: a sine-wave source and one memristor. The difference is in the code block at the bottom. The line boxed in red picks the corner.</p>
+    <p class="do">The same circuit as in <a href="first-simulation.html">Your first simulation</a>: a sine-wave source and one memristor. The difference is in the code block at the bottom. The line boxed in red picks the corner.</p>
     <button class="shot" type="button"><img src="img/e11_lib_line.png" alt="xschem with the corners testbench; the .lib line boxed in red" loading="lazy"></button>
     <div class="file">
       <div class="fname"><span>code block s1</span><span>what ngspice reads</span></div>
@@ -400,7 +400,7 @@ plot $curves vs tran1.v(te) retraceplot title &#x27;20 memristors (Monte Carlo)&
   </article>
 </section>
 
-<nav class="pager" aria-label="Previous and next section"><a class="prev" href="add-device.html"><span class="dir">← Previous</span><span class="t">Add a new device</span></a><a class="next" href="ihp.html"><span class="dir">Next →</span><span class="t">Add IHP's PDK</span></a></nav>
+<nav class="pager" aria-label="Previous and next section"><a class="prev" href="add-device.html"><span class="dir">← Previous</span><span class="t">Add a new device</span></a><a class="next" href="digital.html"><span class="dir">Next →</span><span class="t">The digital side</span></a></nav>
 <footer>
   <p>Every screenshot was taken from the real programs with real mouse clicks: openPDKcreator, xschem, ngspice with OpenVAF-compiled models and KLayout, inside the IIC-OSIC-TOOLS container. The capture scripts are in <code>docs/for_dummies/_capture/</code>.</p>
   <p>Created by R. Picos (<a href="mailto:rpicos.uib@gmail.com">rpicos.uib@gmail.com</a> / <a href="mailto:rodrigo.picos@uib.es">rodrigo.picos@uib.es</a>), as part of the research project <b>MemFRAME</b>.</p>
