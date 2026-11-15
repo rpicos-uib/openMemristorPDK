@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>The digital side · openMemristorPDK Guide</title>
-<meta name="description" content="Store a bit in a memristor, see a write that is too weak fail, write a pattern into a 2 × 2 crossbar, then a draft plan for memories built from memristors.">
+<meta name="description" content="Store a bit in a memristor, see a write that is too weak fail, write a pattern into a 2 × 2 crossbar and simulate a digital twin in Verilog.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -18,11 +18,11 @@
 </div></header>
 <div class="wrap">
 <header class="hero">
-  <div class="crumbs"><a href="index.html">Guide</a> · Section 6 · about 20 min · 47 steps · draft</div>
+  <div class="crumbs"><a href="index.html">Guide</a> · Section 6 · about 30 min · 56 steps · draft</div>
   <h1>The digital side</h1>
-  <p class="lede">A memristor can store a bit with no power at all. Write a 1 into the Au/HfO₂/Al memristor, read it back, erase it, find out why a write that is too weak does nothing, then store four bits in a crossbar without disturbing the neighbours. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
+  <p class="lede">A memristor can store a bit with no power at all. Write a 1 into the Au/HfO₂/Al memristor, read it back, erase it, find out why a write that is too weak does nothing, then store four bits in a crossbar without disturbing the neighbours, and simulate the same memory the way digital designers do, in Verilog. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
   <p class="prereq">Easier after <a href="add-device.html">Add a new device</a>: it uses the Au/HfO₂/Al memristor. Start with openPDKcreator open (steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).</p>
-  <p class="draftnote"><strong>Draft</strong> Parts 1–4 are finished, with a real screenshot for every click. Parts 5 and 6 are still a first draft we are working on together: ideas, a plan and open questions.</p>
+  <p class="draftnote"><strong>Draft</strong> Parts 1–5 are finished, with a real screenshot for every click. Parts 6 and 7 are still a first draft we are working on together: ideas, a plan and open questions.</p>
   <div class="hero-row">
     <button class="btn" type="button" id="play-all">▶ Play as video</button>
     <span class="legend">
@@ -31,7 +31,7 @@
       <span>Keys in the player: <kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd> <kbd>Esc</kbd></span>
     </span>
   </div>
-  <nav class="onpage" aria-label="On this page"><span>On this page:</span><a href="#bit">One memristor, one bit</a><a href="#store">Store a bit and read it back</a><a href="#weak">A write that is too weak</a><a href="#crossbar">Write a pattern into a crossbar</a><a href="#views">The memristor seen by digital tools</a><a href="#plan">What this section could become</a><a href="#questions">Open questions</a><a href="#words">Words you'll meet</a></nav>
+  <nav class="onpage" aria-label="On this page"><span>On this page:</span><a href="#bit">One memristor, one bit</a><a href="#store">Store a bit and read it back</a><a href="#weak">A write that is too weak</a><a href="#crossbar">Write a pattern into a crossbar</a><a href="#twin">A digital twin in Verilog</a><a href="#views">The memristor seen by digital tools</a><a href="#plan">What this section could become</a><a href="#questions">Open questions</a><a href="#words">Words you'll meet</a></nav>
 </header>
 
 <section class="chapter" id="bit">
@@ -372,14 +372,129 @@
 </section>
 
 <!-- ================================================================ -->
+<section class="chapter" id="twin">
+  <header>
+    <div class="eyebrow">Part 5 · about 10 minutes</div>
+    <h2>A digital twin in Verilog</h2>
+    <p>Digital designers don't simulate currents: a chip has millions of bits, far too many for ngspice. They use a <b>digital twin</b>, a short description in <b>Verilog</b> that only says what the memristor does with ones and zeros. You'll simulate one with Icarus Verilog and look at the result in GTKWave.</p>
+  </header>
+  <article class="step" id="step-48">
+    <div class="step-head"><span class="num">48</span><h3>The twin</h3></div>
+    <p class="do">This is the whole twin, in <code>openMemristorPDK/digital/memristor_bit/memristor_bit.v</code>. Nothing to type: it's already there.</p>
+    <div class="file tall">
+      <div class="fname"><span>memristor_bit.v</span><span>Verilog</span></div>
+<pre>// memristor_bit.v -- a digital twin of the Au/HfO2/Al memristor used
+// as a 1-bit memory. No voltages or currents: only what a digital
+// designer needs to know about it.
+//
+//   set   = 1 : a write pulse above +0.8 V -&gt; the bit becomes 1
+//   reset = 1 : a write pulse below -0.6 V -&gt; the bit becomes 0
+//   read  = 1 : a small 0.2 V read         -&gt; q shows the bit
+//
+// A write only works if its pulse lasts at least T_SWITCH (15 ns, about
+// what the ngspice simulation of the real model needs). When nothing
+// happens the bit stays where it is: no power needed.
+`timescale 1ns/1ps
+
+module memristor_bit #(parameter T_SWITCH = 15) (
+  input  wire set,
+  input  wire reset,
+  input  wire read,
+  output wire q
+);
+  reg stored = 1&#x27;b0;   // x0 = 0: the memristor starts off
+
+  // A SET pulse: wait T_SWITCH, then switch on if the pulse is still there.
+  always @(posedge set) begin
+    #(T_SWITCH);
+    if (set) stored = 1&#x27;b1;
+  end
+
+  // A RESET pulse: the same, switching off.
+  always @(posedge reset) begin
+    #(T_SWITCH);
+    if (reset) stored = 1&#x27;b0;
+  end
+
+  // While reading, q shows the bit; otherwise q is disconnected (z).
+  assign q = read ? stored : 1&#x27;bz;
+endmodule</pre>
+    </div>
+    <dl class="explain">
+      <dt>input, output</dt><dd>The wires of the block: three going in (<code>set</code>, <code>reset</code>, <code>read</code>) and one coming out (<code>q</code>). Each is 0 or 1.</dd>
+      <dt>reg stored</dt><dd>The bit inside the memristor. It starts at 0, like <code>x0=0</code> in xschem.</dd>
+      <dt>always @(posedge set)</dt><dd>"Every time <code>set</code> goes from 0 to 1". Then <code>#(T_SWITCH)</code> waits 15 ns, and the bit becomes 1 only if <code>set</code> is still on: a pulse that is too short does nothing.</dd>
+      <dt>assign q = read ? stored : 1'bz</dt><dd>While reading, <code>q</code> shows the bit. Otherwise it is <b>z</b>: not connected, neither 0 nor 1.</dd>
+    </dl>
+    <div class="see"><strong>The test</strong><span>A second file, <code>memristor_bit_tb.v</code>, does the same as the xschem testbench of part 2: read, write 1, read, write 0, read. Then one more write 1 that lasts only 5 ns, and a last read.</span></div>
+  </article>
+  <article class="step" id="step-49" data-img="img/v01_open_terminal.png" data-title="Open a terminal" data-do="In the container desktop (the browser window), click the terminal icon in the bottom panel. A black terminal window opens at the top left.">
+    <div class="step-head"><span class="num">49</span><h3>Open a terminal</h3></div>
+    <p class="do">In the container desktop (the browser window), click the <b class="ui">terminal icon</b> in the bottom panel. A black terminal window opens at the top left.</p>
+    <button class="shot" type="button"><img src="img/v01_open_terminal.png" alt="The whole container desktop with the terminal icon in the bottom panel boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-50" data-img="img/v02_cd.png" data-title="Go to the twin&#x27;s folder" data-do="Click inside the terminal and type these two commands, pressing Enter after each. ls lists the folder: the twin, its test and a GTKWave file.">
+    <div class="step-head"><span class="num">50</span><h3>Go to the twin's folder</h3></div>
+    <p class="do">Click inside the terminal and type these two commands, pressing <kbd>Enter</kbd> after each. <code>ls</code> lists the folder: the twin, its test and a GTKWave file.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>cd openMemristorPDK/digital/memristor_bit</pre><button class="copy" type="button" data-copy="cd openMemristorPDK/digital/memristor_bit">Copy</button></div>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>ls</pre><button class="copy" type="button" data-copy="ls">Copy</button></div>
+    <div class="oops"><strong>Type, don't paste</strong><span>This terminal is inside the container, so pasting from your own computer may not work. Type the commands. Press <kbd>Tab</kbd> halfway through a file name and the terminal finishes it for you.</span></div>
+    <button class="shot" type="button"><img src="img/v02_cd.png" alt="The terminal after cd and ls: memristor_bit_tb.gtkw, memristor_bit_tb.v, memristor_bit.v" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-51" data-img="img/v03_compile.png" data-title="Compile" data-do="Icarus Verilog turns the two files into a program you can run. Nothing is printed: that means it worked.">
+    <div class="step-head"><span class="num">51</span><h3>Compile</h3></div>
+    <p class="do">Icarus Verilog turns the two files into a program you can run. Nothing is printed: that means it worked.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>iverilog -o memristor_bit_tb memristor_bit.v memristor_bit_tb.v</pre><button class="copy" type="button" data-copy="iverilog -o memristor_bit_tb memristor_bit.v memristor_bit_tb.v">Copy</button></div>
+    <button class="shot" type="button"><img src="img/v03_compile.png" alt="The terminal after the iverilog command, with no output" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-52" data-img="img/v04_run.png" data-title="Run it" data-do="The simulation takes a blink. It prints the four reads.">
+    <div class="step-head"><span class="num">52</span><h3>Run it</h3></div>
+    <p class="do">The simulation takes a blink. It prints the four reads.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>vvp memristor_bit_tb</pre><button class="copy" type="button" data-copy="vvp memristor_bit_tb">Copy</button></div>
+    <button class="shot" type="button"><img src="img/v04_run.png" alt="The terminal after vvp: read before any write q = 0, after write 1 q = 1, after write 0 q = 0, after a 5 ns write 1 q = 0" loading="lazy"></button>
+    <div class="see"><strong>What it shows</strong>
+      <span>0, 1, 0: the same answers as the real ngspice simulation in part 2, without a single volt or microamp.</span>
+      <span>The last read is 0 too: the 5 ns write was too short, just like the 0.7 V write in part 3 was too weak.</span>
+    </div>
+  </article>
+  <article class="step" id="step-53" data-img="img/v05_gtkwave.png" data-title="Open the waveforms" data-do="The run also saved every signal in memristor_bit_tb.vcd. Open it in GTKWave. It starts zoomed in too far: click Zoom Fit, the first of the three magnifier buttons.">
+    <div class="step-head"><span class="num">53</span><h3>Open the waveforms</h3></div>
+    <p class="do">The run also saved every signal in <code>memristor_bit_tb.vcd</code>. Open it in GTKWave. It starts zoomed in too far: click <b class="ui">Zoom Fit</b>, the first of the three magnifier buttons.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>gtkwave memristor_bit_tb.vcd memristor_bit_tb.gtkw</pre><button class="copy" type="button" data-copy="gtkwave memristor_bit_tb.vcd memristor_bit_tb.gtkw">Copy</button></div>
+    <button class="shot" type="button"><img src="img/v05_gtkwave.png" alt="GTKWave with the five signals, zoomed in to a few picoseconds; the Zoom Fit button boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-54" data-img="img/v06_waves.png" data-title="The waveforms" data-do="Now the whole 700 ns fit in the window. Time goes left to right; each row is one signal.">
+    <div class="step-head"><span class="num">54</span><h3>The waveforms</h3></div>
+    <p class="do">Now the whole 700 ns fit in the window. Time goes left to right; each row is one signal.</p>
+    <button class="shot" type="button"><img src="img/v06_waves.png" alt="GTKWave: set pulses at 100 and 500 ns, reset at 300 ns, four read pulses, q showing 0 1 0 0 during the reads, stored high from 115 to 315 ns" loading="lazy"></button>
+    <div class="see"><strong>How to read it</strong>
+      <span><b>set</b> goes up at 100 ns; 15 ns later <b>stored</b> goes up too: the bit is 1.</span>
+      <span><b>reset</b> goes up at 300 ns; 15 ns later <b>stored</b> drops back to 0.</span>
+      <span>The tiny <b>set</b> blip at 500 ns is only 5 ns long: <b>stored</b> doesn't move.</span>
+      <span><b>q</b> only shows the bit while <b>read</b> is up. In between it is z, drawn as a yellow line in the middle.</span>
+    </div>
+  </article>
+  <article class="step" id="step-55" data-img="img/v07_close_gtkwave.png" data-title="Close GTKWave" data-do="Click the X at the top-right of the GTKWave window.">
+    <div class="step-head"><span class="num">55</span><h3>Close GTKWave</h3></div>
+    <p class="do">Click the <b class="ui">X</b> at the top-right of the GTKWave window.</p>
+    <button class="shot" type="button"><img src="img/v07_close_gtkwave.png" alt="GTKWave&#x27;s close button boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-56" data-img="img/v08_exit.png" data-title="Close the terminal" data-do="Type exit and press Enter. The terminal closes.">
+    <div class="step-head"><span class="num">56</span><h3>Close the terminal</h3></div>
+    <p class="do">Type <code>exit</code> and press <kbd>Enter</kbd>. The terminal closes.</p>
+    <button class="shot" type="button"><img src="img/v08_exit.png" alt="The terminal with exit typed at the prompt" loading="lazy"></button>
+  </article>
+</section>
+
+<!-- ================================================================ -->
 <section class="chapter" id="views">
   <header>
-    <div class="eyebrow">Part 5 · what digital tools need</div>
+    <div class="eyebrow">Part 6 · what digital tools need</div>
     <h2>The memristor seen by digital tools</h2>
     <p>Digital chip tools don't simulate currents. They work with blocks that have pins, a size and a speed. For them a memristor is a <b>black box</b> with two pins, BE and TE. The PDK already has every file they would ask for, made with the Library Manager (see the second slide deck, <code>digital_aspects.tex</code>).</p>
   </header>
-  <article class="step" id="step-48">
-    <div class="step-head"><span class="num">48</span><h3>Five files, five readers</h3></div>
+  <article class="step" id="step-57">
+    <div class="step-head"><span class="num">57</span><h3>Five files, five readers</h3></div>
     <div class="tablewrap"><table class="views">
       <thead><tr><th>View</th><th>File (for memristor_hfo2_al)</th><th>Who reads it</th><th>In this PDK</th></tr></thead>
       <tbody>
@@ -420,7 +535,7 @@ endmodule</pre>
 <!-- ================================================================ -->
 <section class="chapter" id="plan">
   <header>
-    <div class="eyebrow">Part 6 · the plan (draft)</div>
+    <div class="eyebrow">Part 7 · the plan (draft)</div>
     <h2>What this section could become</h2>
     <p>A proposal, in the order a beginner would meet it. Each item would get the same click-by-click treatment as parts 2 and 3.</p>
   </header>
@@ -434,7 +549,7 @@ endmodule</pre>
   </article>
   <article class="step" id="step-c">
     <div class="step-head"><span class="num">C</span><h3>A digital twin in Verilog</h3></div>
-    <p class="do">Give <code>memristor_hfo2_al.v</code> a behaviour (a 1-bit register: "set" pulse → 1, "reset" pulse → 0) and simulate it with Icarus Verilog. That's how digital designers would use the memristor without simulating currents.</p>
+    <p class="do"><b>Done:</b> part 5 above, with <code>digital/memristor_bit/</code>. The PDK's own <code>memristor_hfo2_al.v</code> still has pins only.</p>
   </article>
   <article class="step" id="step-d">
     <div class="step-head"><span class="num">D</span><h3>A memory controller with Yosys</h3></div>
@@ -456,7 +571,7 @@ endmodule</pre>
   <article class="step" id="step-?">
     <div class="step-head"><span class="num">?</span><h3>Questions</h3></div>
     <dl class="explain">
-      <dt>Goal</dt><dd>Is the aim to <em>understand</em> memories (item C, all simulation) or to go through a real digital flow too (D–E: synthesis, place-and-route, a second PDK)?</dd>
+      <dt>Goal</dt><dd>Is the aim to <em>understand</em> memories (items A–C, done above) or to go through a real digital flow too (D–E: synthesis, place-and-route, a second PDK)?</dd>
       <dt>Models</dt><dd>The HfO₂ model is fixed: its memory now starts at <code>x0</code> and stops at 0 and 1. The TiO₂ models still have the old problem. Fixing them changes nothing in sections 2, 3 and 5 if their testbenches start at <code>x0=0</code>, but about 60 screenshots show <code>x0=0.3</code> in xschem and would need re-shooting. When?</dd>
       <dt>Liberty</dt><dd>Leave the memristor's Liberty view as pins only, or invent a simple "memory macro" (e.g. the 2 × 2 crossbar plus its drivers) with real Verilog and Liberty views?</dd>
       <dt>Crossbar</dt><dd>Part 4 uses a drawing of an HfO₂ crossbar, not a real layout. The PDK's crossbar layouts (<code>crossbar2x2_tio2_au</code>, <code>crossbar4x4_tio2_au</code>) use the TiO₂ device. Make an HfO₂ crossbar layout too?</dd>
@@ -480,6 +595,8 @@ endmodule</pre>
       <dt>Liberty (.lib)</dt><dd>A data sheet for tools: how fast, how much power, which pins.</dd>
       <dt>LEF</dt><dd>A block's outline and pin positions, without the inside details.</dd>
       <dt>1T1R</dt><dd>One transistor, one resistor (memristor): the usual RRAM bit-cell.</dd>
+      <dt>digital twin</dt><dd>A simple digital model that behaves like the real device for ones and zeros, without the physics.</dd>
+      <dt>waveform</dt><dd>A picture of signals changing over time, as GTKWave draws them.</dd>
       <dt>crossbar</dt><dd>A grid of row and column wires with a memristor at every crossing: one bit per crossing.</dd>
       <dt>write disturb</dt><dd>Writing one cell changes a neighbour by accident, because the neighbour got too much voltage.</dd>
       <dt>sneak path</dt><dd>An unwanted route for current through neighbouring cells of a crossbar.</dd>

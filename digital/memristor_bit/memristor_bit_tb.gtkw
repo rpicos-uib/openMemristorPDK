@@ -1,0 +1,17 @@
+[dumpfile] "memristor_bit_tb.vcd"
+[timestart] 0
+[size] 1200 560
+[pos] 120 120
+[treeopen] memristor_bit_tb.
+[sst_width] 200
+[signals_width] 180
+[sst_expanded] 1
+[sst_vpaned_height] 150
+@28
+memristor_bit_tb.set
+memristor_bit_tb.reset
+memristor_bit_tb.read
+memristor_bit_tb.q
+memristor_bit_tb.m1.stored
+[pattern_trace] 1
+[pattern_trace] 0

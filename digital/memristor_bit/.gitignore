@@ -1,0 +1,3 @@
+# Simulation outputs: made again by iverilog / vvp
+memristor_bit_tb
+*.vcd
