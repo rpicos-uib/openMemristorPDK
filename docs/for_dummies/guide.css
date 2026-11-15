@@ -263,3 +263,30 @@ a.card:hover { border-color: var(--trace); }
 .hero > .funding { margin-bottom: .5rem; }
 footer .funding { margin-top: .75rem; }
 .funding .nw { white-space: nowrap; }
+
+/* Tabs (Introduction to FOSS: one tab per program). Without JavaScript
+   every panel shows, one after another. */
+.tabs { display: grid; gap: 0; }
+.tablist { display: flex; flex-wrap: wrap; gap: .4rem; padding-bottom: .75rem; }
+.tablist [role="tab"] {
+  font: inherit; font-size: .93rem; cursor: pointer; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 999px; padding: .3rem .85rem;
+}
+.tablist [role="tab"]:hover { border-color: var(--trace); }
+.tablist [role="tab"][aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.tablist [role="tab"]:focus-visible { outline: 3px solid var(--probe); outline-offset: 2px; }
+.tabpanel {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 1.25rem; display: grid; gap: .9rem; scroll-margin-top: 1rem; min-width: 0;
+}
+.tabs:not(.js) .tabpanel + .tabpanel { margin-top: 1rem; }
+.tabpanel h3 { font-size: 1.5rem; font-weight: 800; }
+.tabpanel h4 { font-family: var(--display); font-size: 1.05rem; font-weight: 600; margin: 0 0 .4rem; }
+.tabpanel p { margin: 0; max-width: 68ch; }
+.tabpanel .two > div { display: grid; gap: .5rem; align-content: start; }
+.tagline { font-size: 1.15rem; color: var(--trace); }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: .35rem 1rem; margin: 0; font-size: .95rem; }
+.facts dt { font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding-top: .2rem; }
+.facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 560px) { .facts { grid-template-columns: 1fr; } .facts dd { margin-bottom: .4rem; } }
+p.small { font-size: .9rem; color: var(--muted); }

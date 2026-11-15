@@ -28,6 +28,19 @@ GUIDE_TITLE = "openMemristorPDK Guide"
 
 SECTIONS = [
     {
+        "slug": "foss",
+        "group": "intro",
+        "title": "Introduction to FOSS",
+        "short": "FOSS",
+        "status": "ready",
+        "time": "about 15 min to read · 7 steps",
+        "desc": "What free and open-source software is, what each program in this guide does and how to install it, "
+                "and openPDKcreator's Tools tab, which checks them all.",
+        "lede": "Every program in this guide is free and open-source software. Meet them one by one: what each does, "
+                "who makes it, how to install it. Then let openPDKcreator's Tools tab check them for you.",
+        "prereq": "",
+    },
+    {
         "slug": "install",
         "group": "install",
         "title": "Install from scratch",
@@ -194,6 +207,8 @@ SECTIONS = [
 ]
 
 GROUPS = [
+    {"id": "intro", "title": "Introduction",
+     "intro": "The free programs this guide is built on: what they are and how they fit together."},
     {"id": "install", "title": "Installing",
      "intro": "Get the tools and the PDKs onto your computer. You do this once per computer."},
     {"id": "analog", "title": "Analog",

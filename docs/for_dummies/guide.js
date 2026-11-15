@@ -1,7 +1,49 @@
+/* Tabs: one panel at a time; the URL hash (#tool-<id>) picks a tab, so
+   links like the table's "#tool-ngspice" open the right one. */
+(() => {
+  document.querySelectorAll('[data-tabs]').forEach(box => {
+    box.classList.add('js');
+    const tabs = [...box.querySelectorAll('[role="tab"]')];
+    const panels = tabs.map(t => document.getElementById(t.getAttribute('aria-controls')));
+    function select(k, focus) {
+      tabs.forEach((t, j) => {
+        const on = j === k;
+        t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; panels[j].hidden = !on;
+      });
+      if (focus) tabs[k].focus();
+    }
+    tabs.forEach((t, k) => {
+      t.addEventListener('click', () => { select(k); history.replaceState(null, '', '#' + panels[k].id); });
+      t.addEventListener('keydown', e => {
+        const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+        if (d) { e.preventDefault(); select((k + d + tabs.length) % tabs.length, true); }
+        else if (e.key === 'Home') { e.preventDefault(); select(0, true); }
+        else if (e.key === 'End') { e.preventDefault(); select(tabs.length - 1, true); }
+      });
+    });
+    function fromHash(scroll) {
+      const k = panels.findIndex(p => '#' + p.id === location.hash);
+      if (k < 0) return false;
+      select(k);
+      if (scroll) box.scrollIntoView({ block: 'start' });
+      return true;
+    }
+    if (!fromHash(false)) select(0);
+    addEventListener('hashchange', () => fromHash(true));
+    // In-page links to a tab (the table) switch tabs even when the hash is already that one.
+    document.querySelectorAll('a[href^="#tool-"]').forEach(a => a.addEventListener('click', e => {
+      const k = panels.findIndex(p => '#' + p.id === a.getAttribute('href'));
+      if (k < 0) return;
+      e.preventDefault(); select(k); history.replaceState(null, '', a.getAttribute('href'));
+      box.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }));
+  });
+})();
+
 /* Shared step player, lightbox and copy buttons for every guide page. */
 (() => {
   if (!document.getElementById('player')) return;  // pages without steps (the index)
-  const steps = [...document.querySelectorAll('.step')].map(el => ({
+  const steps = [...document.querySelectorAll('.step[data-title]')].map(el => ({
     el,
     n: el.querySelector('.num').textContent,
     title: el.dataset.title,
