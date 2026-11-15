@@ -60,6 +60,15 @@ The beginner guide's Part 0 covers the full first-time setup.
 | `saves/` | openPDKcreator's saved edits for this PDK |
 | `docs/` | The beginner guide, presentations and simulation scripts |
 
+## Credits
+
+Created by R. Picos (rpicos.uib@gmail.com / rodrigo.picos@uib.es).
+
+This work is part of the research project MemFRAME, PID2025-170062NB,
+funded by MICIU/AEI/[10.13039/501100011033](https://doi.org/10.13039/501100011033).
+
+<img src="docs/for_dummies/img/miciu_aei.png" alt="Ministerio de Ciencia, Innovación y Universidades and Agencia Estatal de Investigación logos" width="400">
+
 ## License
 
 Apache License 2.0, see [LICENSE](LICENSE).

@@ -5,7 +5,8 @@ Each section's steps live in _src/<slug>.html; this script wraps them in
 the shared page frame (top bar, hero, "on this page", pager, footer,
 step player) and writes index.html with the introduction and the
 section index. To add a section: write _src/<slug>.html and add one
-entry to SECTIONS (status "soon" lists it on the index without a page).
+entry to SECTIONS (status "soon" lists it on the index without a page;
+"draft" builds the page with a draft banner instead of the step player).
 
     python3 docs/for_dummies/_build/build_pages.py
 """
@@ -87,6 +88,18 @@ SECTIONS = [
         "prereq": 'Do <a href="first-simulation.html">Your first simulation</a> first: this section uses the '
                   'same moves (Netlist, Simulate, Quit, quit). Start with openPDKcreator open.',
     },
+    {
+        "slug": "digital",
+        "title": "The digital side",
+        "short": "Digital",
+        "status": "draft",
+        "time": "draft, no steps yet",
+        "desc": "How a memristor stores a bit, what digital tools need from the PDK, and a plan for "
+                "memories built from memristors.",
+        "lede": "A memristor can store a bit with no power at all. This draft shows one doing it in "
+                "simulation, lists the files digital tools need from the PDK, and proposes what to build next.",
+        "prereq": 'Easier after <a href="add-device.html">Add a new device</a>: it uses the Au/HfO₂/Al memristor.',
+    },
 ]
 
 FONTS = (
@@ -123,14 +136,27 @@ PLAYER = '''<div class="overlay" id="player" hidden role="dialog" aria-modal="tr
   </div>
 </div>'''
 
+FUNDING = ('<div class="funding"><img src="img/miciu_aei.png" alt="Ministerio de Ciencia, Innovación y Universidades and Agencia Estatal de Investigación" width="1600" height="393">'
+           '<p>Project PID2025-170062NB (MemFRAME) funded by <span class="nw">MICIU/AEI/'
+           '<a href="https://doi.org/10.13039/501100011033">10.13039/501100011033</a></span></p></div>')
+
 FOOTER = '''<footer>
   <p>Every screenshot was taken from the real programs with real mouse clicks: openPDKcreator, xschem, ngspice with OpenVAF-compiled models and KLayout, inside the IIC-OSIC-TOOLS container. The capture scripts are in <code>docs/for_dummies/_capture/</code>.</p>
+  <p>Created by R. Picos (<a href="mailto:rpicos.uib@gmail.com">rpicos.uib@gmail.com</a> / <a href="mailto:rodrigo.picos@uib.es">rodrigo.picos@uib.es</a>), as part of the research project <b>MemFRAME</b>.</p>
+  ''' + FUNDING + '''
   <p><a href="https://github.com/rpicos-uib/openMemristorPDK">openMemristorPDK</a> · <a href="https://github.com/rpicos-uib/openpdkcreator-toolkit">openPDKcreator</a> · Apache License 2.0</p>
 </footer>'''
 
 
+DRAFT_NOTE = (
+    '  <p class="draftnote"><strong>Draft</strong> This section is a first draft we are still '
+    'working on together: the ideas and the plan, real simulation results, but no click-by-click '
+    'screenshots yet. Read it, comment on it, and expect it to change.</p>'
+)
+
+
 def ready() -> list[dict]:
-    return [s for s in SECTIONS if s["status"] == "ready"]
+    return [s for s in SECTIONS if s["status"] in ("ready", "draft")]
 
 
 def topbar(current: str | None) -> str:
@@ -192,9 +218,11 @@ def section_page(i: int, s: dict) -> str:
         '<header class="hero">\n'
         f'  <div class="crumbs"><a href="index.html">Guide</a> · Section {n} · {s["time"]}</div>\n'
         f'  <h1>{s["title"]}</h1>\n'
-        f'  <p class="lede">{s["lede"]} You only ever need to click whatever is inside the '
-        '<b class="ui">red box</b>, or type exactly what is in a black box.</p>\n'
-        f"{prereq}{LEGEND}\n{on_this_page(src)}\n"
+        f'  <p class="lede">{s["lede"]}'
+        + ('' if s["status"] == "draft" else ' You only ever need to click whatever is inside the '
+           '<b class="ui">red box</b>, or type exactly what is in a black box.')
+        + '</p>\n'
+        f"{prereq}{DRAFT_NOTE if s['status'] == 'draft' else LEGEND}\n{on_this_page(src)}\n"
         "</header>"
     )
     rs = ready()
@@ -214,7 +242,13 @@ def section_page(i: int, s: dict) -> str:
 def index_page() -> str:
     cards = []
     for n, s in enumerate(SECTIONS, 1):
-        if s["status"] == "ready":
+        if s["status"] == "draft":
+            cards.append(
+                f'  <a class="card" href="{s["slug"]}.html">\n'
+                f'    <span class="no">SECTION {n}</span><h3>{s["title"]}</h3><p>{s["desc"]}</p>\n'
+                f'    <span class="meta"><span class="pill draft">Draft</span>{s["time"]}</span>\n  </a>'
+            )
+        elif s["status"] == "ready":
             cards.append(
                 f'  <a class="card" href="{s["slug"]}.html">\n'
                 f'    <span class="no">SECTION {n}</span><h3>{s["title"]}</h3><p>{s["desc"]}</p>\n'
@@ -228,6 +262,7 @@ def index_page() -> str:
             )
     first = ready()[0]
     body = f'''<header class="hero">
+  {FUNDING}
   <div class="eyebrow">openMemristorPDK · beginner's guide</div>
   <h1>Design with memristors, step by step</h1>
   <p class="lede">A hands-on guide to openMemristorPDK, a small chip-design kit for memristors built with openPDKcreator. Every step shows a real screenshot of what to click, from installing the tools to simulating a memristor and looking at its layout. No chip-design experience needed.</p>

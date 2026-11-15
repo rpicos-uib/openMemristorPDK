@@ -119,13 +119,17 @@ def add_image(page, path, x, y, max_w, max_h):
 
 def title_slide():
     page = new_page()
-    f = Frame(stylename=fs_plain, width=f"{PAGE_W-4}cm", height="6cm", x="2cm", y="4.5cm")
+    f = Frame(stylename=fs_plain, width=f"{PAGE_W-4}cm", height="8cm", x="2cm", y="3.5cm")
     page.addElement(f)
     tb = TextBox()
     f.addElement(tb)
     tb.addElement(P(stylename=st_title, text="Building openMemristorPDK"))
     tb.addElement(P(stylename=st_heading, text="A minimum memristor PDK, built end-to-end with openPDKcreator"))
     tb.addElement(P(stylename=st_subtitle, text="Wizard → Layers → Magic Tech/DRC → Library Manager → Verilog-A → real ngspice simulation"))
+    tb.addElement(P(stylename=st_subtitle, text=""))
+    tb.addElement(P(stylename=st_subtitle, text="R. Picos · rpicos.uib@gmail.com / rodrigo.picos@uib.es"))
+    tb.addElement(P(stylename=st_subtitle, text="Project PID2025-170062NB (MemFRAME) funded by MICIU/AEI/10.13039/501100011033"))
+    add_image(page, os.path.join(HERE, "figures", "miciu_aei.png"), 2, 12.2, 11, 2.7)
     return page
 
 
@@ -161,6 +165,7 @@ title_slide()
 text_slide(
     "Goal",
     [
+        "Note: this short deck is the first pass of the project (a 4-layer, 1-plane stack). The current PDK -- 7 layers, 3 planes, 3 device variants -- is in walkthrough_full.tex.",
         "Build a genuinely minimum PDK for a two-terminal memristor device, using openPDKcreator's own GUI/CLI.",
         "Separate from the IHP-based project: its own directory, its own git history, its own empty starting point -- only the openPDKcreator tool itself is shared.",
         "Every step documented here is a real GUI action, nothing staged.",

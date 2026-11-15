@@ -14,10 +14,11 @@
 <body>
 <header class="topbar"><div class="inner">
   <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span>openMemristorPDK Guide</a>
-  <nav class="topnav" aria-label="Guide sections"><a href="index.html" aria-current="page">Overview</a><a href="install.html">Install</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html">Monte Carlo</a></nav>
+  <nav class="topnav" aria-label="Guide sections"><a href="index.html" aria-current="page">Overview</a><a href="install.html">Install</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html">Monte Carlo</a><a href="digital.html">Digital</a></nav>
 </div></header>
 <div class="wrap">
 <header class="hero">
+  <div class="funding"><img src="img/miciu_aei.png" alt="Ministerio de Ciencia, Innovación y Universidades and Agencia Estatal de Investigación" width="1600" height="393"><p>Project PID2025-170062NB (MemFRAME) funded by <span class="nw">MICIU/AEI/<a href="https://doi.org/10.13039/501100011033">10.13039/501100011033</a></span></p></div>
   <div class="eyebrow">openMemristorPDK · beginner's guide</div>
   <h1>Design with memristors, step by step</h1>
   <p class="lede">A hands-on guide to openMemristorPDK, a small chip-design kit for memristors built with openPDKcreator. Every step shows a real screenshot of what to click, from installing the tools to simulating a memristor and looking at its layout. No chip-design experience needed.</p>
@@ -64,10 +65,16 @@
     <span class="no">SECTION 5</span><h3>Corners and Monte Carlo</h3><p>Simulate the TT/FF/SS process corners, then a Monte Carlo run where Ron, Roff and the oxide thickness vary from device to device.</p>
     <span class="meta"><span class="pill ready">Ready</span>about 15 min · 41 steps</span>
   </a>
+  <a class="card" href="digital.html">
+    <span class="no">SECTION 6</span><h3>The digital side</h3><p>How a memristor stores a bit, what digital tools need from the PDK, and a plan for memories built from memristors.</p>
+    <span class="meta"><span class="pill draft">Draft</span>draft, no steps yet</span>
+  </a>
   </div>
 </section>
 <footer>
   <p>Every screenshot was taken from the real programs with real mouse clicks: openPDKcreator, xschem, ngspice with OpenVAF-compiled models and KLayout, inside the IIC-OSIC-TOOLS container. The capture scripts are in <code>docs/for_dummies/_capture/</code>.</p>
+  <p>Created by R. Picos (<a href="mailto:rpicos.uib@gmail.com">rpicos.uib@gmail.com</a> / <a href="mailto:rodrigo.picos@uib.es">rodrigo.picos@uib.es</a>), as part of the research project <b>MemFRAME</b>.</p>
+  <div class="funding"><img src="img/miciu_aei.png" alt="Ministerio de Ciencia, Innovación y Universidades and Agencia Estatal de Investigación" width="1600" height="393"><p>Project PID2025-170062NB (MemFRAME) funded by <span class="nw">MICIU/AEI/<a href="https://doi.org/10.13039/501100011033">10.13039/501100011033</a></span></p></div>
   <p><a href="https://github.com/rpicos-uib/openMemristorPDK">openMemristorPDK</a> · <a href="https://github.com/rpicos-uib/openpdkcreator-toolkit">openPDKcreator</a> · Apache License 2.0</p>
 </footer>
 </div>

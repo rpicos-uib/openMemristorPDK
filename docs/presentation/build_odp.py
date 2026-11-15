@@ -113,13 +113,17 @@ def add_image(page, path, x, y, max_w, max_h):
 
 def title_slide():
     page = new_page()
-    f = Frame(stylename=fs_plain, width=f"{PAGE_W-4}cm", height="6cm", x="2cm", y="4.5cm")
+    f = Frame(stylename=fs_plain, width=f"{PAGE_W-4}cm", height="8cm", x="2cm", y="3.5cm")
     page.addElement(f)
     tb = TextBox()
     f.addElement(tb)
     tb.addElement(P(stylename=st_title, text="openMemristorPDK"))
     tb.addElement(P(stylename=st_heading, text="Layout, Extraction, LVS, DRC and Simulation"))
     tb.addElement(P(stylename=st_subtitle, text="A real, step-by-step walkthrough -- memristor_tio2_au, built and verified end to end with OpenPDKCreator"))
+    tb.addElement(P(stylename=st_subtitle, text=""))
+    tb.addElement(P(stylename=st_subtitle, text="R. Picos · rpicos.uib@gmail.com / rodrigo.picos@uib.es"))
+    tb.addElement(P(stylename=st_subtitle, text="Project PID2025-170062NB (MemFRAME) funded by MICIU/AEI/10.13039/501100011033"))
+    add_image(page, os.path.join(HERE, "figures", "miciu_aei.png"), 2, 12.2, 11, 2.7)
     return page
 
 
@@ -215,7 +219,7 @@ step_slide(
     "Step 6 -- Set up Magic Tech: planes and types",
     [
         "Technology -> Magic Tech -> Planes/Types sub-tabs.",
-        "3 real planes (botmetal/oxide/topmetal); each of 6 real types reassigned to its own real plane -- the real prerequisite for drawing a true, physically-stacked device.",
+        "3 real planes (botmetal/oxide/topmetal); each of 6 device types reassigned to its own real plane -- the real prerequisite for drawing a true, physically-stacked device. (A seventh type, via1 on botmetal, was added later with the via fix.)",
     ],
     [f"{FIG}/memristor_step6_planes.png", f"{FIG}/memristor_step6_types.png"],
     caption="Left: Planes sub-tab (planes:3 types:6). Right: Types sub-tab, each type on its own real plane.",

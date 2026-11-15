@@ -21,7 +21,9 @@
 
 \title{openMemristorPDK: Digital-Flow Views, Step by Step}
 \subtitle{Real Verilog/CDL/SPICE/Liberty views, layout extraction/LVS/DRC, and a real per-instance view switch}
-\author{}
+\author{R.~Picos\\{\small\texttt{rpicos.uib@gmail.com} / \texttt{rodrigo.picos@uib.es}}}
+\institute{Project PID2025-170062NB (MemFRAME) funded by\\MICIU/AEI/10.13039/501100011033}
+\titlegraphic{\includegraphics[height=1.1cm]{figures/miciu_aei.png}}
 \date{}
 
 \begin{document}
@@ -200,7 +202,9 @@ from-scratch project with none of its own).
 Left: the real Planes sub-tab, 3 real planes (\texttt{botmetal}/
 \texttt{oxide}/\texttt{topmetal}), summary line confirming
 \texttt{planes:3 types:6}. Right: the real Types sub-tab, each of the
-6 real types reassigned to its own real plane.
+6 device types reassigned to its own real plane. (A seventh type,
+\texttt{via1} on \texttt{botmetal}, was added later with the via fix
+-- Step 7 of the first deck.)
 \end{frame}
 
 % ---------------------------------------------------------------

@@ -243,5 +243,23 @@ a.card:hover { border-color: var(--trace); }
 .pill { font-family: var(--mono); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; border-radius: 999px; padding: .15rem .55rem; }
 .pill.ready { background: var(--trace-soft); color: var(--trace); }
 .pill.soon { background: var(--warn-soft); color: var(--warn-ink); }
+.pill.draft { background: var(--warn-soft); color: var(--warn-ink); border: 1px dashed currentColor; }
+.draftnote { background: var(--warn-soft); color: var(--warn-ink); border: 1px dashed currentColor; border-radius: 8px; padding: .8rem 1rem; margin: 1rem 0; }
+.draftnote strong { font-family: var(--mono); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; margin-right: .5rem; }
+.views { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .95rem; }
+.views th, .views td { text-align: left; vertical-align: top; padding: .5rem .6rem; border-bottom: 1px solid var(--line); }
+.views th { font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; }
+.tablewrap { overflow-x: auto; }
+.figure { margin: 1rem 0; }
+.figure img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.figure figcaption { font-size: .9rem; margin-top: .4rem; }
 .card.soon { border-style: dashed; }
 .card.soon h3 { color: var(--muted); }
+
+/* Funding acknowledgement (AEI publicity rules: every page; top of the home page) */
+.funding { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1.1rem; }
+.funding img { height: 52px; width: auto; max-width: 100%; background: #fff; border-radius: 4px; }
+.funding p { margin: 0; font-size: .88rem; color: var(--muted); max-width: 64ch; }
+.hero > .funding { margin-bottom: .5rem; }
+footer .funding { margin-top: .75rem; }
+.funding .nw { white-space: nowrap; }

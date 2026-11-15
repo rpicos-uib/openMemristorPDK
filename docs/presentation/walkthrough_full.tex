@@ -30,7 +30,9 @@
 
 \title{Building openMemristorPDK, Step by Step}
 \subtitle{A bare-minimum, multi-material memristor PDK -- every real step, in order, through openPDKcreator's own GUI}
-\author{}
+\author{R.~Picos\\{\small\texttt{rpicos.uib@gmail.com} / \texttt{rodrigo.picos@uib.es}}}
+\institute{Project PID2025-170062NB (MemFRAME) funded by\\MICIU/AEI/10.13039/501100011033}
+\titlegraphic{\includegraphics[height=1.1cm]{figures/miciu_aei.png}}
 \date{}
 
 \begin{document}
@@ -40,8 +42,9 @@
 % ---------------------------------------------------------------
 \begin{frame}{What gets built}
 \begin{itemize}
-  \item A real, from-scratch technology: 6 GDS layers, 3 Magic
-        planes/6 types, 4 DRC rules.
+  \item A real, from-scratch technology: 7 GDS layers (6 device
+        layers plus a via), 3 Magic planes/7 types, 4 DRC rules (a
+        fifth is added in Step 10).
   \item 4 real LEF macros -- two switching-oxide materials
         (TiO$_2$, HfO$_2$), three top-electrode metals (Au, Ti, Al),
         bottom electrode always Au -- each with real drawn port
@@ -143,6 +146,8 @@ Name & GDS layer/dt & Purpose & Role \\
 BE\_Au.drawing & 10/0 & drawing & Bottom electrode (Au, always) \\
 MEM\_TiO2.drawing & 11/0 & drawing & TiO$_2$ switching oxide \\
 MEM\_HfO2.drawing & 12/0 & drawing & HfO$_2$ switching oxide \\
+VIA1.drawing & 15/0 & drawing & Via BE$\leftrightarrow$TE, for
+  interconnect only (Step 7) \\
 TE\_Au.drawing & 20/0 & drawing & Top electrode (Au) \\
 TE\_Ti.drawing & 21/0 & drawing & Top electrode (Ti) \\
 TE\_Al.drawing & 22/0 & drawing & Top electrode (Al) \\
@@ -160,7 +165,8 @@ qualified process.
 \includegraphics[width=0.62\textwidth]{figures/walkthrough_step4_layers.png}
 \end{center}
 \footnotesize
-The real Layers tab: all 6 real layers, correct GDS layer/datatype
+The real Layers tab with the 6 device layers (taken before
+\texttt{VIA1.drawing} was added), correct GDS layer/datatype
 numbers, and a real, live ``Stack cross-section'' diagram built from
 them -- \texttt{BE\_Au.drawing} selected on the right with its own
 real GDS layer \#10, datatype \#0.
@@ -173,7 +179,7 @@ Edited Layers}:
 \begin{center}
 \texttt{export/openmemristorpdk/libs.tech/klayout/tech/openmemristorpdk.lyp}
 \end{center}
-A real, valid, open\_pdks-format KLayout layer file with all 6 real
+A real, valid, open\_pdks-format KLayout layer file with all 7 real
 \texttt{<properties>} blocks above.
 \end{frame}
 
@@ -181,7 +187,7 @@ A real, valid, open\_pdks-format KLayout layer file with all 6 real
 \begin{frame}[fragile]{Step 6 -- Magic Tech: planes and types}
 Technology $\to$ Magic Tech $\to$ type a new path $\to$ \textbf{New
 .tech File...}, then \textbf{New Plane} $\times$3 and \textbf{New
-Type} $\times$6. Three planes, not one shared ``metal'' plane -- a
+Type} $\times$7. Three planes, not one shared ``metal'' plane -- a
 real vertical BE/oxide/TE stack needs each level on its own real
 Magic plane, or the bottom and top electrodes could never physically
 overlap in one real layout (two types on the \emph{same} plane are
@@ -191,7 +197,7 @@ mutually exclusive at a given $(x,y)$):
 \toprule
 Plane & Short code & Types on this plane \\
 \midrule
-botmetal & bm & be\_au \\
+botmetal & bm & be\_au, via1 \\
 oxide & oxd & mem\_tio2, mem\_hfo2 \\
 topmetal & tm & te\_au, te\_ti, te\_al \\
 \bottomrule
@@ -215,14 +221,15 @@ where they're actually used.
 \end{center}
 \footnotesize
 Left: the real Planes sub-tab, all 3 real planes. Right: the real
-Types sub-tab, all 6 real types each on their own real plane.
+Types sub-tab with the 6 device types, each on its own real plane
+(the seventh, \texttt{via1}, is added the same way -- see Step 7).
 \end{frame}
 
 % ---------------------------------------------------------------
 \begin{frame}[fragile]{Step 7 -- Magic Tech: Contacts, Aliases, Compose}
-Same Magic Tech tab, three more real sub-tabs -- each genuinely small
-for this project, but real, confirmed Magic syntax throughout (New
-Contact/New Alias/New Statement):
+Same Magic Tech tab, three more real sub-tabs (New Contact/New
+Alias/New Statement). First add one more type on the Types sub-tab,
+\texttt{via1} on \texttt{botmetal}, its own type, not an alias:
 \begin{center}
 \begin{tabularx}{\textwidth}{lX}
 \toprule
@@ -230,30 +237,31 @@ Sub-tab & Real entry \\
 \midrule
 Contacts & \texttt{via1 be\_au te\_au} -- a real via between the
   metal1-equivalent and metal2-equivalent layers, matching IHP's own
-  real \texttt{via\emph{N} metal\emph{N} metal\emph{N+1}} convention;
-  for real interconnect elsewhere on the chip, not through the active
-  device stack \\
+  real \texttt{via\emph{N} metal\emph{N} metal\emph{N+1}} convention.
+  Only where \texttt{via1} is \emph{drawn} do BE and TE connect; a
+  plain BE/TE overlap (the memristor stack) stays two layers \\
 Aliases & \texttt{m1} $\to$ \texttt{be\_au}, \texttt{m2} $\to$
-  \texttt{te\_au} -- shorthand matching the metal1/metal2-style
-  convention Styles already establishes \\
-Compose & \texttt{active\_tio2 = te\_au AND mem\_tio2} -- the real
-  top-electrode/oxide overlap, mirroring IHP's own real
-  \texttt{nfet = poly AND ndiff} pattern \\
+  \texttt{te\_au}, \texttt{active\_tio2} $\to$ \texttt{mem\_tio2} --
+  shorthand only \\
+Compose & \emph{empty} -- deliberately no rules \\
 \bottomrule
 \end{tabularx}
 \end{center}
 \footnotesize
-A real via needs no separate Connect rule of its own -- Magic derives
-the electrical connection from the geometric overlap the Contacts
-entry itself declares. Two real, live-checked Magic constraints, not
-guessed: an Alias's own first name must be new (real Magic rejects
-\texttt{be\_au m1} -- ``shadows a defined type'' -- the correct real
-order is \texttt{m1 be\_au}), and \textbf{Contacts must be declared
-before Aliases} in the real file (Magic's own real, enforced section
-order), with \texttt{via1} itself given as a second real alias
-directly on \texttt{be\_au}'s own Types-section line so Contacts can
-resolve it. Both confirmed by loading this exact real file through
-real Magic, zero section errors.
+Two earlier versions of this file looked fine and were wrong, and both
+erased every memristor's top electrode in Magic and in the exported
+GDS: \texttt{botmetal be\_au,via1} made \texttt{via1} a mere alias of
+\texttt{be\_au}, so the Contacts rule turned \emph{every} BE/TE overlap
+into a via; and \texttt{compose active\_tio2 te\_au mem\_tio2} merged
+TE\_Au drawn over TiO$_2$ into the oxide. The fix: \texttt{via1} as a
+separate type (style \texttt{via2}, GDS layer \texttt{VIA1} 15/0, added
+to the \texttt{.lyp} as \texttt{VIA1.drawing}), and no Compose rules.
+Live-checked Magic constraints: an Alias's first name must be new
+(\texttt{be\_au m1} is rejected -- ``shadows a defined type''), and
+Contacts come before Aliases in the file. Loading this exact file in
+Magic gives zero section errors, and every memristor exports BE, oxide
+and TE to GDS (\texttt{tests/test\_magic\_aliases\_compose.py},
+\texttt{tests/test\_memristor\_devices\_lvs.py}).
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -367,7 +375,10 @@ every real mismatch either way:
 Real, live: \textbf{Copy to DRC Rules} on the \texttt{te\_ti} width
 check -- the real confirmation names the new rule
 \texttt{TE\_Ti.drawing.W.1}, and the DRC Rules tab's own tree picks it
-up immediately, no second click.
+up immediately, no second click. It is a saved edit
+(\texttt{saves/openmemristorpdk.yaml}): \texttt{custom\_rules.drc}
+as shipped still holds the 4 rules of Step 9 until
+\textbf{Export Edited DRC Rules} is run again.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -484,8 +495,10 @@ physics next.
 \end{center}
 \footnotesize
 The real User Models tab, after Step 15 is repeated once per real
-cell: all 5 real Verilog/Verilog-A modules found under
-\texttt{user\_models/}, each auto-matched (\texttt{Rescan}/
+cell: the 4 real Verilog-A modules found under
+\texttt{user\_models/veriloga/} (plus \texttt{memristor\_tio2\_au.v},
+which comes from the digital deck -- the screenshot was taken after
+it existed), each auto-matched (\texttt{Rescan}/
 \textbf{Link All Auto-Matches}) to its own real cell by name.
 \end{frame}
 

@@ -1,0 +1,178 @@
+<section class="chapter" id="bit">
+  <header>
+    <div class="eyebrow">Part 1 · the idea</div>
+    <h2>One memristor, one bit</h2>
+    <p>Computers store everything as <b>bits</b>, zeros and ones. A memristor can hold a bit without any power, because its resistance stays where you left it. That is the whole "digital side" of a memristor: it is a tiny, non-volatile memory cell, the idea behind <em>RRAM</em> (resistive RAM).</p>
+  </header>
+  <article class="step">
+    <div class="step-head"><span class="num">1</span><h3>Bit 0 and bit 1</h3></div>
+    <dl class="explain">
+      <dt>bit 1</dt><dd>The memristor is <b>on</b>: low resistance (Ron), a lot of current flows.</dd>
+      <dt>bit 0</dt><dd>The memristor is <b>off</b>: high resistance (Roff), very little current flows.</dd>
+      <dt>write 1 (SET)</dt><dd>A short, <b>big positive</b> voltage pulse switches it on.</dd>
+      <dt>write 0 (RESET)</dt><dd>A short, <b>big negative</b> pulse switches it off.</dd>
+      <dt>read</dt><dd>A <b>small</b> voltage, too small to switch anything. Measure the current: big means 1, small means 0.</dd>
+    </dl>
+  </article>
+  <article class="step">
+    <div class="step-head"><span class="num">2</span><h3>A real simulation: write, read, erase, read</h3></div>
+    <p class="do">The Au/HfO₂/Al memristor from <a href="add-device.html">Add a new device</a> is the best one for this: it only changes above +0.8 V or below −0.6 V, so a 0.2 V read can never change the bit by accident. Here it is in ngspice, with the same compiled model as the other sections.</p>
+    <figure class="figure">
+      <img src="img/g01_bit_cycle.png" alt="Top: voltage pulses read 0.2 V, write 1.2 V, read, write -1.0 V, read. Bottom: read current 4 uA, then 400 uA after the write 1, then 4 uA again after the write 0." loading="lazy">
+      <figcaption>Top: the voltage the circuit applies. Bottom: the current that flows (log scale). Reads give 4 µA, then 400 µA, then 4 µA again.</figcaption>
+    </figure>
+    <div class="see"><strong>What it shows</strong>
+      <span>Before writing: 4 µA → bit 0. After "write 1": 400 µA → bit 1. After "write 0": 4 µA → bit 0 again.</span>
+      <span>A factor of 100 between 0 and 1: easy for a circuit to tell apart.</span>
+      <span>Between the pulses the voltage is 0 and nothing changes: the bit is remembered.</span>
+    </div>
+    <div class="file">
+      <div class="fname"><span>the netlist used</span><span>ngspice</span></div>
+<pre>one memristor as one bit
+.model mm memristor_hfo2_al x0=0
+n1 te 0 mm
+* read 0.2 V, write 1 (SET +1.2 V), read, write 0 (RESET -1.0 V), read
+vte te 0 pwl(0 0  10n 0.2  90n 0.2  100n 0  110n 1.2  190n 1.2  200n 0
++ 210n 0.2  290n 0.2  300n 0  310n -1.0  390n -1.0  400n 0  410n 0.2  490n 0.2  500n 0)
+.control
+pre_osdi /foss/designs/openMemristorPDK/user_models/veriloga/memristor_hfo2_al.osdi
+tran 0.5n 500n
+let imem = -vte#branch*1e6
+meas tran r0 avg imem from=40n to=80n
+meas tran r1 avg imem from=240n to=280n
+meas tran r2 avg imem from=440n to=480n
+.endc
+.end</pre>
+    </div>
+    <div class="oops"><strong>Note for us</strong><span>The erase takes about 70 ns instead of about 12 ns. The model's internal state keeps growing after the device is fully on, and has to come back down first. It's the same model quirk as in the TiO₂ models (the clamp is outside <code>idt</code>). Worth fixing in the models before we take screenshots for this section.</span></div>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="views">
+  <header>
+    <div class="eyebrow">Part 2 · what digital tools need</div>
+    <h2>The memristor seen by digital tools</h2>
+    <p>Digital chip tools don't simulate currents. They work with blocks that have pins, a size and a speed. For them a memristor is a <b>black box</b> with two pins, BE and TE. The PDK already has every file they would ask for, made with the Library Manager (see the second slide deck, <code>digital_aspects.tex</code>).</p>
+  </header>
+  <article class="step">
+    <div class="step-head"><span class="num">3</span><h3>Five files, five readers</h3></div>
+    <div class="tablewrap"><table class="views">
+      <thead><tr><th>View</th><th>File (for memristor_hfo2_al)</th><th>Who reads it</th><th>In this PDK</th></tr></thead>
+      <tbody>
+        <tr><td>Verilog</td><td><code>user_models/verilog/memristor_hfo2_al.v</code></td><td>Digital simulators (Icarus Verilog) and synthesis (Yosys): "this block exists, with these pins"</td><td>Pins only, no behaviour</td></tr>
+        <tr><td>Liberty</td><td><code>libraries/openmemristorpdk_pr/memristor_hfo2_al.lib</code></td><td>Synthesis and timing tools (Yosys, OpenSTA): how fast and how power-hungry a block is</td><td>Pins only, no timing</td></tr>
+        <tr><td>LEF</td><td><code>libs.ref/openmemristorpdk_pr/lef/openmemristorpdk_pr.lef</code></td><td>Place-and-route (OpenROAD, LibreLane): the block's size and where its pins are</td><td>Complete (1 × 1 µm)</td></tr>
+        <tr><td>CDL</td><td><code>libraries/openmemristorpdk_pr/memristor_hfo2_al.cdl</code></td><td>LVS (Netgen): checks the layout matches the circuit</td><td>Complete</td></tr>
+        <tr><td>GDS</td><td><code>libraries/openmemristorpdk_pr/memristor_hfo2_al.gds</code></td><td>The factory: the actual shapes to build</td><td>Complete</td></tr>
+      </tbody>
+    </table></div>
+    <div class="two">
+      <div class="file">
+        <div class="fname"><span>memristor_hfo2_al.v</span><span>Verilog</span></div>
+<pre>module memristor_hfo2_al(BE, TE);
+  inout BE;
+  inout TE;
+
+endmodule</pre>
+      </div>
+      <div class="file">
+        <div class="fname"><span>memristor_hfo2_al.lib</span><span>Liberty</span></div>
+<pre>library (memristor_hfo2_al) {
+  cell (memristor_hfo2_al) {
+    pin (BE) {
+      direction : inout;
+    }
+    pin (TE) {
+      direction : inout;
+    }
+  }
+}</pre>
+      </div>
+    </div>
+    <div class="see"><strong>Why so empty?</strong><span>A memristor has no clock and no logic function, so Liberty's usual "delay from input to output" doesn't describe it. Real memory chips solve this by wrapping the memristors in a <em>memory macro</em> (array + the circuits that write and read it), and only the macro gets real Verilog and Liberty views.</span></div>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="array">
+  <header>
+    <div class="eyebrow">Part 3 · many bits</div>
+    <h2>From one bit to a memory</h2>
+    <p>One bit isn't much. Put memristors where rows and columns of wire cross and you get a <b>crossbar</b>: 4 bits in a 2 × 2 grid, 16 in 4 × 4. The PDK already has both, <code>crossbar2x2_tio2_au</code> and <code>crossbar4x4_tio2_au</code>, with layouts checked by DRC and LVS (see the crossbar slide decks).</p>
+  </header>
+  <article class="step">
+    <div class="step-head"><span class="num">4</span><h3>How you pick one bit</h3></div>
+    <p class="do">To write or read one bit, you put the voltage on <b>its row</b> and ground <b>its column</b>. Only that crossing sees the full voltage.</p>
+    <div class="oops"><strong>The catch: sneak paths</strong><span>Current can also sneak around through the neighbours (row → other device → other column → …). Writing one bit can disturb the others a little, and reading can be fooled. The crossbar slide decks show this happening in simulation. Real chips add a transistor (1T1R) or a selector to each bit to block those paths.</span></div>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="plan">
+  <header>
+    <div class="eyebrow">Part 4 · the plan</div>
+    <h2>What this section could become</h2>
+    <p>A proposal, in the order a beginner would meet it. Each item would get the same click-by-click treatment as sections 2–5.</p>
+  </header>
+  <article class="step">
+    <div class="step-head"><span class="num">A</span><h3>Store a bit in xschem</h3></div>
+    <p class="do">A new testbench, <code>memristor_hfo2_al_bit_tb</code>, with the pulse source above. Simulate, read 0, write 1, read 1, erase. The plot is the one in step 2.</p>
+  </article>
+  <article class="step">
+    <div class="step-head"><span class="num">B</span><h3>Write a pattern into the 2 × 2 crossbar</h3></div>
+    <p class="do">Write 1-0-0-1 into the four crossings, read them back, and see how much the sneak paths disturb the neighbours.</p>
+  </article>
+  <article class="step">
+    <div class="step-head"><span class="num">C</span><h3>A digital twin in Verilog</h3></div>
+    <p class="do">Give <code>memristor_hfo2_al.v</code> a behaviour (a 1-bit register: "set" pulse → 1, "reset" pulse → 0) and simulate it with Icarus Verilog. That's how digital designers would use the memristor without simulating currents.</p>
+  </article>
+  <article class="step">
+    <div class="step-head"><span class="num">D</span><h3>A memory controller with Yosys</h3></div>
+    <p class="do">A small Verilog block that decides which row and column to drive. Synthesize it with Yosys to see it become logic gates.</p>
+  </article>
+  <article class="step">
+    <div class="step-head"><span class="num">E</span><h3>The real bit-cell: 1T1R</h3></div>
+    <p class="do">One transistor plus one memristor per bit. This PDK has no transistors (on purpose), so the transistor would come from the IHP SG13G2 PDK that openPDKcreator already handles: a mixed schematic with parts from two PDKs.</p>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="questions">
+  <header>
+    <div class="eyebrow">Part 5 · to decide together</div>
+    <h2>Open questions</h2>
+    <p>Things to settle before turning this draft into steps with screenshots.</p>
+  </header>
+  <article class="step">
+    <div class="step-head"><span class="num">?</span><h3>Questions</h3></div>
+    <dl class="explain">
+      <dt>Goal</dt><dd>Is the aim to <em>understand</em> memories (items A–C, all simulation) or to go through a real digital flow too (D–E: synthesis, place-and-route, a second PDK)?</dd>
+      <dt>Device</dt><dd>Use the HfO₂ memristor for memory (clean thresholds, works as shown), and keep TiO₂ for the analog sections?</dd>
+      <dt>Models</dt><dd>Fix the <code>idt</code> clamp in all the Verilog-A models first? It changes the erase timing here and makes <code>x0</code> work. Section 2's plots would have to be re-shot.</dd>
+      <dt>Liberty</dt><dd>Leave the memristor's Liberty view as pins only, or invent a simple "memory macro" (e.g. the 2 × 2 crossbar plus its drivers) with real Verilog and Liberty views?</dd>
+      <dt>Crossbar</dt><dd>The crossbars use the TiO₂ device. Make an HfO₂ version for the memory examples?</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="words">
+  <header>
+    <div class="eyebrow">Glossary</div>
+    <h2>Words you'll meet</h2>
+  </header>
+  <article class="step">
+    <dl class="explain">
+      <dt>RRAM</dt><dd>Resistive RAM: memory that stores bits as the resistance of memristors.</dd>
+      <dt>non-volatile</dt><dd>Keeps its data without power (like a USB stick, unlike a computer's main RAM).</dd>
+      <dt>Verilog</dt><dd>A language to describe digital circuits as text.</dd>
+      <dt>synthesis</dt><dd>Turning a Verilog description into real logic gates (Yosys does this).</dd>
+      <dt>place and route</dt><dd>Deciding where every block goes on the chip and drawing the wires between them (OpenROAD, LibreLane).</dd>
+      <dt>Liberty (.lib)</dt><dd>A data sheet for tools: how fast, how much power, which pins.</dd>
+      <dt>LEF</dt><dd>A block's outline and pin positions, without the inside details.</dd>
+      <dt>1T1R</dt><dd>One transistor, one resistor (memristor): the usual RRAM bit-cell.</dd>
+      <dt>sneak path</dt><dd>An unwanted route for current through neighbouring cells of a crossbar.</dd>
+    </dl>
+  </article>
+</section>
