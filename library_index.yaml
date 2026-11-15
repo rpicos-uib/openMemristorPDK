@@ -217,3 +217,7 @@ entries:
   cell: memristor_tio2_au_mc_tb
   view_kind: xschem_schematic
   path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_tio2_au_mc_tb.sch
+- library: openmemristorpdk_pr
+  cell: memristor_hfo2_al_bit_tb
+  view_kind: xschem_schematic
+  path: /foss/designs/openMemristorPDK/libraries/openmemristorpdk_pr/memristor_hfo2_al_bit_tb.sch

@@ -6,7 +6,9 @@ the shared page frame (top bar, hero, "on this page", pager, footer,
 step player) and writes index.html with the introduction and the
 section index. To add a section: write _src/<slug>.html and add one
 entry to SECTIONS (status "soon" lists it on the index without a page;
-"draft" builds the page with a draft banner instead of the step player).
+"draft" builds the page with a draft banner; a draft that already has
+screenshot steps also gets the step player, and "draftnote" overrides
+the banner text).
 
     python3 docs/for_dummies/_build/build_pages.py
 """
@@ -93,12 +95,15 @@ SECTIONS = [
         "title": "The digital side",
         "short": "Digital",
         "status": "draft",
-        "time": "draft, no steps yet",
-        "desc": "How a memristor stores a bit, what digital tools need from the PDK, and a plan for "
-                "memories built from memristors.",
-        "lede": "A memristor can store a bit with no power at all. This draft shows one doing it in "
-                "simulation, lists the files digital tools need from the PDK, and proposes what to build next.",
-        "prereq": 'Easier after <a href="add-device.html">Add a new device</a>: it uses the Au/HfO₂/Al memristor.',
+        "time": "about 10 min · 26 steps · draft",
+        "desc": "Store a bit in a memristor and read it back, see what happens when a write is too weak, "
+                "then a draft plan for memories built from memristors.",
+        "lede": "A memristor can store a bit with no power at all. Write a 1 into the Au/HfO₂/Al memristor, "
+                "read it back, erase it, and find out why a write that is too weak does nothing.",
+        "prereq": 'Easier after <a href="add-device.html">Add a new device</a>: it uses the Au/HfO₂/Al memristor. '
+                  'Start with openPDKcreator open (steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).',
+        "draftnote": 'Parts 1–3 are finished, with a real screenshot for every click. Parts 4–6 are still a '
+                     'first draft we are working on together: ideas, a plan and open questions.',
     },
 ]
 
@@ -214,15 +219,23 @@ def section_page(i: int, s: dict) -> str:
     src = add_step_ids((HERE.parent / "_src" / f'{s["slug"]}.html').read_text(encoding="utf-8"))
     n = SECTIONS.index(s) + 1
     prereq = f'  <p class="prereq">{s["prereq"]}</p>\n' if s.get("prereq") else ""
+    # A draft can already contain real screenshot steps: then it gets the
+    # red-box hint and the step player too, plus its draft note.
+    draft = s["status"] == "draft"
+    has_steps = not draft or 'data-img="' in src
+    note = ""
+    if draft:
+        note = (f'  <p class="draftnote"><strong>Draft</strong> {s["draftnote"]}</p>'
+                if s.get("draftnote") else DRAFT_NOTE) + "\n"
     hero = (
         '<header class="hero">\n'
         f'  <div class="crumbs"><a href="index.html">Guide</a> · Section {n} · {s["time"]}</div>\n'
         f'  <h1>{s["title"]}</h1>\n'
         f'  <p class="lede">{s["lede"]}'
-        + ('' if s["status"] == "draft" else ' You only ever need to click whatever is inside the '
-           '<b class="ui">red box</b>, or type exactly what is in a black box.')
+        + (' You only ever need to click whatever is inside the '
+           '<b class="ui">red box</b>, or type exactly what is in a black box.' if has_steps else '')
         + '</p>\n'
-        f"{prereq}{DRAFT_NOTE if s['status'] == 'draft' else LEGEND}\n{on_this_page(src)}\n"
+        f"{prereq}{note}{LEGEND + chr(10) if has_steps else ''}{on_this_page(src)}\n"
         "</header>"
     )
     rs = ready()

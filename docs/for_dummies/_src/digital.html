@@ -2,7 +2,7 @@
   <header>
     <div class="eyebrow">Part 1 · the idea</div>
     <h2>One memristor, one bit</h2>
-    <p>Computers store everything as <b>bits</b>, zeros and ones. A memristor can hold a bit without any power, because its resistance stays where you left it. That is the whole "digital side" of a memristor: it is a tiny, non-volatile memory cell, the idea behind <em>RRAM</em> (resistive RAM).</p>
+    <p>Computers store everything as <b>bits</b>, zeros and ones. A memristor can hold a bit without any power, because its resistance stays where you left it. That is the whole "digital side" of a memristor: it is a tiny memory cell that keeps its data with the power off, the idea behind <em>RRAM</em> (resistive RAM).</p>
   </header>
   <article class="step">
     <div class="step-head"><span class="num">1</span><h3>Bit 0 and bit 1</h3></div>
@@ -13,50 +13,195 @@
       <dt>write 0 (RESET)</dt><dd>A short, <b>big negative</b> pulse switches it off.</dd>
       <dt>read</dt><dd>A <b>small</b> voltage, too small to switch anything. Measure the current: big means 1, small means 0.</dd>
     </dl>
+    <div class="see"><strong>Why the HfO₂ memristor</strong><span>The Au/HfO₂/Al memristor from <a href="add-device.html">Add a new device</a> only changes above +0.8 V or below −0.6 V. So a 0.2 V read can never change the bit by accident.</span></div>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="store">
+  <header>
+    <div class="eyebrow">Part 2 · about 5 minutes</div>
+    <h2>Store a bit and read it back</h2>
+    <p>A ready-made testbench writes a 1 into the memristor, reads it, writes a 0 and reads again. You'll run it and read the bit from the numbers ngspice prints.</p>
+  </header>
+  <article class="step" data-img="img/b01_click_libman.png" data-title="Open the Library Manager" data-do="Click the Library Manager tab.">
+    <div class="step-head"><span class="num">2</span><h3>Open the Library Manager</h3></div>
+    <p class="do">Click the <b class="ui">Library Manager</b> tab.</p>
+    <button class="shot" type="button"><img src="img/b01_click_libman.png" alt="The Library Manager tab boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b02_click_library.png" data-title="Pick the library" data-do="Click openmemristorpdk_pr in the Libraries list.">
+    <div class="step-head"><span class="num">3</span><h3>Pick the library</h3></div>
+    <p class="do">Click <b class="ui">openmemristorpdk_pr</b> in the Libraries list.</p>
+    <button class="shot" type="button"><img src="img/b02_click_library.png" alt="The openmemristorpdk_pr library row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b03_click_bit_tb.png" data-title="Pick the bit testbench" data-do="Click memristor_hfo2_al_bit_tb in the Cells list. tb is short for testbench: a circuit made only to try a device.">
+    <div class="step-head"><span class="num">4</span><h3>Pick the bit testbench</h3></div>
+    <p class="do">Click <b class="ui">memristor_hfo2_al_bit_tb</b> in the Cells list. <code>tb</code> is short for <em>testbench</em>: a circuit made only to try a device.</p>
+    <button class="shot" type="button"><img src="img/b03_click_bit_tb.png" alt="memristor_hfo2_al_bit_tb boxed in red in the Cells list" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b04_open_xschem.png" data-title="Open it in xschem" data-do="On the Schematic row, click Open in xschem.">
+    <div class="step-head"><span class="num">5</span><h3>Open it in xschem</h3></div>
+    <p class="do">On the <b>Schematic</b> row, click <b class="ui">Open in xschem</b>.</p>
+    <button class="shot" type="button"><img src="img/b04_open_xschem.png" alt="Open in xschem on the Schematic row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b05_testbench.png" data-title="The testbench" data-do="xschem shows the circuit: the memristor on the left, the voltage source V1 on the right (box 1), and the code block below. Box 2 holds the two write voltages.">
+    <div class="step-head"><span class="num">6</span><h3>The testbench</h3></div>
+    <p class="do">xschem shows the circuit: the memristor on the left, the voltage source <b>V1</b> on the right (box 1), and the code block below. Box 2 holds the two write voltages.</p>
+    <button class="shot" type="button"><img src="img/b05_testbench.png" alt="xschem with the bit testbench; V1 and its long pwl value boxed as 1, the vset and vreset lines boxed as 2" loading="lazy"></button>
+    <div class="tablewrap"><table class="views">
+      <thead><tr><th>Time</th><th>V1 gives</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>0–100 ns</td><td>0.2 V</td><td>read 1: what is stored at the start?</td></tr>
+        <tr><td>100–200 ns</td><td>vset = 1.2 V</td><td>write a 1 (SET)</td></tr>
+        <tr><td>200–300 ns</td><td>0.2 V</td><td>read 2</td></tr>
+        <tr><td>300–400 ns</td><td>vreset = −1.0 V</td><td>write a 0 (RESET)</td></tr>
+        <tr><td>400–500 ns</td><td>0.2 V</td><td>read 3</td></tr>
+      </tbody>
+    </table></div>
+    <dl class="explain">
+      <dt>pwl(...)</dt><dd><em>Piece-wise linear</em>: a list of time–voltage pairs, joined by straight lines. <code>110n {vset}</code> means "at 110 ns, be at vset".</dd>
+      <dt>ns</dt><dd>Nanosecond, a billionth of a second. The whole test takes half a microsecond.</dd>
+      <dt>x0=0</dt><dd>The memristor starts fully off, so the first read should say 0.</dd>
+      <dt>meas ... avg</dt><dd>Measures the average current during each read: <code>read1</code>, <code>read2</code>, <code>read3</code>.</dd>
+    </dl>
+  </article>
+  <article class="step" data-img="img/b06_netlist.png" data-title="Click Netlist" data-do="Click Netlist, top-right of the menu bar.">
+    <div class="step-head"><span class="num">7</span><h3>Click Netlist</h3></div>
+    <p class="do">Click <b class="ui">Netlist</b>, top-right of the menu bar.</p>
+    <button class="shot" type="button"><img src="img/b06_netlist.png" alt="Netlist boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b07_simulate.png" data-title="Click Simulate" data-do="Click Simulate and wait about 10 seconds.">
+    <div class="step-head"><span class="num">8</span><h3>Click Simulate</h3></div>
+    <p class="do">Click <b class="ui">Simulate</b> and wait about 10 seconds.</p>
+    <button class="shot" type="button"><img src="img/b07_simulate.png" alt="Simulate boxed in red; Netlist is green" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b08_result.png" data-title="Two plots and the console" data-do="Two plot windows open on the right, plus the ngspice window in the middle. The next three steps look at each one.">
+    <div class="step-head"><span class="num">9</span><h3>Two plots and the console</h3></div>
+    <p class="do">Two plot windows open on the right, plus the ngspice window in the middle. The next three steps look at each one.</p>
+    <button class="shot" type="button"><img src="img/b08_result.png" alt="xschem, the ngspice window and two plot windows: current on top, voltage below" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b09_voltage_plot.png" data-title="The voltage" data-do="The bottom plot shows what V1 does: three low steps (the reads) and two tall ones, up for the write 1 and down for the write 0.">
+    <div class="step-head"><span class="num">10</span><h3>The voltage</h3></div>
+    <p class="do">The bottom plot shows what V1 does: three low steps (the reads) and two tall ones, up for the write 1 and down for the write 0.</p>
+    <button class="shot" type="button"><img src="img/b09_voltage_plot.png" alt="Voltage plot: 0.2 V steps, a 1.2 V pulse at 100 to 200 ns and a -1.0 V pulse at 300 to 400 ns" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b10_current_plot.png" data-title="The current" data-do="The top plot shows the current through the memristor, in mA.">
+    <div class="step-head"><span class="num">11</span><h3>The current</h3></div>
+    <p class="do">The top plot shows the current through the memristor, in mA.</p>
+    <button class="shot" type="button"><img src="img/b10_current_plot.png" alt="Current plot: 2.4 mA during the write 1, 0.4 mA during read 2, a short dip to -1.4 mA when the write 0 starts, almost zero elsewhere" loading="lazy"></button>
+    <div class="see"><strong>How to read it</strong>
+      <span>Read 1 (0–100 ns): almost no current. The memristor is off.</span>
+      <span>Write 1: the current jumps to 2.4 mA as the memristor turns on.</span>
+      <span>Read 2: 0.4 mA. Same small read voltage as read 1, a hundred times more current: the memristor is now on.</span>
+      <span>Write 0: a short dip, then almost nothing as it turns off again.</span>
+      <span>Read 3: almost no current. Back to off.</span>
+    </div>
+    <figure class="figure">
+      <img src="img/g01_bit_cycle.png" alt="The same simulation drawn with a log scale for the current: the reads give 4 uA, then 400 uA, then 4 uA" loading="lazy">
+      <figcaption>The same run with the current on a <em>log scale</em>, where each line is ten times the one below: now the small reads show up too (4 µA, 400 µA, 4 µA).</figcaption>
+    </figure>
+  </article>
+  <article class="step" data-img="img/b11_console.png" data-title="Read the bit" data-do="Look at the end of the ngspice window: the three reads, in µA (microamps, millionths of an amp).">
+    <div class="step-head"><span class="num">12</span><h3>Read the bit</h3></div>
+    <p class="do">Look at the end of the ngspice window: the three reads, in µA (microamps, millionths of an amp).</p>
+    <button class="shot" type="button"><img src="img/b11_console.png" alt="ngspice: read 1 before any write 4 uA, read 2 after write 1 400 uA, read 3 after write 0 4 uA" loading="lazy"></button>
+    <div class="see"><strong>The rule</strong><span>More than 100 µA means <b>1</b>, less means <b>0</b>. So the bit was 0 at the start, 1 after writing a 1, and 0 again after writing a 0. Between the pulses the voltage was 0 and nothing changed: the memristor remembered.</span></div>
+  </article>
+  <article class="step" data-img="img/b12_quit_current.png" data-title="Close the current plot" data-do="Click Quit in the top plot window.">
+    <div class="step-head"><span class="num">13</span><h3>Close the current plot</h3></div>
+    <p class="do">Click <b class="ui">Quit</b> in the top plot window.</p>
+    <button class="shot" type="button"><img src="img/b12_quit_current.png" alt="Quit in the current plot window boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b13_quit_voltage.png" data-title="Close the voltage plot" data-do="Now the other plot window is in front. Click its Quit.">
+    <div class="step-head"><span class="num">14</span><h3>Close the voltage plot</h3></div>
+    <p class="do">Now the other plot window is in front. Click its <b class="ui">Quit</b>.</p>
+    <button class="shot" type="button"><img src="img/b13_quit_voltage.png" alt="Quit in the voltage plot window boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b14_quit_ngspice.png" data-title="Close the simulator" data-do="Click inside the white ngspice window, type quit and press Enter. Keep xschem open for part 3.">
+    <div class="step-head"><span class="num">15</span><h3>Close the simulator</h3></div>
+    <p class="do">Click inside the white ngspice window, type <code>quit</code> and press <kbd>Enter</kbd>. Keep xschem open for part 3.</p>
+    <button class="shot" type="button"><img src="img/b14_quit_ngspice.png" alt="The ngspice prompt boxed in red" loading="lazy"></button>
+  </article>
+</section>
+
+<!-- ================================================================ -->
+<section class="chapter" id="weak">
+  <header>
+    <div class="eyebrow">Part 3 · about 5 minutes</div>
+    <h2>A write that is too weak</h2>
+    <p>The memristor only switches on above +0.8 V. What happens if the write pulse is only 0.7 V? Change one number and find out.</p>
+  </header>
+  <article class="step" data-img="img/b15_edit_codeblock.png" data-title="Edit the code block" data-do="Double-click on the text of the code block, at the bottom of xschem.">
+    <div class="step-head"><span class="num">16</span><h3>Edit the code block</h3></div>
+    <p class="do"><b>Double-click</b> on the text of the code block, at the bottom of xschem.</p>
+    <button class="shot" type="button"><img src="img/b15_edit_codeblock.png" alt="The code block boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b16_edit_properties.png" data-title="The vset line" data-do="The Edit Properties box opens with the whole code block. The line to change is .param vset = 1.2.">
+    <div class="step-head"><span class="num">17</span><h3>The vset line</h3></div>
+    <p class="do">The <b>Edit Properties</b> box opens with the whole code block. The line to change is <code>.param vset = 1.2</code>.</p>
+    <button class="shot" type="button"><img src="img/b16_edit_properties.png" alt="Edit Properties with the .param vset = 1.2 line boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b17_end_of_line.png" data-title="Go to the end of the line" data-do="Click anywhere on the vset line, then press End. The cursor jumps to just after 1.2.">
+    <div class="step-head"><span class="num">18</span><h3>Go to the end of the line</h3></div>
+    <p class="do">Click anywhere on the <code>vset</code> line, then press <kbd>End</kbd>. The cursor jumps to just after <code>1.2</code>.</p>
+    <button class="shot" type="button"><img src="img/b17_end_of_line.png" alt="The 1.2 at the end of the vset line boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b18_type_07.png" data-title="Type 0.7" data-do="Press Backspace three times to delete 1.2, type 0.7 (box 1), then click OK (box 2).">
+    <div class="step-head"><span class="num">19</span><h3>Type 0.7</h3></div>
+    <p class="do">Press <kbd>Backspace</kbd> three times to delete <code>1.2</code>, type <code>0.7</code> (box 1), then click <b class="ui">OK</b> (box 2).</p>
+    <button class="shot" type="button"><img src="img/b18_type_07.png" alt="The vset line now ending in 0.7 boxed as 1, OK boxed as 2" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b19_netlist_simulate.png" data-title="Netlist, then Simulate" data-do="Click Netlist (1), then Simulate (2), and wait about 10 seconds.">
+    <div class="step-head"><span class="num">20</span><h3>Netlist, then Simulate</h3></div>
+    <p class="do">Click <b class="ui">Netlist</b> (1), then <b class="ui">Simulate</b> (2), and wait about 10 seconds.</p>
+    <button class="shot" type="button"><img src="img/b19_netlist_simulate.png" alt="Netlist boxed as 1, Simulate boxed as 2" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b20_weak_result.png" data-title="The new result" data-do="The same windows open again. The voltage plot now only reaches 0.7 V during the write 1.">
+    <div class="step-head"><span class="num">21</span><h3>The new result</h3></div>
+    <p class="do">The same windows open again. The voltage plot now only reaches 0.7 V during the write 1.</p>
+    <button class="shot" type="button"><img src="img/b20_weak_result.png" alt="xschem, the ngspice window and the two plots of the weak write" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b21_weak_current.png" data-title="No switching" data-do="Look at the current plot. Its scale is now in µA, not mA: the current stays tiny all the time.">
+    <div class="step-head"><span class="num">22</span><h3>No switching</h3></div>
+    <p class="do">Look at the current plot. Its scale is now in µA, not mA: the current stays tiny all the time.</p>
+    <button class="shot" type="button"><img src="img/b21_weak_current.png" alt="Current plot in microamps: 4 uA reads, 14 uA during the weak write, -20 uA during the write 0" loading="lazy"></button>
+    <div class="see"><strong>What happened</strong>
+      <span>0.7 V is below the +0.8 V threshold, so the memristor never switched on. It stayed a plain 50 kΩ resistor.</span>
+      <span>14 µA during the write is just Ohm's law: 0.7 V ÷ 50 000 Ω. Read 2 is 4 µA, the same as read 1.</span>
+    </div>
+  </article>
+  <article class="step" data-img="img/b22_weak_console.png" data-title="All reads say 0" data-do="The ngspice window confirms it: 4 µA, 4 µA, 4 µA. The write failed, so the bit stayed 0.">
+    <div class="step-head"><span class="num">23</span><h3>All reads say 0</h3></div>
+    <p class="do">The ngspice window confirms it: 4 µA, 4 µA, 4 µA. The write failed, so the bit stayed 0.</p>
+    <button class="shot" type="button"><img src="img/b22_weak_console.png" alt="ngspice: read 1 4 uA, read 2 4 uA, read 3 4 uA" loading="lazy"></button>
+    <div class="see"><strong>Why this matters</strong><span>Real memory chips must write with enough voltage, but they also must read with a small enough one. The gap between the two (0.2 V for reading, more than 0.8 V for writing) is what makes the memory safe.</span></div>
+    <div class="oops"><strong>Try it</strong><span>Before closing, try other values: <code>vset = 0.9</code> still writes a 1 (it switches more slowly); <code>vreset = -0.5</code> can't erase it. Each time: Edit, Netlist, Simulate, then close the plots and ngspice.</span></div>
   </article>
   <article class="step">
-    <div class="step-head"><span class="num">2</span><h3>A real simulation: write, read, erase, read</h3></div>
-    <p class="do">The Au/HfO₂/Al memristor from <a href="add-device.html">Add a new device</a> is the best one for this: it only changes above +0.8 V or below −0.6 V, so a 0.2 V read can never change the bit by accident. Here it is in ngspice, with the same compiled model as the other sections.</p>
-    <figure class="figure">
-      <img src="img/g01_bit_cycle.png" alt="Top: voltage pulses read 0.2 V, write 1.2 V, read, write -1.0 V, read. Bottom: read current 4 uA, then 400 uA after the write 1, then 4 uA again after the write 0." loading="lazy">
-      <figcaption>Top: the voltage the circuit applies. Bottom: the current that flows (log scale). Reads give 4 µA, then 400 µA, then 4 µA again.</figcaption>
-    </figure>
-    <div class="see"><strong>What it shows</strong>
-      <span>Before writing: 4 µA → bit 0. After "write 1": 400 µA → bit 1. After "write 0": 4 µA → bit 0 again.</span>
-      <span>A factor of 100 between 0 and 1: easy for a circuit to tell apart.</span>
-      <span>Between the pulses the voltage is 0 and nothing changes: the bit is remembered.</span>
-    </div>
-    <div class="file">
-      <div class="fname"><span>the netlist used</span><span>ngspice</span></div>
-<pre>one memristor as one bit
-.model mm memristor_hfo2_al x0=0
-n1 te 0 mm
-* read 0.2 V, write 1 (SET +1.2 V), read, write 0 (RESET -1.0 V), read
-vte te 0 pwl(0 0  10n 0.2  90n 0.2  100n 0  110n 1.2  190n 1.2  200n 0
-+ 210n 0.2  290n 0.2  300n 0  310n -1.0  390n -1.0  400n 0  410n 0.2  490n 0.2  500n 0)
-.control
-pre_osdi /foss/designs/openMemristorPDK/user_models/veriloga/memristor_hfo2_al.osdi
-tran 0.5n 500n
-let imem = -vte#branch*1e6
-meas tran r0 avg imem from=40n to=80n
-meas tran r1 avg imem from=240n to=280n
-meas tran r2 avg imem from=440n to=480n
-.endc
-.end</pre>
-    </div>
-    <div class="see"><strong>How fast?</strong><span>Writing a 1 takes about 15 ns once the pulse passes +0.8 V, and writing a 0 about the same once it passes −0.6 V: the memory stops at fully on or fully off, so it is ready to switch back straight away. (A ns, nanosecond, is a billionth of a second.)</span></div>
+    <div class="step-head"><span class="num">24</span><h3>Close the plots and the simulator</h3></div>
+    <p class="do">Same as steps 13–15: <b>Quit</b> in the top plot, <b>Quit</b> in the other one, then <code>quit</code> in the ngspice window.</p>
+  </article>
+  <article class="step" data-img="img/b23_close_xschem.png" data-title="Close xschem" data-do="Click the X at the top-right of the xschem window.">
+    <div class="step-head"><span class="num">25</span><h3>Close xschem</h3></div>
+    <p class="do">Click the <b class="ui">X</b> at the top-right of the xschem window.</p>
+    <button class="shot" type="button"><img src="img/b23_close_xschem.png" alt="xschem&#x27;s close button boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/b24_dont_save.png" data-title="Don&#x27;t save" data-do="xschem asks about UNSAVED data, because you changed vset. Click OK to close without saving: the testbench keeps vset = 1.2 for next time.">
+    <div class="step-head"><span class="num">26</span><h3>Don't save</h3></div>
+    <p class="do">xschem asks about <b>UNSAVED data</b>, because you changed vset. Click <b class="ui">OK</b> to close without saving: the testbench keeps <code>vset = 1.2</code> for next time.</p>
+    <button class="shot" type="button"><img src="img/b24_dont_save.png" alt="The UNSAVED data question with OK boxed in red" loading="lazy"></button>
   </article>
 </section>
 
 <!-- ================================================================ -->
 <section class="chapter" id="views">
   <header>
-    <div class="eyebrow">Part 2 · what digital tools need</div>
+    <div class="eyebrow">Part 4 · what digital tools need</div>
     <h2>The memristor seen by digital tools</h2>
     <p>Digital chip tools don't simulate currents. They work with blocks that have pins, a size and a speed. For them a memristor is a <b>black box</b> with two pins, BE and TE. The PDK already has every file they would ask for, made with the Library Manager (see the second slide deck, <code>digital_aspects.tex</code>).</p>
   </header>
   <article class="step">
-    <div class="step-head"><span class="num">3</span><h3>Five files, five readers</h3></div>
+    <div class="step-head"><span class="num">27</span><h3>Five files, five readers</h3></div>
     <div class="tablewrap"><table class="views">
       <thead><tr><th>View</th><th>File (for memristor_hfo2_al)</th><th>Who reads it</th><th>In this PDK</th></tr></thead>
       <tbody>
@@ -97,12 +242,12 @@ endmodule</pre>
 <!-- ================================================================ -->
 <section class="chapter" id="array">
   <header>
-    <div class="eyebrow">Part 3 · many bits</div>
+    <div class="eyebrow">Part 5 · many bits</div>
     <h2>From one bit to a memory</h2>
     <p>One bit isn't much. Put memristors where rows and columns of wire cross and you get a <b>crossbar</b>: 4 bits in a 2 × 2 grid, 16 in 4 × 4. The PDK already has both, <code>crossbar2x2_tio2_au</code> and <code>crossbar4x4_tio2_au</code>, with layouts checked by DRC and LVS (see the crossbar slide decks).</p>
   </header>
   <article class="step">
-    <div class="step-head"><span class="num">4</span><h3>How you pick one bit</h3></div>
+    <div class="step-head"><span class="num">28</span><h3>How you pick one bit</h3></div>
     <p class="do">To write or read one bit, you put the voltage on <b>its row</b> and ground <b>its column</b>. Only that crossing sees the full voltage.</p>
     <div class="oops"><strong>The catch: sneak paths</strong><span>Current can also sneak around through the neighbours (row → other device → other column → …). Writing one bit can disturb the others a little, and reading can be fooled. The crossbar slide decks show this happening in simulation. Real chips add a transistor (1T1R) or a selector to each bit to block those paths.</span></div>
   </article>
@@ -111,13 +256,13 @@ endmodule</pre>
 <!-- ================================================================ -->
 <section class="chapter" id="plan">
   <header>
-    <div class="eyebrow">Part 4 · the plan</div>
+    <div class="eyebrow">Part 6 · the plan (draft)</div>
     <h2>What this section could become</h2>
-    <p>A proposal, in the order a beginner would meet it. Each item would get the same click-by-click treatment as sections 2–5.</p>
+    <p>A proposal, in the order a beginner would meet it. Each item would get the same click-by-click treatment as parts 2 and 3.</p>
   </header>
   <article class="step">
     <div class="step-head"><span class="num">A</span><h3>Store a bit in xschem</h3></div>
-    <p class="do">A new testbench, <code>memristor_hfo2_al_bit_tb</code>, with the pulse source above. Simulate, read 0, write 1, read 1, erase. The plot is the one in step 2.</p>
+    <p class="do"><b>Done:</b> parts 2 and 3 above, with the testbench <code>memristor_hfo2_al_bit_tb</code>.</p>
   </article>
   <article class="step">
     <div class="step-head"><span class="num">B</span><h3>Write a pattern into the 2 × 2 crossbar</h3></div>
@@ -140,15 +285,14 @@ endmodule</pre>
 <!-- ================================================================ -->
 <section class="chapter" id="questions">
   <header>
-    <div class="eyebrow">Part 5 · to decide together</div>
+    <div class="eyebrow">To decide together</div>
     <h2>Open questions</h2>
-    <p>Things to settle before turning this draft into steps with screenshots.</p>
+    <p>Things to settle before turning the rest of this draft into steps with screenshots.</p>
   </header>
   <article class="step">
     <div class="step-head"><span class="num">?</span><h3>Questions</h3></div>
     <dl class="explain">
-      <dt>Goal</dt><dd>Is the aim to <em>understand</em> memories (items A–C, all simulation) or to go through a real digital flow too (D–E: synthesis, place-and-route, a second PDK)?</dd>
-      <dt>Device</dt><dd>Use the HfO₂ memristor for memory (clean thresholds, works as shown), and keep TiO₂ for the analog sections?</dd>
+      <dt>Goal</dt><dd>Is the aim to <em>understand</em> memories (items B–C, all simulation) or to go through a real digital flow too (D–E: synthesis, place-and-route, a second PDK)?</dd>
       <dt>Models</dt><dd>The HfO₂ model is fixed: its memory now starts at <code>x0</code> and stops at 0 and 1. The TiO₂ models still have the old problem. Fixing them changes nothing in sections 2, 3 and 5 if their testbenches start at <code>x0=0</code>, but about 60 screenshots show <code>x0=0.3</code> in xschem and would need re-shooting. When?</dd>
       <dt>Liberty</dt><dd>Leave the memristor's Liberty view as pins only, or invent a simple "memory macro" (e.g. the 2 × 2 crossbar plus its drivers) with real Verilog and Liberty views?</dd>
       <dt>Crossbar</dt><dd>The crossbars use the TiO₂ device. Make an HfO₂ version for the memory examples?</dd>

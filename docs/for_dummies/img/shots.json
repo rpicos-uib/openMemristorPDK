@@ -880,5 +880,201 @@
    1680,
    1019
   ]
+ },
+ "x_check": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b01_click_libman": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b02_click_library": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b03_click_bit_tb": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b04_open_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b05_raw": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b05_testbench": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b06_netlist": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b07_simulate": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b08_result": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b10_current_plot": {
+  "note": "",
+  "size": [
+   714,
+   544
+  ]
+ },
+ "b09_voltage_plot": {
+  "note": "",
+  "size": [
+   714,
+   544
+  ]
+ },
+ "b11_console": {
+  "note": "",
+  "size": [
+   373,
+   120
+  ]
+ },
+ "b12_quit_current": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b13_quit_voltage": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b14_quit_ngspice": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b15_edit_codeblock": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b16_raw": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b16_edit_properties": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b17_end_of_line": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b18_type_07": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b19_netlist_simulate": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b20_weak_result": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b21_weak_current": {
+  "note": "",
+  "size": [
+   714,
+   544
+  ]
+ },
+ "b22_weak_console": {
+  "note": "",
+  "size": [
+   373,
+   120
+  ]
+ },
+ "b23_close_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b24_raw": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "b24_dont_save": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
  }
 }
