@@ -95,14 +95,15 @@ SECTIONS = [
         "title": "The digital side",
         "short": "Digital",
         "status": "draft",
-        "time": "about 10 min · 26 steps · draft",
-        "desc": "Store a bit in a memristor and read it back, see what happens when a write is too weak, "
-                "then a draft plan for memories built from memristors.",
+        "time": "about 20 min · 47 steps · draft",
+        "desc": "Store a bit in a memristor, see a write that is too weak fail, write a pattern into a "
+                "2 × 2 crossbar, then a draft plan for memories built from memristors.",
         "lede": "A memristor can store a bit with no power at all. Write a 1 into the Au/HfO₂/Al memristor, "
-                "read it back, erase it, and find out why a write that is too weak does nothing.",
+                "read it back, erase it, find out why a write that is too weak does nothing, "
+                "then store four bits in a crossbar without disturbing the neighbours.",
         "prereq": 'Easier after <a href="add-device.html">Add a new device</a>: it uses the Au/HfO₂/Al memristor. '
                   'Start with openPDKcreator open (steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).',
-        "draftnote": 'Parts 1–3 are finished, with a real screenshot for every click. Parts 4–6 are still a '
+        "draftnote": 'Parts 1–4 are finished, with a real screenshot for every click. Parts 5 and 6 are still a '
                      'first draft we are working on together: ideas, a plan and open questions.',
     },
 ]

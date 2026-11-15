@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>The digital side · openMemristorPDK Guide</title>
-<meta name="description" content="Store a bit in a memristor and read it back, see what happens when a write is too weak, then a draft plan for memories built from memristors.">
+<meta name="description" content="Store a bit in a memristor, see a write that is too weak fail, write a pattern into a 2 × 2 crossbar, then a draft plan for memories built from memristors.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -18,11 +18,11 @@
 </div></header>
 <div class="wrap">
 <header class="hero">
-  <div class="crumbs"><a href="index.html">Guide</a> · Section 6 · about 10 min · 26 steps · draft</div>
+  <div class="crumbs"><a href="index.html">Guide</a> · Section 6 · about 20 min · 47 steps · draft</div>
   <h1>The digital side</h1>
-  <p class="lede">A memristor can store a bit with no power at all. Write a 1 into the Au/HfO₂/Al memristor, read it back, erase it, and find out why a write that is too weak does nothing. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
+  <p class="lede">A memristor can store a bit with no power at all. Write a 1 into the Au/HfO₂/Al memristor, read it back, erase it, find out why a write that is too weak does nothing, then store four bits in a crossbar without disturbing the neighbours. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
   <p class="prereq">Easier after <a href="add-device.html">Add a new device</a>: it uses the Au/HfO₂/Al memristor. Start with openPDKcreator open (steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).</p>
-  <p class="draftnote"><strong>Draft</strong> Parts 1–3 are finished, with a real screenshot for every click. Parts 4–6 are still a first draft we are working on together: ideas, a plan and open questions.</p>
+  <p class="draftnote"><strong>Draft</strong> Parts 1–4 are finished, with a real screenshot for every click. Parts 5 and 6 are still a first draft we are working on together: ideas, a plan and open questions.</p>
   <div class="hero-row">
     <button class="btn" type="button" id="play-all">▶ Play as video</button>
     <span class="legend">
@@ -31,7 +31,7 @@
       <span>Keys in the player: <kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd> <kbd>Esc</kbd></span>
     </span>
   </div>
-  <nav class="onpage" aria-label="On this page"><span>On this page:</span><a href="#bit">One memristor, one bit</a><a href="#store">Store a bit and read it back</a><a href="#weak">A write that is too weak</a><a href="#views">The memristor seen by digital tools</a><a href="#array">From one bit to a memory</a><a href="#plan">What this section could become</a><a href="#questions">Open questions</a><a href="#words">Words you'll meet</a></nav>
+  <nav class="onpage" aria-label="On this page"><span>On this page:</span><a href="#bit">One memristor, one bit</a><a href="#store">Store a bit and read it back</a><a href="#weak">A write that is too weak</a><a href="#crossbar">Write a pattern into a crossbar</a><a href="#views">The memristor seen by digital tools</a><a href="#plan">What this section could become</a><a href="#questions">Open questions</a><a href="#words">Words you'll meet</a></nav>
 </header>
 
 <section class="chapter" id="bit">
@@ -230,14 +230,156 @@
 </section>
 
 <!-- ================================================================ -->
+<section class="chapter" id="crossbar">
+  <header>
+    <div class="eyebrow">Part 4 · about 10 minutes</div>
+    <h2>Write a pattern into a crossbar</h2>
+    <p>One bit isn't much. Put memristors where rows and columns of wire cross and you get a <b>crossbar</b>: 4 bits in a 2 × 2 grid, 16 in 4 × 4. You'll write the pattern <b>1 0 / 0 1</b> into four HfO₂ memristors, read it back, and then see how a careless write ruins it.</p>
+  </header>
+  <article class="step" id="step-27">
+    <div class="step-head"><span class="num">27</span><h3>How you pick one cell</h3></div>
+    <p class="do">Each memristor sits between one <b>column</b> wire (its BE) and one <b>row</b> wire (its TE). It feels the column voltage minus the row voltage. To write one cell with 1.2 V, the testbench shares the voltage: <b>+0.6 V</b> on its column and <b>−0.6 V</b> on its row. All other wires stay at 0 V.</p>
+    <div class="tablewrap"><table class="views">
+      <thead><tr><th>Writing cell 11</th><th>Column</th><th>Row</th><th>It feels</th><th>Switches?</th></tr></thead>
+      <tbody>
+        <tr><td>cell 11 (the one we want)</td><td>+0.6 V</td><td>−0.6 V</td><td>1.2 V</td><td>yes</td></tr>
+        <tr><td>cell 12 (same row)</td><td>0 V</td><td>−0.6 V</td><td>0.6 V</td><td>no, below 0.8 V</td></tr>
+        <tr><td>cell 21 (same column)</td><td>+0.6 V</td><td>0 V</td><td>0.6 V</td><td>no, below 0.8 V</td></tr>
+        <tr><td>cell 22</td><td>0 V</td><td>0 V</td><td>0 V</td><td>no</td></tr>
+      </tbody>
+    </table></div>
+    <div class="see"><strong>The trick</strong><span>The neighbours only get <em>half</em> the write voltage, and half is below the +0.8 V threshold. That is why a memristor with a clear threshold, like the HfO₂ one, is good for memories.</span></div>
+  </article>
+  <article class="step" id="step-28" data-img="img/c01_click_crossbar_tb.png" data-title="Pick the crossbar testbench" data-do="In the Library Manager, with openmemristorpdk_pr still selected, click memristor_hfo2_al_crossbar2x2_tb in the Cells list.">
+    <div class="step-head"><span class="num">28</span><h3>Pick the crossbar testbench</h3></div>
+    <p class="do">In the Library Manager, with <b>openmemristorpdk_pr</b> still selected, click <b class="ui">memristor_hfo2_al_crossbar2x2_tb</b> in the Cells list.</p>
+    <button class="shot" type="button"><img src="img/c01_click_crossbar_tb.png" alt="memristor_hfo2_al_crossbar2x2_tb boxed in red in the Cells list" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-29" data-img="img/c02_open_xschem.png" data-title="Open it in xschem" data-do="On the Schematic row, click Open in xschem.">
+    <div class="step-head"><span class="num">29</span><h3>Open it in xschem</h3></div>
+    <p class="do">On the <b>Schematic</b> row, click <b class="ui">Open in xschem</b>.</p>
+    <button class="shot" type="button"><img src="img/c02_open_xschem.png" alt="Open in xschem on the Schematic row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-30" data-img="img/c03_testbench.png" data-title="The crossbar" data-do="Box 1 is the crossbar: two columns (be1, be2) going down, two rows (te1, te2) going across, and a memristor at each crossing, named after its row and column. Each wire has its own voltage source. Box 2 is how the write voltage is shared.">
+    <div class="step-head"><span class="num">30</span><h3>The crossbar</h3></div>
+    <p class="do">Box 1 is the crossbar: two columns (be1, be2) going down, two rows (te1, te2) going across, and a memristor at each crossing, named after its row and column. Each wire has its own voltage source. Box 2 is how the write voltage is shared.</p>
+    <button class="shot" type="button"><img src="img/c03_testbench.png" alt="xschem with the 2 by 2 crossbar boxed as 1 and the colpart, vcol and vrow lines boxed as 2" loading="lazy"></button>
+    <div class="tablewrap"><table class="views">
+      <thead><tr><th>Time</th><th>What happens</th></tr></thead>
+      <tbody>
+        <tr><td>0–100 ns</td><td>write a 1 into cell 11</td></tr>
+        <tr><td>100–200 ns</td><td>write a 1 into cell 22</td></tr>
+        <tr><td>200–600 ns</td><td>read cells 11, 12, 21 and 22, one every 100 ns, with 0.2 V on one column</td></tr>
+      </tbody>
+    </table></div>
+    <dl class="explain">
+      <dt>colpart</dt><dd>The part of the 1.2 V that goes on the column. 0.5 means half: <code>vcol</code> = +0.6 V, <code>vrow</code> = −0.6 V.</dd>
+      <dt>i1, i2</dt><dd>The current flowing out of row 1 and row 2, in µA. A read measures the row of the cell being read.</dd>
+    </dl>
+  </article>
+  <article class="step" id="step-31" data-img="img/c04_netlist_simulate.png" data-title="Netlist, then Simulate" data-do="Click Netlist (1), then Simulate (2), and wait about 10 seconds.">
+    <div class="step-head"><span class="num">31</span><h3>Netlist, then Simulate</h3></div>
+    <p class="do">Click <b class="ui">Netlist</b> (1), then <b class="ui">Simulate</b> (2), and wait about 10 seconds.</p>
+    <button class="shot" type="button"><img src="img/c04_netlist_simulate.png" alt="Netlist boxed as 1, Simulate boxed as 2" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-32" data-img="img/c05_result.png" data-title="The result" data-do="One plot window opens, plus the ngspice window.">
+    <div class="step-head"><span class="num">32</span><h3>The result</h3></div>
+    <p class="do">One plot window opens, plus the ngspice window.</p>
+    <button class="shot" type="button"><img src="img/c05_result.png" alt="xschem, the ngspice window and the read current plot" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-33" data-img="img/c06_plot.png" data-title="The read current" data-do="The plot shows only the four reads, 100 ns each: cell 11, 12, 21 and 22.">
+    <div class="step-head"><span class="num">33</span><h3>The read current</h3></div>
+    <p class="do">The plot shows only the four reads, 100 ns each: cell 11, 12, 21 and 22.</p>
+    <button class="shot" type="button"><img src="img/c06_plot.png" alt="Read current: about 0.4 mA from 200 to 300 ns, almost zero from 300 to 500 ns, 0.4 mA again from 500 to 600 ns" loading="lazy"></button>
+    <div class="see"><strong>How to read it</strong><span>High, low, low, high: <b>1 0 0 1</b>. The pattern is stored.</span></div>
+  </article>
+  <article class="step" id="step-34" data-img="img/c07_console.png" data-title="The four reads" data-do="The ngspice window prints them as a little 2 × 2 table, in µA.">
+    <div class="step-head"><span class="num">34</span><h3>The four reads</h3></div>
+    <p class="do">The ngspice window prints them as a little 2 × 2 table, in µA.</p>
+    <button class="shot" type="button"><img src="img/c07_console.png" alt="ngspice: row 1: cell 11 = 400 cell 12 = 4; row 2: cell 21 = 4 cell 22 = 400" loading="lazy"></button>
+    <div class="see"><strong>The pattern</strong><span>Row 1 reads 1 0, row 2 reads 0 1, exactly what was written. Cells 12 and 21 felt 0.6 V twice and didn't change.</span></div>
+    <div class="oops"><strong>Why ground the other wires?</strong><span>During a read, the unused row and column sit at 0 V. If they were left unconnected, current could <em>sneak</em> through the other memristors (column → cell → other row → cell → …) and make a 0 look like a 1. Real chips fight these <b>sneak paths</b> by grounding wires like here, or by adding a transistor to every cell (1T1R).</span></div>
+  </article>
+  <article class="step" id="step-35" data-img="img/c08_quit_plot.png" data-title="Close the plot" data-do="Click Quit in the plot window.">
+    <div class="step-head"><span class="num">35</span><h3>Close the plot</h3></div>
+    <p class="do">Click <b class="ui">Quit</b> in the plot window.</p>
+    <button class="shot" type="button"><img src="img/c08_quit_plot.png" alt="Quit in the plot window boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-36" data-img="img/c09_quit_ngspice.png" data-title="Close the simulator" data-do="Click inside the white ngspice window, type quit and press Enter. Keep xschem open.">
+    <div class="step-head"><span class="num">36</span><h3>Close the simulator</h3></div>
+    <p class="do">Click inside the white ngspice window, type <code>quit</code> and press <kbd>Enter</kbd>. Keep xschem open.</p>
+    <button class="shot" type="button"><img src="img/c09_quit_ngspice.png" alt="The ngspice prompt boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-37" data-img="img/c10_edit_codeblock.png" data-title="Edit the code block" data-do="Now the careless write. Double-click on the text of the code block.">
+    <div class="step-head"><span class="num">37</span><h3>Edit the code block</h3></div>
+    <p class="do">Now the careless write. <b>Double-click</b> on the text of the code block.</p>
+    <button class="shot" type="button"><img src="img/c10_edit_codeblock.png" alt="The code block boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-38" data-img="img/c11_edit_properties.png" data-title="The colpart line" data-do="The line to change is .param colpart = 0.5.">
+    <div class="step-head"><span class="num">38</span><h3>The colpart line</h3></div>
+    <p class="do">The line to change is <code>.param colpart = 0.5</code>.</p>
+    <button class="shot" type="button"><img src="img/c11_edit_properties.png" alt="Edit Properties with the .param colpart = 0.5 line boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-39" data-img="img/c12_end_of_line.png" data-title="Go to the end of the line" data-do="Click on the colpart line, then press End.">
+    <div class="step-head"><span class="num">39</span><h3>Go to the end of the line</h3></div>
+    <p class="do">Click on the <code>colpart</code> line, then press <kbd>End</kbd>.</p>
+    <button class="shot" type="button"><img src="img/c12_end_of_line.png" alt="The 0.5 at the end of the colpart line boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-40" data-img="img/c13_type_1.png" data-title="Type 1" data-do="Press Backspace three times, type 1 (box 1), then click OK (box 2). Now the whole 1.2 V goes on the column and the row stays at 0 V.">
+    <div class="step-head"><span class="num">40</span><h3>Type 1</h3></div>
+    <p class="do">Press <kbd>Backspace</kbd> three times, type <code>1</code> (box 1), then click <b class="ui">OK</b> (box 2). Now the whole 1.2 V goes on the column and the row stays at 0 V.</p>
+    <button class="shot" type="button"><img src="img/c13_type_1.png" alt="The colpart line now ending in 1 boxed as 1, OK boxed as 2" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-41" data-img="img/c14_netlist_simulate.png" data-title="Netlist, then Simulate" data-do="Click Netlist (1), then Simulate (2).">
+    <div class="step-head"><span class="num">41</span><h3>Netlist, then Simulate</h3></div>
+    <p class="do">Click <b class="ui">Netlist</b> (1), then <b class="ui">Simulate</b> (2).</p>
+    <button class="shot" type="button"><img src="img/c14_netlist_simulate.png" alt="Netlist boxed as 1, Simulate boxed as 2" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-42" data-img="img/c15_disturb_result.png" data-title="The new result" data-do="The same windows open again.">
+    <div class="step-head"><span class="num">42</span><h3>The new result</h3></div>
+    <p class="do">The same windows open again.</p>
+    <button class="shot" type="button"><img src="img/c15_disturb_result.png" alt="xschem, the ngspice window and the new read current plot" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-43" data-img="img/c16_disturb_plot.png" data-title="Every cell reads 1" data-do="Four high reads: 1 1 1 1. The two zeros are gone.">
+    <div class="step-head"><span class="num">43</span><h3>Every cell reads 1</h3></div>
+    <p class="do">Four high reads: <b>1 1 1 1</b>. The two zeros are gone.</p>
+    <button class="shot" type="button"><img src="img/c16_disturb_plot.png" alt="Read current: about 0.4 mA in all four reads" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-44" data-img="img/c17_disturb_console.png" data-title="What went wrong" data-do="ngspice agrees: 400 µA everywhere.">
+    <div class="step-head"><span class="num">44</span><h3>What went wrong</h3></div>
+    <p class="do">ngspice agrees: 400 µA everywhere.</p>
+    <button class="shot" type="button"><img src="img/c17_disturb_console.png" alt="ngspice: all four cells 400 uA" loading="lazy"></button>
+    <div class="see"><strong>Write disturb</strong>
+      <span>Writing cell 11 put 1.2 V on column 1. Cell 21 is on the same column, and its row was at 0 V, so it felt the full 1.2 V too and switched on.</span>
+      <span>Writing cell 22 did the same to cell 12. A write that only looks at the cell you want can change its neighbours: sharing the voltage between column and row is what keeps them safe.</span>
+    </div>
+    <div class="oops"><strong>Try it</strong><span><code>colpart = 0.75</code> puts 0.9 V on the column: just above the threshold, and the neighbours on the same column get written too. Every value between 0.34 and 0.66 keeps both neighbours below 0.8 V.</span></div>
+  </article>
+  <article class="step" id="step-45">
+    <div class="step-head"><span class="num">45</span><h3>Close the plot and the simulator</h3></div>
+    <p class="do">As in steps 35–36: <b>Quit</b> in the plot window, then <code>quit</code> in the ngspice window.</p>
+  </article>
+  <article class="step" id="step-46" data-img="img/c18_close_xschem.png" data-title="Close xschem" data-do="Click the X at the top-right of the xschem window.">
+    <div class="step-head"><span class="num">46</span><h3>Close xschem</h3></div>
+    <p class="do">Click the <b class="ui">X</b> at the top-right of the xschem window.</p>
+    <button class="shot" type="button"><img src="img/c18_close_xschem.png" alt="xschem&#x27;s close button boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-47" data-img="img/c19_dont_save.png" data-title="Don&#x27;t save" data-do="Click OK to close without saving: the testbench keeps colpart = 0.5.">
+    <div class="step-head"><span class="num">47</span><h3>Don't save</h3></div>
+    <p class="do">Click <b class="ui">OK</b> to close without saving: the testbench keeps <code>colpart = 0.5</code>.</p>
+    <button class="shot" type="button"><img src="img/c19_dont_save.png" alt="The UNSAVED data question with OK boxed in red" loading="lazy"></button>
+  </article>
+</section>
+
+<!-- ================================================================ -->
 <section class="chapter" id="views">
   <header>
-    <div class="eyebrow">Part 4 · what digital tools need</div>
+    <div class="eyebrow">Part 5 · what digital tools need</div>
     <h2>The memristor seen by digital tools</h2>
     <p>Digital chip tools don't simulate currents. They work with blocks that have pins, a size and a speed. For them a memristor is a <b>black box</b> with two pins, BE and TE. The PDK already has every file they would ask for, made with the Library Manager (see the second slide deck, <code>digital_aspects.tex</code>).</p>
   </header>
-  <article class="step" id="step-27">
-    <div class="step-head"><span class="num">27</span><h3>Five files, five readers</h3></div>
+  <article class="step" id="step-48">
+    <div class="step-head"><span class="num">48</span><h3>Five files, five readers</h3></div>
     <div class="tablewrap"><table class="views">
       <thead><tr><th>View</th><th>File (for memristor_hfo2_al)</th><th>Who reads it</th><th>In this PDK</th></tr></thead>
       <tbody>
@@ -276,20 +418,6 @@ endmodule</pre>
 </section>
 
 <!-- ================================================================ -->
-<section class="chapter" id="array">
-  <header>
-    <div class="eyebrow">Part 5 · many bits</div>
-    <h2>From one bit to a memory</h2>
-    <p>One bit isn't much. Put memristors where rows and columns of wire cross and you get a <b>crossbar</b>: 4 bits in a 2 × 2 grid, 16 in 4 × 4. The PDK already has both, <code>crossbar2x2_tio2_au</code> and <code>crossbar4x4_tio2_au</code>, with layouts checked by DRC and LVS (see the crossbar slide decks).</p>
-  </header>
-  <article class="step" id="step-28">
-    <div class="step-head"><span class="num">28</span><h3>How you pick one bit</h3></div>
-    <p class="do">To write or read one bit, you put the voltage on <b>its row</b> and ground <b>its column</b>. Only that crossing sees the full voltage.</p>
-    <div class="oops"><strong>The catch: sneak paths</strong><span>Current can also sneak around through the neighbours (row → other device → other column → …). Writing one bit can disturb the others a little, and reading can be fooled. The crossbar slide decks show this happening in simulation. Real chips add a transistor (1T1R) or a selector to each bit to block those paths.</span></div>
-  </article>
-</section>
-
-<!-- ================================================================ -->
 <section class="chapter" id="plan">
   <header>
     <div class="eyebrow">Part 6 · the plan (draft)</div>
@@ -302,7 +430,7 @@ endmodule</pre>
   </article>
   <article class="step" id="step-b">
     <div class="step-head"><span class="num">B</span><h3>Write a pattern into the 2 × 2 crossbar</h3></div>
-    <p class="do">Write 1-0-0-1 into the four crossings, read them back, and see how much the sneak paths disturb the neighbours.</p>
+    <p class="do"><b>Done:</b> part 4 above, with the testbench <code>memristor_hfo2_al_crossbar2x2_tb</code>. Still open: a read with the unused wires left unconnected, to see a sneak path turn a 0 into a 1.</p>
   </article>
   <article class="step" id="step-c">
     <div class="step-head"><span class="num">C</span><h3>A digital twin in Verilog</h3></div>
@@ -328,10 +456,10 @@ endmodule</pre>
   <article class="step" id="step-?">
     <div class="step-head"><span class="num">?</span><h3>Questions</h3></div>
     <dl class="explain">
-      <dt>Goal</dt><dd>Is the aim to <em>understand</em> memories (items B–C, all simulation) or to go through a real digital flow too (D–E: synthesis, place-and-route, a second PDK)?</dd>
+      <dt>Goal</dt><dd>Is the aim to <em>understand</em> memories (item C, all simulation) or to go through a real digital flow too (D–E: synthesis, place-and-route, a second PDK)?</dd>
       <dt>Models</dt><dd>The HfO₂ model is fixed: its memory now starts at <code>x0</code> and stops at 0 and 1. The TiO₂ models still have the old problem. Fixing them changes nothing in sections 2, 3 and 5 if their testbenches start at <code>x0=0</code>, but about 60 screenshots show <code>x0=0.3</code> in xschem and would need re-shooting. When?</dd>
       <dt>Liberty</dt><dd>Leave the memristor's Liberty view as pins only, or invent a simple "memory macro" (e.g. the 2 × 2 crossbar plus its drivers) with real Verilog and Liberty views?</dd>
-      <dt>Crossbar</dt><dd>The crossbars use the TiO₂ device. Make an HfO₂ version for the memory examples?</dd>
+      <dt>Crossbar</dt><dd>Part 4 uses a drawing of an HfO₂ crossbar, not a real layout. The PDK's crossbar layouts (<code>crossbar2x2_tio2_au</code>, <code>crossbar4x4_tio2_au</code>) use the TiO₂ device. Make an HfO₂ crossbar layout too?</dd>
     </dl>
   </article>
 </section>
@@ -352,6 +480,8 @@ endmodule</pre>
       <dt>Liberty (.lib)</dt><dd>A data sheet for tools: how fast, how much power, which pins.</dd>
       <dt>LEF</dt><dd>A block's outline and pin positions, without the inside details.</dd>
       <dt>1T1R</dt><dd>One transistor, one resistor (memristor): the usual RRAM bit-cell.</dd>
+      <dt>crossbar</dt><dd>A grid of row and column wires with a memristor at every crossing: one bit per crossing.</dd>
+      <dt>write disturb</dt><dd>Writing one cell changes a neighbour by accident, because the neighbour got too much voltage.</dd>
       <dt>sneak path</dt><dd>An unwanted route for current through neighbouring cells of a crossbar.</dd>
     </dl>
   </article>

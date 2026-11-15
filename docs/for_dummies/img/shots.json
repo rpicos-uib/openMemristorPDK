@@ -1076,5 +1076,152 @@
    1680,
    1019
   ]
+ },
+ "c01_click_crossbar_tb": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c02_open_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c03_raw": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c03_testbench": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c04_netlist_simulate": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c05_result": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c06_plot": {
+  "note": "",
+  "size": [
+   714,
+   544
+  ]
+ },
+ "c07_console": {
+  "note": "",
+  "size": [
+   373,
+   65
+  ]
+ },
+ "c08_quit_plot": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c09_quit_ngspice": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c10_edit_codeblock": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c11_raw": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c11_edit_properties": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c12_end_of_line": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c13_type_1": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c14_netlist_simulate": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c15_disturb_result": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c16_disturb_plot": {
+  "note": "",
+  "size": [
+   714,
+   544
+  ]
+ },
+ "c17_disturb_console": {
+  "note": "",
+  "size": [
+   373,
+   65
+  ]
+ },
+ "c18_close_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "c19_dont_save": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
  }
 }
