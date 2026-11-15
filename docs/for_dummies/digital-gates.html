@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>A controller made of real logic gates · openMemristorPDK Guide</title>
+<meta name="description" content="Write a small memory controller in Verilog and let Yosys turn it into 65 logic gates from IHP&#x27;s library.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<header class="topbar"><div class="inner">
+  <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span>openMemristorPDK Guide</a>
+  <nav class="topnav" aria-label="Guide sections"><a href="index.html">Overview</a><a href="install.html">Install</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html">Monte Carlo</a><a href="ihp.html">IHP PDK</a><a href="digital.html" aria-current="page">Digital</a></nav>
+</div></header>
+<div class="wrap">
+<header class="hero">
+  <div class="crumbs"><a href="index.html">Guide</a> · Section 7 · <a href="digital.html">The digital side</a> · Part 4 · about 10 min · 7 steps</div>
+  <h1>A controller made of real logic gates</h1>
+  <p class="lede">Build a 4-bit memory with a controller, then let Yosys turn the controller into real logic gates from IHP's SG13G2 library. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
+  <p class="prereq">Do <a href="digital-twin.html">A digital twin in Verilog</a> first: it uses the same terminal.</p>
+  <div class="hero-row">
+    <button class="btn" type="button" id="play-all">▶ Play as video</button>
+    <span class="legend">
+      <span><i class="swatch-box"></i> click here</span>
+      <span>Click any screenshot to see it full size</span>
+      <span>Keys in the player: <kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd> <kbd>Esc</kbd></span>
+    </span>
+  </div>
+
+</header>
+
+<section class="chapter" id="ctrl">
+  <header>
+    <div class="eyebrow">About 10 minutes</div>
+    <h2>Step by step</h2>
+    <p>A memory needs a little circuit that says "write a 1 into cell 3" or "read cell 0" and makes the right pulses, long enough for a memristor to switch. That circuit is ordinary digital logic: you write it in Verilog, and <b>Yosys</b> turns it into real logic gates from IHP's standard-cell library.</p>
+  </header>
+  <article class="step" id="step-1">
+    <div class="step-head"><span class="num">1</span><h3>The controller</h3></div>
+    <p class="do">Four files in <code>openMemristorPDK/digital/memory2x2/</code>, all ready (you can also open each one from the Library Manager: cells <b>mem_ctrl</b>, <b>memory2x2</b>, <b>memory2x2_tb</b>, Verilog row):</p>
+    <dl class="explain">
+      <dt>mem_ctrl.v</dt><dd>The controller, below. This is the part that becomes gates.</dd>
+      <dt>memory2x2.v</dt><dd>A 4-bit memory: the controller plus four copies of the memristor twin from <a href="digital-twin.html">A digital twin in Verilog</a>.</dd>
+      <dt>memory2x2_tb.v</dt><dd>The test: write 1 0 0 1 into cells 0 to 3, read them back, then write a 0 into cell 0 and read it.</dd>
+      <dt>Makefile, synth.ys</dt><dd>The commands, so you only have to type <code>make sim</code>, <code>make synth</code> or <code>make gates</code>.</dd>
+    </dl>
+    <div class="file tall">
+      <div class="fname"><span>mem_ctrl.v</span><span>Verilog</span></div>
+<pre>// mem_ctrl.v -- a tiny controller for a 4-bit memristor memory.
+// It turns &quot;write a 1 into cell 2&quot; or &quot;read cell 3&quot; into the right
+// pulses, long enough for a memristor to switch:
+//   write: PULSE clock cycles of set or reset on one cell,
+//   read:  READ  clock cycles of read on one cell, then it keeps the bit.
+// With a 10 ns clock, PULSE = 8 gives an 80 ns pulse, like the xschem
+// testbenches. This file is real logic: Yosys turns it into gates.
+// (No `timescale here: it has no delays, only clock ticks.)
+
+module mem_ctrl #(parameter PULSE = 8, parameter READ = 4) (
+  input  wire       clk,
+  input  wire       rst,       // 1: stop and start over
+  input  wire       start,     // 1 for one clock: begin an operation
+  input  wire [1:0] op,        // 0 = read, 1 = write 1, 2 = write 0
+  input  wire [1:0] addr,      // which cell: 0, 1, 2 or 3
+  input  wire [3:0] q,         // what the cells show while being read
+  output wire [3:0] set,       // write-1 pulse, one wire per cell
+  output wire [3:0] reset,     // write-0 pulse, one wire per cell
+  output wire [3:0] read,      // read pulse, one wire per cell
+  output reg        data_out,  // the last bit read
+  output reg        busy       // 1 while an operation is going on
+);
+  reg [1:0] cur_op;
+  reg [1:0] cur_addr;
+  reg [3:0] count;
+
+  // Only the chosen cell gets a pulse: 1 shifted to its position.
+  wire [3:0] chosen = 4&#x27;b0001 &lt;&lt; cur_addr;
+
+  assign set   = (busy &amp;&amp; cur_op == 2&#x27;d1) ? chosen : 4&#x27;b0000;
+  assign reset = (busy &amp;&amp; cur_op == 2&#x27;d2) ? chosen : 4&#x27;b0000;
+  assign read  = (busy &amp;&amp; cur_op == 2&#x27;d0) ? chosen : 4&#x27;b0000;
+
+  always @(posedge clk) begin
+    if (rst) begin
+      busy     &lt;= 1&#x27;b0;
+      count    &lt;= 4&#x27;d0;
+      data_out &lt;= 1&#x27;b0;
+      cur_op   &lt;= 2&#x27;d0;
+      cur_addr &lt;= 2&#x27;d0;
+    end else if (!busy) begin
+      if (start) begin              // remember what to do, then start
+        busy     &lt;= 1&#x27;b1;
+        cur_op   &lt;= op;
+        cur_addr &lt;= addr;
+        count    &lt;= 4&#x27;d0;
+      end
+    end else begin
+      count &lt;= count + 4&#x27;d1;
+      if (cur_op == 2&#x27;d0 &amp;&amp; count == READ - 1) begin
+        data_out &lt;= q[cur_addr];    // the end of a read: keep the bit
+        busy     &lt;= 1&#x27;b0;
+      end else if (cur_op != 2&#x27;d0 &amp;&amp; count == PULSE - 1) begin
+        busy     &lt;= 1&#x27;b0;           // the end of a write
+      end
+    end
+  end
+endmodule</pre>
+    </div>
+    <dl class="explain">
+      <dt>clk</dt><dd>The clock: a signal that ticks every 10 ns. The controller does one small step per tick.</dd>
+      <dt>busy, count</dt><dd>While <code>busy</code> is 1, <code>count</code> counts the ticks: 8 for a write (80 ns), 4 for a read.</dd>
+      <dt>chosen</dt><dd>A 1 shifted to the chosen cell's position: only that cell gets the pulse.</dd>
+      <dt>always @(posedge clk)</dt><dd>"At every clock tick". The <code>reg</code>s changed here (<code>busy</code>, <code>count</code>, ...) become <b>flip-flops</b>: tiny memories inside the logic.</dd>
+    </dl>
+  </article>
+  <article class="step" id="step-2" data-img="img/v01_open_terminal.png" data-title="Open a terminal" data-do="In the container desktop, click the terminal icon in the bottom panel.">
+    <div class="step-head"><span class="num">2</span><h3>Open a terminal</h3></div>
+    <p class="do">In the container desktop, click the <b class="ui">terminal icon</b> in the bottom panel.</p>
+    <button class="shot" type="button"><img src="img/v01_open_terminal.png" alt="The whole container desktop with the terminal icon in the bottom panel boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-3" data-img="img/y02_cd.png" data-title="Go to the memory&#x27;s folder" data-do="Type these two commands, pressing Enter after each.">
+    <div class="step-head"><span class="num">3</span><h3>Go to the memory's folder</h3></div>
+    <p class="do">Type these two commands, pressing <kbd>Enter</kbd> after each.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>cd openMemristorPDK/digital/memory2x2</pre><button class="copy" type="button" data-copy="cd openMemristorPDK/digital/memory2x2">Copy</button></div>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>ls</pre><button class="copy" type="button" data-copy="ls">Copy</button></div>
+    <button class="shot" type="button"><img src="img/y02_cd.png" alt="The terminal after cd and ls: Makefile, mem_ctrl.v, memory2x2_tb.v, memory2x2.v, synth.ys" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-4" data-img="img/y03_make_sim.png" data-title="Simulate the memory" data-do="make sim compiles and runs the test with Icarus Verilog, as on the Verilog twin page. Type clear and Enter first if you want an empty terminal.">
+    <div class="step-head"><span class="num">4</span><h3>Simulate the memory</h3></div>
+    <p class="do"><code>make sim</code> compiles and runs the test with Icarus Verilog, as in <a href="digital-twin.html">A digital twin in Verilog</a>. Type <code>clear</code> and <kbd>Enter</kbd> first if you want an empty terminal.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>make sim</pre><button class="copy" type="button" data-copy="make sim">Copy</button></div>
+    <button class="shot" type="button"><img src="img/y03_make_sim.png" alt="The terminal after make sim: wrote 1 into cell 0, wrote 1 into cell 3, read cell 0 1, cell 1 0, cell 2 0, cell 3 1, wrote 0 into cell 0, read cell 0 0" loading="lazy"></button>
+    <div class="see"><strong>What it shows</strong><span>The controller wrote 1 0 0 1 into the four memristors and read it back, then changed cell 0 to 0. The same pattern as the <a href="digital-crossbar.html">crossbar</a>, now driven by a circuit instead of by hand-made voltage pulses.</span></div>
+  </article>
+  <article class="step" id="step-5" data-img="img/y04_make_synth.png" data-title="Turn it into gates" data-do="make synth runs Yosys on the controller.">
+    <div class="step-head"><span class="num">5</span><h3>Turn it into gates</h3></div>
+    <p class="do"><code>make synth</code> runs Yosys on the controller.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>make synth</pre><button class="copy" type="button" data-copy="make synth">Copy</button></div>
+    <button class="shot" type="button"><img src="img/y04_make_synth.png" alt="The terminal after make synth: 65 cells, a list of sg13g2 gates such as 10 sg13g2_dfrbpq_1, 11 sg13g2_nand2_1, 12 sg13g2_nor2_1, and a chip area of 996" loading="lazy"></button>
+    <div class="see"><strong>How to read it</strong>
+      <span>The controller became <b>65 gates</b>, all from IHP's library: <code>sg13g2_nand2_1</code> is a 2-input NAND gate, <code>sg13g2_nor2_1</code> a 2-input NOR, and so on.</span>
+      <span>The 10 <code>sg13g2_dfrbpq_1</code> are flip-flops: busy (1), count (4), the operation (2), the address (2) and data_out (1). 10 bits, 10 flip-flops.</span>
+      <span>Chip area: 996 µm², a square about 32 µm wide, thinner than a hair. Half of it is the flip-flops.</span>
+      <span>Only the controller becomes gates. The memristors stay memristors: they aren't logic.</span>
+    </div>
+    <div class="file">
+      <div class="fname"><span>mem_ctrl_gates.v (two of the 65 gates)</span><span>Verilog, made by Yosys</span></div>
+<pre>  sg13g2_nand2_1 _049_ (
+    .A(busy),
+    .B(_020_),
+    .Y(_022_)
+  );
+  sg13g2_dfrbpq_1 _098_ (
+    .CLK(clk),
+    .D(_004_),
+    .Q(cur_op[0]),
+    .RESET_B(1'h1)
+  );</pre>
+    </div>
+  </article>
+  <article class="step" id="step-6" data-img="img/y05_make_gates.png" data-title="Simulate the gates" data-do="make gates synthesizes again, then runs the same test with the 65 gates instead of the original Verilog, using IHP&#x27;s own models of each gate.">
+    <div class="step-head"><span class="num">6</span><h3>Simulate the gates</h3></div>
+    <p class="do"><code>make gates</code> synthesizes again, then runs the same test with the 65 gates instead of the original Verilog, using IHP's own models of each gate.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>make gates</pre><button class="copy" type="button" data-copy="make gates">Copy</button></div>
+    <button class="shot" type="button"><img src="img/y05_make_gates.png" alt="The terminal after make gates: the gate list, then the same reads as make sim: 1 0 0 1, then 0" loading="lazy"></button>
+    <div class="see"><strong>The same answers</strong><span>1 0 0 1, then 0: the gates do exactly what the Verilog said. This check is a normal step in real chip design.</span></div>
+  </article>
+  <article class="step" id="step-7" data-title="Clean up and close" data-do="make clean deletes everything the other commands made. Then close the terminal.">
+    <div class="step-head"><span class="num">7</span><h3>Clean up and close</h3></div>
+    <p class="do"><code>make clean</code> deletes everything the other commands made. Then close the terminal.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>make clean</pre><button class="copy" type="button" data-copy="make clean">Copy</button></div>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>exit</pre><button class="copy" type="button" data-copy="exit">Copy</button></div>
+  </article>
+</section>
+
+<nav class="pager" aria-label="Previous and next section"><a class="prev" href="digital-twin.html"><span class="dir">← Previous</span><span class="t">A digital twin in Verilog</span></a><a class="next" href="digital-layout.html"><span class="dir">Next →</span><span class="t">From gates to a chip layout</span></a></nav>
+<footer>
+  <p>Every screenshot was taken from the real programs with real mouse clicks: openPDKcreator, xschem, ngspice with OpenVAF-compiled models and KLayout, inside the IIC-OSIC-TOOLS container. The capture scripts are in <code>docs/for_dummies/_capture/</code>.</p>
+  <p>Created by R. Picos (<a href="mailto:rpicos.uib@gmail.com">rpicos.uib@gmail.com</a> / <a href="mailto:rodrigo.picos@uib.es">rodrigo.picos@uib.es</a>), as part of the research project <b>MemFRAME</b>.</p>
+  <div class="funding"><img src="img/miciu_aei.png" alt="Ministerio de Ciencia, Innovación y Universidades and Agencia Estatal de Investigación" width="1600" height="393"><p>Project PID2025-170062NB (MemFRAME) funded by <span class="nw">MICIU/AEI/<a href="https://doi.org/10.13039/501100011033">10.13039/501100011033</a></span></p></div>
+  <p><a href="https://github.com/rpicos-uib/openMemristorPDK">openMemristorPDK</a> · <a href="https://github.com/rpicos-uib/openpdkcreator-toolkit">openPDKcreator</a> · Apache License 2.0</p>
+</footer>
+</div>
+
+<div class="overlay" id="player" hidden role="dialog" aria-modal="true" aria-label="Step player">
+  <div class="bar">
+    <div class="title"><span class="n" id="p-n"></span><span id="p-title"></span></div>
+    <button type="button" id="p-close">Close ✕</button>
+  </div>
+  <div class="stage" id="p-stage"></div>
+  <div style="display:grid;gap:10px">
+    <p class="do-line" id="p-do"></p>
+    <div class="progress" aria-hidden="true"><i id="p-bar"></i></div>
+    <div class="ctrls">
+      <button type="button" id="p-prev">← Back</button>
+      <button type="button" class="primary" id="p-play">⏸ Pause</button>
+      <button type="button" id="p-next">Next →</button>
+    </div>
+  </div>
+</div>
+<script src="guide.js"></script>
+</body>
+</html>

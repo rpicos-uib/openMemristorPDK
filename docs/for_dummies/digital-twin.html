@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>A digital twin in Verilog · openMemristorPDK Guide</title>
+<meta name="description" content="Describe the memristor bit the way digital designers do, simulate it with Icarus Verilog and look at the waveforms in GTKWave.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<header class="topbar"><div class="inner">
+  <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span>openMemristorPDK Guide</a>
+  <nav class="topnav" aria-label="Guide sections"><a href="index.html">Overview</a><a href="install.html">Install</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html">Monte Carlo</a><a href="ihp.html">IHP PDK</a><a href="digital.html" aria-current="page">Digital</a></nav>
+</div></header>
+<div class="wrap">
+<header class="hero">
+  <div class="crumbs"><a href="index.html">Guide</a> · Section 7 · <a href="digital.html">The digital side</a> · Part 3 · about 10 min · 9 steps</div>
+  <h1>A digital twin in Verilog</h1>
+  <p class="lede">Simulate the same bit the way digital designers do: a short Verilog description, Icarus Verilog, and waveforms in GTKWave. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
+  <p class="prereq">Do <a href="digital-bit.html">Store a bit</a> first: this part gives the same answers without volts.</p>
+  <div class="hero-row">
+    <button class="btn" type="button" id="play-all">▶ Play as video</button>
+    <span class="legend">
+      <span><i class="swatch-box"></i> click here</span>
+      <span>Click any screenshot to see it full size</span>
+      <span>Keys in the player: <kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd> <kbd>Esc</kbd></span>
+    </span>
+  </div>
+
+</header>
+
+<section class="chapter" id="twin">
+  <header>
+    <div class="eyebrow">About 10 minutes</div>
+    <h2>Step by step</h2>
+    <p>Digital designers don't simulate currents: a chip has millions of bits, far too many for ngspice. They use a <b>digital twin</b>, a short description in <b>Verilog</b> that only says what the memristor does with ones and zeros. You'll simulate one with Icarus Verilog and look at the result in GTKWave.</p>
+  </header>
+  <article class="step" id="step-1">
+    <div class="step-head"><span class="num">1</span><h3>The twin</h3></div>
+    <p class="do">This is the whole twin, in <code>openMemristorPDK/digital/memristor_bit/memristor_bit.v</code>. Nothing to type: it's already there. You can also open it from the Library Manager: cell <b>memristor_bit</b> (and <b>memristor_bit_tb</b> for the test), <b>Verilog</b> row, <b>View</b>.</p>
+    <div class="file tall">
+      <div class="fname"><span>memristor_bit.v</span><span>Verilog</span></div>
+<pre>// memristor_bit.v -- a digital twin of the Au/HfO2/Al memristor used
+// as a 1-bit memory. No voltages or currents: only what a digital
+// designer needs to know about it.
+//
+//   set   = 1 : a write pulse above +0.8 V -&gt; the bit becomes 1
+//   reset = 1 : a write pulse below -0.6 V -&gt; the bit becomes 0
+//   read  = 1 : a small 0.2 V read         -&gt; q shows the bit
+//
+// A write only works if its pulse lasts at least T_SWITCH (15 ns, about
+// what the ngspice simulation of the real model needs). When nothing
+// happens the bit stays where it is: no power needed.
+`timescale 1ns/1ps
+
+module memristor_bit #(parameter T_SWITCH = 15) (
+  input  wire set,
+  input  wire reset,
+  input  wire read,
+  output wire q
+);
+  reg stored = 1&#x27;b0;   // x0 = 0: the memristor starts off
+
+  // A SET pulse: wait T_SWITCH, then switch on if the pulse is still there.
+  always @(posedge set) begin
+    #(T_SWITCH);
+    if (set) stored = 1&#x27;b1;
+  end
+
+  // A RESET pulse: the same, switching off.
+  always @(posedge reset) begin
+    #(T_SWITCH);
+    if (reset) stored = 1&#x27;b0;
+  end
+
+  // While reading, q shows the bit; otherwise q is disconnected (z).
+  assign q = read ? stored : 1&#x27;bz;
+endmodule</pre>
+    </div>
+    <dl class="explain">
+      <dt>input, output</dt><dd>The wires of the block: three going in (<code>set</code>, <code>reset</code>, <code>read</code>) and one coming out (<code>q</code>). Each is 0 or 1.</dd>
+      <dt>reg stored</dt><dd>The bit inside the memristor. It starts at 0, like <code>x0=0</code> in xschem.</dd>
+      <dt>always @(posedge set)</dt><dd>"Every time <code>set</code> goes from 0 to 1". Then <code>#(T_SWITCH)</code> waits 15 ns, and the bit becomes 1 only if <code>set</code> is still on: a pulse that is too short does nothing.</dd>
+      <dt>assign q = read ? stored : 1'bz</dt><dd>While reading, <code>q</code> shows the bit. Otherwise it is <b>z</b>: not connected, neither 0 nor 1.</dd>
+    </dl>
+    <div class="see"><strong>The test</strong><span>A second file, <code>memristor_bit_tb.v</code>, does the same as the xschem testbench of <a href="digital-bit.html">Store a bit</a>: read, write 1, read, write 0, read. Then one more write 1 that lasts only 5 ns, and a last read.</span></div>
+  </article>
+  <article class="step" id="step-2" data-img="img/v01_open_terminal.png" data-title="Open a terminal" data-do="In the container desktop (the browser window), click the terminal icon in the bottom panel. A black terminal window opens at the top left.">
+    <div class="step-head"><span class="num">2</span><h3>Open a terminal</h3></div>
+    <p class="do">In the container desktop (the browser window), click the <b class="ui">terminal icon</b> in the bottom panel. A black terminal window opens at the top left.</p>
+    <button class="shot" type="button"><img src="img/v01_open_terminal.png" alt="The whole container desktop with the terminal icon in the bottom panel boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-3" data-img="img/v02_cd.png" data-title="Go to the twin&#x27;s folder" data-do="Click inside the terminal and type these two commands, pressing Enter after each. ls lists the folder: the twin, its test and a GTKWave file.">
+    <div class="step-head"><span class="num">3</span><h3>Go to the twin's folder</h3></div>
+    <p class="do">Click inside the terminal and type these two commands, pressing <kbd>Enter</kbd> after each. <code>ls</code> lists the folder: the twin, its test and a GTKWave file.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>cd openMemristorPDK/digital/memristor_bit</pre><button class="copy" type="button" data-copy="cd openMemristorPDK/digital/memristor_bit">Copy</button></div>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>ls</pre><button class="copy" type="button" data-copy="ls">Copy</button></div>
+    <div class="oops"><strong>Type, don't paste</strong><span>This terminal is inside the container, so pasting from your own computer may not work. Type the commands. Press <kbd>Tab</kbd> halfway through a file name and the terminal finishes it for you.</span></div>
+    <button class="shot" type="button"><img src="img/v02_cd.png" alt="The terminal after cd and ls: memristor_bit_tb.gtkw, memristor_bit_tb.v, memristor_bit.v" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-4" data-img="img/v03_compile.png" data-title="Compile" data-do="Icarus Verilog turns the two files into a program you can run. Nothing is printed: that means it worked.">
+    <div class="step-head"><span class="num">4</span><h3>Compile</h3></div>
+    <p class="do">Icarus Verilog turns the two files into a program you can run. Nothing is printed: that means it worked.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>iverilog -o memristor_bit_tb memristor_bit.v memristor_bit_tb.v</pre><button class="copy" type="button" data-copy="iverilog -o memristor_bit_tb memristor_bit.v memristor_bit_tb.v">Copy</button></div>
+    <button class="shot" type="button"><img src="img/v03_compile.png" alt="The terminal after the iverilog command, with no output" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-5" data-img="img/v04_run.png" data-title="Run it" data-do="The simulation takes a blink. It prints the four reads.">
+    <div class="step-head"><span class="num">5</span><h3>Run it</h3></div>
+    <p class="do">The simulation takes a blink. It prints the four reads.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>vvp memristor_bit_tb</pre><button class="copy" type="button" data-copy="vvp memristor_bit_tb">Copy</button></div>
+    <button class="shot" type="button"><img src="img/v04_run.png" alt="The terminal after vvp: read before any write q = 0, after write 1 q = 1, after write 0 q = 0, after a 5 ns write 1 q = 0" loading="lazy"></button>
+    <div class="see"><strong>What it shows</strong>
+      <span>0, 1, 0: the same answers as the real ngspice simulation in <a href="digital-bit.html">Store a bit</a>, without a single volt or microamp.</span>
+      <span>The last read is 0 too: the 5 ns write was too short, just like the 0.7 V write in <a href="digital-bit.html#weak">A write that is too weak</a> was too weak.</span>
+    </div>
+  </article>
+  <article class="step" id="step-6" data-img="img/v05_gtkwave.png" data-title="Open the waveforms" data-do="The run also saved every signal in memristor_bit_tb.vcd. Open it in GTKWave. It starts zoomed in too far: click Zoom Fit, the first of the three magnifier buttons.">
+    <div class="step-head"><span class="num">6</span><h3>Open the waveforms</h3></div>
+    <p class="do">The run also saved every signal in <code>memristor_bit_tb.vcd</code>. Open it in GTKWave. It starts zoomed in too far: click <b class="ui">Zoom Fit</b>, the first of the three magnifier buttons.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>gtkwave memristor_bit_tb.vcd memristor_bit_tb.gtkw</pre><button class="copy" type="button" data-copy="gtkwave memristor_bit_tb.vcd memristor_bit_tb.gtkw">Copy</button></div>
+    <button class="shot" type="button"><img src="img/v05_gtkwave.png" alt="GTKWave with the five signals, zoomed in to a few picoseconds; the Zoom Fit button boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-7" data-img="img/v06_waves.png" data-title="The waveforms" data-do="Now the whole 700 ns fit in the window. Time goes left to right; each row is one signal.">
+    <div class="step-head"><span class="num">7</span><h3>The waveforms</h3></div>
+    <p class="do">Now the whole 700 ns fit in the window. Time goes left to right; each row is one signal.</p>
+    <button class="shot" type="button"><img src="img/v06_waves.png" alt="GTKWave: set pulses at 100 and 500 ns, reset at 300 ns, four read pulses, q showing 0 1 0 0 during the reads, stored high from 115 to 315 ns" loading="lazy"></button>
+    <div class="see"><strong>How to read it</strong>
+      <span><b>set</b> goes up at 100 ns; 15 ns later <b>stored</b> goes up too: the bit is 1.</span>
+      <span><b>reset</b> goes up at 300 ns; 15 ns later <b>stored</b> drops back to 0.</span>
+      <span>The tiny <b>set</b> blip at 500 ns is only 5 ns long: <b>stored</b> doesn't move.</span>
+      <span><b>q</b> only shows the bit while <b>read</b> is up. In between it is z, drawn as a yellow line in the middle.</span>
+    </div>
+  </article>
+  <article class="step" id="step-8" data-img="img/v07_close_gtkwave.png" data-title="Close GTKWave" data-do="Click the X at the top-right of the GTKWave window.">
+    <div class="step-head"><span class="num">8</span><h3>Close GTKWave</h3></div>
+    <p class="do">Click the <b class="ui">X</b> at the top-right of the GTKWave window.</p>
+    <button class="shot" type="button"><img src="img/v07_close_gtkwave.png" alt="GTKWave&#x27;s close button boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-9" data-img="img/v08_exit.png" data-title="Close the terminal" data-do="Type exit and press Enter. The terminal closes.">
+    <div class="step-head"><span class="num">9</span><h3>Close the terminal</h3></div>
+    <p class="do">Type <code>exit</code> and press <kbd>Enter</kbd>. The terminal closes.</p>
+    <button class="shot" type="button"><img src="img/v08_exit.png" alt="The terminal with exit typed at the prompt" loading="lazy"></button>
+  </article>
+</section>
+
+<nav class="pager" aria-label="Previous and next section"><a class="prev" href="digital-crossbar.html"><span class="dir">← Previous</span><span class="t">Write a pattern into a crossbar</span></a><a class="next" href="digital-gates.html"><span class="dir">Next →</span><span class="t">A controller made of real logic gates</span></a></nav>
+<footer>
+  <p>Every screenshot was taken from the real programs with real mouse clicks: openPDKcreator, xschem, ngspice with OpenVAF-compiled models and KLayout, inside the IIC-OSIC-TOOLS container. The capture scripts are in <code>docs/for_dummies/_capture/</code>.</p>
+  <p>Created by R. Picos (<a href="mailto:rpicos.uib@gmail.com">rpicos.uib@gmail.com</a> / <a href="mailto:rodrigo.picos@uib.es">rodrigo.picos@uib.es</a>), as part of the research project <b>MemFRAME</b>.</p>
+  <div class="funding"><img src="img/miciu_aei.png" alt="Ministerio de Ciencia, Innovación y Universidades and Agencia Estatal de Investigación" width="1600" height="393"><p>Project PID2025-170062NB (MemFRAME) funded by <span class="nw">MICIU/AEI/<a href="https://doi.org/10.13039/501100011033">10.13039/501100011033</a></span></p></div>
+  <p><a href="https://github.com/rpicos-uib/openMemristorPDK">openMemristorPDK</a> · <a href="https://github.com/rpicos-uib/openpdkcreator-toolkit">openPDKcreator</a> · Apache License 2.0</p>
+</footer>
+</div>
+
+<div class="overlay" id="player" hidden role="dialog" aria-modal="true" aria-label="Step player">
+  <div class="bar">
+    <div class="title"><span class="n" id="p-n"></span><span id="p-title"></span></div>
+    <button type="button" id="p-close">Close ✕</button>
+  </div>
+  <div class="stage" id="p-stage"></div>
+  <div style="display:grid;gap:10px">
+    <p class="do-line" id="p-do"></p>
+    <div class="progress" aria-hidden="true"><i id="p-bar"></i></div>
+    <div class="ctrls">
+      <button type="button" id="p-prev">← Back</button>
+      <button type="button" class="primary" id="p-play">⏸ Pause</button>
+      <button type="button" id="p-next">Next →</button>
+    </div>
+  </div>
+</div>
+<script src="guide.js"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@
 //   read:  READ  clock cycles of read on one cell, then it keeps the bit.
 // With a 10 ns clock, PULSE = 8 gives an 80 ns pulse, like the xschem
 // testbenches. This file is real logic: Yosys turns it into gates.
-`timescale 1ns/1ps
+// (No `timescale here: it has no delays, only clock ticks.)
 
 module mem_ctrl #(parameter PULSE = 8, parameter READ = 4) (
   input  wire       clk,

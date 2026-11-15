@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>From gates to a chip layout · openMemristorPDK Guide</title>
+<meta name="description" content="Place and wire the controller&#x27;s gates with LibreLane and IHP&#x27;s standard cells, and look at the result in KLayout.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<header class="topbar"><div class="inner">
+  <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span>openMemristorPDK Guide</a>
+  <nav class="topnav" aria-label="Guide sections"><a href="index.html">Overview</a><a href="install.html">Install</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html">Monte Carlo</a><a href="ihp.html">IHP PDK</a><a href="digital.html" aria-current="page">Digital</a></nav>
+</div></header>
+<div class="wrap">
+<header class="hero">
+  <div class="crumbs"><a href="index.html">Guide</a> · Section 7 · <a href="digital.html">The digital side</a> · Part 5 · about 10 min · 12 steps</div>
+  <h1>From gates to a chip layout</h1>
+  <p class="lede">Turn the controller's gates into a real chip layout with LibreLane: placed, wired, checked and ready to build, in about two minutes. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
+  <p class="prereq">Do <a href="digital-gates.html">A controller made of real logic gates</a> first.</p>
+  <div class="hero-row">
+    <button class="btn" type="button" id="play-all">▶ Play as video</button>
+    <span class="legend">
+      <span><i class="swatch-box"></i> click here</span>
+      <span>Click any screenshot to see it full size</span>
+      <span>Keys in the player: <kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd> <kbd>Esc</kbd></span>
+    </span>
+  </div>
+
+</header>
+
+<section class="chapter" id="layout">
+  <header>
+    <div class="eyebrow">About 10 minutes</div>
+    <h2>Step by step</h2>
+    <p>The 65 gates of <a href="digital-gates.html">the controller</a> are only a list so far. <b>Place and route</b> decides where each gate sits on the chip and draws every wire between them, then checks the result. <b>LibreLane</b> does the whole job in one command, using IHP's standard cells.</p>
+  </header>
+  <article class="step" id="step-1">
+    <div class="step-head"><span class="num">1</span><h3>What LibreLane does</h3></div>
+    <dl class="explain">
+      <dt>synthesis</dt><dd>Verilog to gates, as in the previous part (Yosys).</dd>
+      <dt>floorplan</dt><dd>Choose the size of the chip and lay out rows where gates can sit, plus the power wires.</dd>
+      <dt>placement</dt><dd>Put every gate in a row, close to the gates it talks to.</dd>
+      <dt>clock tree</dt><dd>Add buffers so the clock reaches all flip-flops at the same time.</dd>
+      <dt>routing</dt><dd>Draw every wire on the metal layers, without shorts.</dd>
+      <dt>checks</dt><dd>Design rules (DRC), layout against netlist (LVS), antennas, and timing: is the circuit fast enough for a 10 ns clock?</dd>
+    </dl>
+    <p class="do">All of that from a five-line file, <code>mem_ctrl.json</code>, in the same folder as the controller:</p>
+    <div class="file">
+      <div class="fname"><span>mem_ctrl.json</span><span>LibreLane configuration</span></div>
+<pre>{
+    &quot;DESIGN_NAME&quot;: &quot;mem_ctrl&quot;,
+    &quot;VERILOG_FILES&quot;: &quot;dir::mem_ctrl.v&quot;,
+    &quot;CLOCK_PORT&quot;: &quot;clk&quot;,
+    &quot;CLOCK_PERIOD&quot;: 10
+}</pre>
+    </div>
+    <dl class="explain">
+      <dt>DESIGN_NAME</dt><dd>The Verilog module to build.</dd>
+      <dt>VERILOG_FILES</dt><dd>Where it is; <code>dir::</code> means "next to this file".</dd>
+      <dt>CLOCK_PORT, CLOCK_PERIOD</dt><dd>The clock input and its period: 10 ns, the same 100 MHz clock as the simulation.</dd>
+    </dl>
+    <div class="see"><strong>Which PDK?</strong><span>The container is set up for IHP SG13G2, so LibreLane uses it without being told. See <a href="ihp.html">Add IHP's PDK</a>.</span></div>
+  </article>
+  <article class="step" id="step-2" data-img="img/v01_open_terminal.png" data-title="Open a terminal" data-do="In the container desktop, click the terminal icon in the bottom panel.">
+    <div class="step-head"><span class="num">2</span><h3>Open a terminal</h3></div>
+    <p class="do">In the container desktop, click the <b class="ui">terminal icon</b> in the bottom panel.</p>
+    <button class="shot" type="button"><img src="img/v01_open_terminal.png" alt="The whole container desktop with the terminal icon in the bottom panel boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-3" data-img="img/l02_config.png" data-title="Go to the folder" data-do="Go to the controller&#x27;s folder and look at the configuration:">
+    <div class="step-head"><span class="num">3</span><h3>Go to the folder</h3></div>
+    <p class="do">Go to the controller's folder and look at the configuration:</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>cd openMemristorPDK/digital/memory2x2</pre><button class="copy" type="button" data-copy="cd openMemristorPDK/digital/memory2x2">Copy</button></div>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>cat mem_ctrl.json</pre><button class="copy" type="button" data-copy="cat mem_ctrl.json">Copy</button></div>
+    <button class="shot" type="button"><img src="img/l02_config.png" alt="The terminal showing mem_ctrl.json: DESIGN_NAME mem_ctrl, VERILOG_FILES dir::mem_ctrl.v, CLOCK_PORT clk, CLOCK_PERIOD 10" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-4" data-img="img/l03_layout_running.png" data-title="Run LibreLane" data-do="Start it. A progress bar at the bottom counts its 80 stages; it takes about two minutes.">
+    <div class="step-head"><span class="num">4</span><h3>Run LibreLane</h3></div>
+    <p class="do">Start it. A progress bar at the bottom counts its 80 stages; it takes about two minutes.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>make layout</pre><button class="copy" type="button" data-copy="make layout">Copy</button></div>
+    <button class="shot" type="button"><img src="img/l03_layout_running.png" alt="LibreLane running: clock tree synthesis messages, and the progress bar at stage 34 of 80" loading="lazy"></button>
+    <div class="see"><strong>What scrolls by</strong><span>Each stage prints what it does. Here, stage 35 is building the clock tree with IHP's clock buffers (<code>sg13g2_buf_8</code>, ...).</span></div>
+  </article>
+  <article class="step" id="step-5" data-img="img/l04_layout_done.png" data-title="It&#x27;s done" data-do="The prompt comes back. The last lines are yellow WARNINGs.">
+    <div class="step-head"><span class="num">5</span><h3>It's done</h3></div>
+    <p class="do">The prompt comes back. The last lines are yellow <b>WARNING</b>s.</p>
+    <button class="shot" type="button"><img src="img/l04_layout_done.png" alt="The end of the LibreLane run: a list of yellow warnings and the prompt" loading="lazy"></button>
+    <div class="oops"><strong>Warnings are fine here</strong><span>They say some settings were left at their defaults (timing constraints, power-grid analysis...). For a practice design that's what we want. The real verdict is in the next step.</span></div>
+  </article>
+  <article class="step" id="step-6" data-img="img/l05_report.png" data-title="The results" data-do="make report prints the main results of the run in plain words.">
+    <div class="step-head"><span class="num">6</span><h3>The results</h3></div>
+    <p class="do"><code>make report</code> prints the main results of the run in plain words.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>make report</pre><button class="copy" type="button" data-copy="make report">Copy</button></div>
+    <button class="shot" type="button"><img src="img/l05_report.png" alt="make report: chip size 4516 um2 about 67 x 67 um, 137 cells placed, 2315 um of wires, DRC OK, layout vs netlist OK, antennas OK, timing OK with 5.6 ns to spare" loading="lazy"></button>
+    <dl class="explain">
+      <dt>Chip size</dt><dd>About 67 × 67 µm: the controller fits in a square smaller than the thickness of a hair.</dd>
+      <dt>Cells placed</dt><dd>137: the 65 gates, plus buffers added for the clock and for speed, and filler cells.</dd>
+      <dt>Design rules</dt><dd>No shapes too thin or too close: the factory could build it.</dd>
+      <dt>Layout vs. netlist</dt><dd>The drawn wires connect exactly the gates the netlist says.</dd>
+      <dt>Timing</dt><dd>Even in IHP's slowest corner (1.08 V, 125 °C) every signal arrives 5.6 ns before the next clock tick.</dd>
+    </dl>
+  </article>
+  <article class="step" id="step-7" data-img="img/l06_tip_yes.png" data-title="Open the layout" data-do="make view opens the finished chip in KLayout, with IHP&#x27;s layers. A Tip asks how to show the cells: click Yes.">
+    <div class="step-head"><span class="num">7</span><h3>Open the layout</h3></div>
+    <p class="do"><code>make view</code> opens the finished chip in KLayout, with IHP's layers. A <b>Tip</b> asks how to show the cells: click <b class="ui">Yes</b>.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>make view</pre><button class="copy" type="button" data-copy="make view">Copy</button></div>
+    <button class="shot" type="button"><img src="img/l06_tip_yes.png" alt="KLayout open with the layout, and a Tip window with Yes boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-8" data-img="img/l07_maximize.png" data-title="Make it bigger" data-do="Click the maximize button of the KLayout window.">
+    <div class="step-head"><span class="num">8</span><h3>Make it bigger</h3></div>
+    <p class="do">Click the <b class="ui">maximize</b> button of the KLayout window.</p>
+    <button class="shot" type="button"><img src="img/l07_maximize.png" alt="The maximize button of the KLayout window boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-9" data-img="img/l08_layout.png" data-title="The chip" data-do="This is the controller, ready to build.">
+    <div class="step-head"><span class="num">9</span><h3>The chip</h3></div>
+    <p class="do">This is the controller, ready to build.</p>
+    <button class="shot" type="button"><img src="img/l08_layout.png" alt="KLayout showing the whole controller: a purple chip outline, rows of orange-labelled cells, blue and red metal wires, and pin names such as clk, start, data_out and busy around the edge" loading="lazy"></button>
+    <div class="see"><strong>How to read it</strong>
+      <span>The dashed purple square is the edge of the chip. Inside, the gates sit in horizontal rows, each labelled with its IHP name.</span>
+      <span>The coloured lines are wires on different metal layers (the Layers list on the right). The two wide vertical stripes carry power.</span>
+      <span>Around the edge are the pins: <code>clk</code>, <code>start</code>, <code>op</code>, <code>addr</code>, <code>data_out</code>, <code>busy</code> and the set/reset/read wires to the memristors.</span>
+    </div>
+  </article>
+  <article class="step" id="step-10" data-img="img/l09_zoom.png" data-title="Zoom in" data-do="Point at the cells and turn the mouse wheel forward to zoom in. Now you can read the gate names, like the flip-flop sg13g2_dfrbpq_1 (boxed).">
+    <div class="step-head"><span class="num">10</span><h3>Zoom in</h3></div>
+    <p class="do">Point at the cells and turn the <b>mouse wheel</b> forward to zoom in. Now you can read the gate names, like the flip-flop <code>sg13g2_dfrbpq_1</code> (boxed).</p>
+    <button class="shot" type="button"><img src="img/l09_zoom.png" alt="A closer view of the layout with the label sg13g2_dfrbpq_1 boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-11" data-img="img/l10_close_klayout.png" data-title="Close KLayout" data-do="Click the X at the top-right of the KLayout window.">
+    <div class="step-head"><span class="num">11</span><h3>Close KLayout</h3></div>
+    <p class="do">Click the <b class="ui">X</b> at the top-right of the KLayout window.</p>
+    <button class="shot" type="button"><img src="img/l10_close_klayout.png" alt="KLayout&#x27;s close button boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-12" data-title="Close the terminal" data-do="If you want, make clean deletes the run (make layout makes it again). Then close the terminal.">
+    <div class="step-head"><span class="num">12</span><h3>Close the terminal</h3></div>
+    <p class="do">If you want, <code>make clean</code> deletes the run (<code>make layout</code> makes it again). Then close the terminal.</p>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>make clean</pre><button class="copy" type="button" data-copy="make clean">Copy</button></div>
+    <div class="cmd-row"><pre class="term"><span class="p">$ </span>exit</pre><button class="copy" type="button" data-copy="exit">Copy</button></div>
+  </article>
+</section>
+
+<nav class="pager" aria-label="Previous and next section"><a class="prev" href="digital-gates.html"><span class="dir">← Previous</span><span class="t">A controller made of real logic gates</span></a><a class="next" href="digital-1t1r.html"><span class="dir">Next →</span><span class="t">A real bit-cell: 1T1R</span></a></nav>
+<footer>
+  <p>Every screenshot was taken from the real programs with real mouse clicks: openPDKcreator, xschem, ngspice with OpenVAF-compiled models and KLayout, inside the IIC-OSIC-TOOLS container. The capture scripts are in <code>docs/for_dummies/_capture/</code>.</p>
+  <p>Created by R. Picos (<a href="mailto:rpicos.uib@gmail.com">rpicos.uib@gmail.com</a> / <a href="mailto:rodrigo.picos@uib.es">rodrigo.picos@uib.es</a>), as part of the research project <b>MemFRAME</b>.</p>
+  <div class="funding"><img src="img/miciu_aei.png" alt="Ministerio de Ciencia, Innovación y Universidades and Agencia Estatal de Investigación" width="1600" height="393"><p>Project PID2025-170062NB (MemFRAME) funded by <span class="nw">MICIU/AEI/<a href="https://doi.org/10.13039/501100011033">10.13039/501100011033</a></span></p></div>
+  <p><a href="https://github.com/rpicos-uib/openMemristorPDK">openMemristorPDK</a> · <a href="https://github.com/rpicos-uib/openpdkcreator-toolkit">openPDKcreator</a> · Apache License 2.0</p>
+</footer>
+</div>
+
+<div class="overlay" id="player" hidden role="dialog" aria-modal="true" aria-label="Step player">
+  <div class="bar">
+    <div class="title"><span class="n" id="p-n"></span><span id="p-title"></span></div>
+    <button type="button" id="p-close">Close ✕</button>
+  </div>
+  <div class="stage" id="p-stage"></div>
+  <div style="display:grid;gap:10px">
+    <p class="do-line" id="p-do"></p>
+    <div class="progress" aria-hidden="true"><i id="p-bar"></i></div>
+    <div class="ctrls">
+      <button type="button" id="p-prev">← Back</button>
+      <button type="button" class="primary" id="p-play">⏸ Pause</button>
+      <button type="button" id="p-next">Next →</button>
+    </div>
+  </div>
+</div>
+<script src="guide.js"></script>
+</body>
+</html>

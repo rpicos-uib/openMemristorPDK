@@ -8,7 +8,9 @@ section index. To add a section: write _src/<slug>.html and add one
 entry to SECTIONS (status "soon" lists it on the index without a page;
 "draft" builds the page with a draft banner; a draft that already has
 screenshot steps also gets the step player, and "draftnote" overrides
-the banner text).
+the banner text). A section with "children" is a hub: _src/<slug>.html
+holds its own text, with <!--PARTS--> where the part cards go, and each
+child is a part page of its own (_src/<child-slug>.html).
 
     python3 docs/for_dummies/_build/build_pages.py
 """
@@ -106,20 +108,80 @@ SECTIONS = [
         "slug": "digital",
         "title": "The digital side",
         "short": "Digital",
-        "status": "draft",
-        "time": "about 50 min · 76 steps · draft",
-        "desc": "Store a bit in a memristor, see a write that is too weak fail, write a pattern into a "
-                "2 × 2 crossbar, simulate a digital twin in Verilog, synthesize a controller into IHP gates "
-                "and build a real 1T1R bit-cell.",
-        "lede": "A memristor can store a bit with no power at all. Write a 1 into the Au/HfO₂/Al memristor, "
-                "read it back, erase it, find out why a write that is too weak does nothing, "
-                "then store four bits in a crossbar without disturbing the neighbours, and simulate "
-                "the same memory the way digital designers do, in Verilog, turn its controller into real "
-                "logic gates, and add IHP's transistor to make a real 1T1R cell.",
-        "prereq": 'Easier after <a href="add-device.html">Add a new device</a>: it uses the Au/HfO₂/Al memristor. '
-                  'Start with openPDKcreator open (steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).',
-        "draftnote": 'Parts 1–7 are finished, with a real screenshot for every click. Parts 8 and 9 are still a '
-                     'first draft we are working on together: ideas, a plan and open questions.',
+        "status": "ready",
+        "time": "6 parts · about 1 hour",
+        "desc": "Use memristors as bits: store one, fill a 2 × 2 crossbar, describe it in Verilog, turn its "
+                "controller into IHP logic gates and a chip layout, and build a real 1T1R bit-cell.",
+        "lede": "A memristor can store a bit with no power at all. These parts go from one memristor in a "
+                "simulator to a small memory whose controller becomes real logic gates and a real chip layout.",
+        "prereq": "",
+        "children": [
+            {
+                "slug": "digital-bit",
+                "title": "Store a bit",
+                "status": "ready",
+                "time": "about 10 min",
+                "desc": "Write a 1 into one memristor, read it back, erase it, and see a write that is too weak fail.",
+                "lede": "Write a 1 into the Au/HfO₂/Al memristor, read it back and erase it, then find out why a "
+                        "write that is too weak does nothing.",
+                "prereq": 'Easier after <a href="add-device.html">Add a new device</a>: it uses the Au/HfO₂/Al memristor. '
+                          'Start with openPDKcreator open (steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).',
+            },
+            {
+                "slug": "digital-crossbar",
+                "title": "Write a pattern into a crossbar",
+                "status": "ready",
+                "time": "about 10 min",
+                "desc": "Four memristors in a 2 × 2 grid: write 1 0 0 1 without disturbing the neighbours, "
+                        "then see a careless write overwrite them.",
+                "lede": "Store four bits in a 2 × 2 crossbar without disturbing the neighbours, then see what a "
+                        "careless write does to them.",
+                "prereq": 'Do <a href="digital-bit.html">Store a bit</a> first: same moves (Netlist, Simulate, Edit Properties).',
+            },
+            {
+                "slug": "digital-twin",
+                "title": "A digital twin in Verilog",
+                "status": "ready",
+                "time": "about 10 min",
+                "desc": "Describe the memristor bit the way digital designers do, simulate it with Icarus Verilog "
+                        "and look at the waveforms in GTKWave.",
+                "lede": "Simulate the same bit the way digital designers do: a short Verilog description, Icarus "
+                        "Verilog, and waveforms in GTKWave.",
+                "prereq": 'Do <a href="digital-bit.html">Store a bit</a> first: this part gives the same answers without volts.',
+            },
+            {
+                "slug": "digital-gates",
+                "title": "A controller made of real logic gates",
+                "status": "ready",
+                "time": "about 10 min",
+                "desc": "Write a small memory controller in Verilog and let Yosys turn it into 65 logic gates "
+                        "from IHP's library.",
+                "lede": "Build a 4-bit memory with a controller, then let Yosys turn the controller into real logic "
+                        "gates from IHP's SG13G2 library.",
+                "prereq": 'Do <a href="digital-twin.html">A digital twin in Verilog</a> first: it uses the same terminal.',
+            },
+            {
+                "slug": "digital-layout",
+                "title": "From gates to a chip layout",
+                "status": "ready",
+                "time": "about 10 min",
+                "desc": "Place and wire the controller's gates with LibreLane and IHP's standard cells, and look at "
+                        "the result in KLayout.",
+                "lede": "Turn the controller's gates into a real chip layout with LibreLane: placed, wired, checked "
+                        "and ready to build, in about two minutes.",
+                "prereq": 'Do <a href="digital-gates.html">A controller made of real logic gates</a> first.',
+            },
+            {
+                "slug": "digital-1t1r",
+                "title": "A real bit-cell: 1T1R",
+                "status": "ready",
+                "time": "about 10 min",
+                "desc": "Put IHP's transistor in series with the memristor: a door that blocks writes to the cells "
+                        "you don't want to change.",
+                "lede": "Add IHP's transistor to the memristor to make the bit-cell real memory chips use.",
+                "prereq": 'Do <a href="ihp.html">Add IHP\'s PDK</a> first, and <a href="digital-bit.html">Store a bit</a>.',
+            },
+        ],
     },
 ]
 
@@ -180,10 +242,36 @@ def ready() -> list[dict]:
     return [s for s in SECTIONS if s["status"] in ("ready", "draft")]
 
 
+def ready_children(s: dict) -> list[dict]:
+    return [c for c in s.get("children", []) if c["status"] in ("ready", "draft")]
+
+
+def reading_order() -> list[dict]:
+    """Every page in reading order: each section, then its ready parts."""
+    order = []
+    for s in ready():
+        order.append(s)
+        order.extend(ready_children(s))
+    return order
+
+
+def parent_of(slug: str) -> dict | None:
+    for s in SECTIONS:
+        if any(c["slug"] == slug for c in s.get("children", [])):
+            return s
+    return None
+
+
+def count_steps(slug: str) -> int:
+    src = (HERE.parent / "_src" / f"{slug}.html").read_text(encoding="utf-8")
+    return len(re.findall(r'<span class="num">\d+</span>', src))
+
+
 def topbar(current: str | None) -> str:
     links = []
+    par = parent_of(current) if current else None
     for s in ready():
-        cur = ' aria-current="page"' if s["slug"] == current else ""
+        cur = ' aria-current="page"' if s["slug"] == current or (par and par["slug"] == s["slug"]) else ""
         links.append(f'<a href="{s["slug"]}.html"{cur}>{s["short"]}</a>')
     home_cur = ' aria-current="page"' if current is None else ""
     return (
@@ -231,9 +319,33 @@ def on_this_page(src: str) -> str:
     return f'  <nav class="onpage" aria-label="On this page"><span>On this page:</span>{chips}</nav>'
 
 
+def pager(s: dict) -> str:
+    order = reading_order()
+    i = order.index(s)
+    prev_s = order[i - 1] if i > 0 else None
+    next_s = order[i + 1] if i + 1 < len(order) else None
+    out = '<nav class="pager" aria-label="Previous and next section">'
+    out += (f'<a class="prev" href="{prev_s["slug"]}.html"><span class="dir">← Previous</span>'
+            f'<span class="t">{prev_s["title"]}</span></a>') if prev_s else \
+           '<a class="prev" href="index.html"><span class="dir">← Back to</span><span class="t">Guide overview</span></a>'
+    out += (f'<a class="next" href="{next_s["slug"]}.html"><span class="dir">Next →</span>'
+            f'<span class="t">{next_s["title"]}</span></a>') if next_s else \
+           '<a class="next" href="index.html"><span class="dir">Back to →</span><span class="t">Guide overview</span></a>'
+    return out + "</nav>"
+
+
+def crumbs(s: dict) -> str:
+    par = parent_of(s["slug"])
+    if par:
+        n = SECTIONS.index(par) + 1
+        k = par["children"].index(s) + 1
+        return (f'<a href="index.html">Guide</a> · Section {n} · <a href="{par["slug"]}.html">{par["title"]}</a>'
+                f' · Part {k} · {s["time"]} · {count_steps(s["slug"])} steps')
+    return f'<a href="index.html">Guide</a> · Section {SECTIONS.index(s) + 1} · {s["time"]}'
+
+
 def section_page(i: int, s: dict) -> str:
     src = add_step_ids((HERE.parent / "_src" / f'{s["slug"]}.html').read_text(encoding="utf-8"))
-    n = SECTIONS.index(s) + 1
     prereq = f'  <p class="prereq">{s["prereq"]}</p>\n' if s.get("prereq") else ""
     # A draft can already contain real screenshot steps: then it gets the
     # red-box hint and the step player too, plus its draft note.
@@ -245,7 +357,7 @@ def section_page(i: int, s: dict) -> str:
                 if s.get("draftnote") else DRAFT_NOTE) + "\n"
     hero = (
         '<header class="hero">\n'
-        f'  <div class="crumbs"><a href="index.html">Guide</a> · Section {n} · {s["time"]}</div>\n'
+        f'  <div class="crumbs">{crumbs(s)}</div>\n'
         f'  <h1>{s["title"]}</h1>\n'
         f'  <p class="lede">{s["lede"]}'
         + (' You only ever need to click whatever is inside the '
@@ -254,18 +366,45 @@ def section_page(i: int, s: dict) -> str:
         f"{prereq}{note}{LEGEND + chr(10) if has_steps else ''}{on_this_page(src)}\n"
         "</header>"
     )
-    rs = ready()
-    prev_s = rs[i - 1] if i > 0 else None
-    next_s = rs[i + 1] if i + 1 < len(rs) else None
-    pager = '<nav class="pager" aria-label="Previous and next section">'
-    pager += (f'<a class="prev" href="{prev_s["slug"]}.html"><span class="dir">← Previous</span>'
-              f'<span class="t">{prev_s["title"]}</span></a>') if prev_s else \
-             '<a class="prev" href="index.html"><span class="dir">← Back to</span><span class="t">Guide overview</span></a>'
-    pager += (f'<a class="next" href="{next_s["slug"]}.html"><span class="dir">Next →</span>'
-              f'<span class="t">{next_s["title"]}</span></a>') if next_s else \
-             '<a class="next" href="index.html"><span class="dir">Back to →</span><span class="t">Guide overview</span></a>'
-    pager += "</nav>"
-    return page(f'{s["title"]} · {GUIDE_TITLE}', s["desc"], s["slug"], f"{hero}\n\n{src}\n{pager}", player=True)
+    return page(f'{s["title"]} · {GUIDE_TITLE}', s["desc"], s["slug"], f"{hero}\n\n{src}\n{pager(s)}", player=True)
+
+
+def part_cards(s: dict) -> str:
+    cards = []
+    for k, c in enumerate(s["children"], 1):
+        if c["status"] == "ready":
+            cards.append(
+                f'  <a class="card" href="{c["slug"]}.html">\n'
+                f'    <span class="no">PART {k}</span><h3>{c["title"]}</h3><p>{c["desc"]}</p>\n'
+                f'    <span class="meta"><span class="pill ready">Ready</span>{c["time"]} · {count_steps(c["slug"])} steps</span>\n  </a>'
+            )
+        else:
+            cards.append(
+                f'  <div class="card soon">\n'
+                f'    <span class="no">PART {k}</span><h3>{c["title"]}</h3><p>{c["desc"]}</p>\n'
+                f'    <span class="meta"><span class="pill soon">In preparation</span></span>\n  </div>'
+            )
+    return (
+        '<section class="chapter" id="parts">\n  <header>\n    <div class="eyebrow">Parts</div>\n'
+        '    <h2>Pick a part</h2>\n    <p>Do them in order the first time: each one builds on the one before.</p>\n'
+        '  </header>\n  <div class="cards">\n' + "\n".join(cards) + '\n  </div>\n</section>'
+    )
+
+
+def hub_page(s: dict) -> str:
+    src = (HERE.parent / "_src" / f'{s["slug"]}.html').read_text(encoding="utf-8")
+    src = add_step_ids(src.replace("<!--PARTS-->", part_cards(s)))
+    first = ready_children(s)[0]
+    hero = (
+        '<header class="hero">\n'
+        f'  <div class="crumbs">{crumbs(s)}</div>\n'
+        f'  <h1>{s["title"]}</h1>\n'
+        f'  <p class="lede">{s["lede"]}</p>\n'
+        f'  <div class="hero-row"><a class="btn" href="{first["slug"]}.html">Start with part 1 →</a></div>\n'
+        f'{on_this_page(src)}\n'
+        "</header>"
+    )
+    return page(f'{s["title"]} · {GUIDE_TITLE}', s["desc"], s["slug"], f"{hero}\n\n{src}\n{pager(s)}", player=False)
 
 
 def index_page() -> str:
@@ -327,9 +466,10 @@ def index_page() -> str:
 
 def main() -> None:
     (ROOT / "index.html").write_text(index_page(), encoding="utf-8")
-    for i, s in enumerate(ready()):
-        (ROOT / f'{s["slug"]}.html').write_text(section_page(i, s), encoding="utf-8")
-    print("wrote index.html and", ", ".join(f'{s["slug"]}.html' for s in ready()))
+    for i, s in enumerate(reading_order()):
+        out = hub_page(s) if s.get("children") else section_page(i, s)
+        (ROOT / f'{s["slug"]}.html').write_text(out, encoding="utf-8")
+    print("wrote index.html and", ", ".join(f'{s["slug"]}.html' for s in reading_order()))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,6 @@
+{
+    "DESIGN_NAME": "mem_ctrl",
+    "VERILOG_FILES": "dir::mem_ctrl.v",
+    "CLOCK_PORT": "clk",
+    "CLOCK_PERIOD": 10
+}

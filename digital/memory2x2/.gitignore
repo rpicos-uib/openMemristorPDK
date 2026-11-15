@@ -1,6 +1,7 @@
-# Outputs: made again by make sim / synth / gates
+# Outputs: made again by make sim / synth / gates / layout
 memory2x2_tb
 gates_tb
 *.vcd
 mem_ctrl_gates.v
 mem_ctrl_stats.txt
+runs/

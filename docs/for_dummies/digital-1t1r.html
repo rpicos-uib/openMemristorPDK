@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>A real bit-cell: 1T1R · openMemristorPDK Guide</title>
+<meta name="description" content="Put IHP&#x27;s transistor in series with the memristor: a door that blocks writes to the cells you don&#x27;t want to change.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<header class="topbar"><div class="inner">
+  <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span>openMemristorPDK Guide</a>
+  <nav class="topnav" aria-label="Guide sections"><a href="index.html">Overview</a><a href="install.html">Install</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html">Monte Carlo</a><a href="ihp.html">IHP PDK</a><a href="digital.html" aria-current="page">Digital</a></nav>
+</div></header>
+<div class="wrap">
+<header class="hero">
+  <div class="crumbs"><a href="index.html">Guide</a> · Section 7 · <a href="digital.html">The digital side</a> · Part 6 · about 10 min · 13 steps</div>
+  <h1>A real bit-cell: 1T1R</h1>
+  <p class="lede">Add IHP's transistor to the memristor to make the bit-cell real memory chips use. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
+  <p class="prereq">Do <a href="ihp.html">Add IHP's PDK</a> first, and <a href="digital-bit.html">Store a bit</a>.</p>
+  <div class="hero-row">
+    <button class="btn" type="button" id="play-all">▶ Play as video</button>
+    <span class="legend">
+      <span><i class="swatch-box"></i> click here</span>
+      <span>Click any screenshot to see it full size</span>
+      <span>Keys in the player: <kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd> <kbd>Esc</kbd></span>
+    </span>
+  </div>
+
+</header>
+
+<section class="chapter" id="t1r">
+  <header>
+    <div class="eyebrow">About 10 minutes</div>
+    <h2>Step by step</h2>
+    <p>Real memory chips put a <b>transistor</b> in series with every memristor: the <b>1T1R</b> cell. The transistor is a door: only the cells whose door is open can be written or read, so neighbours are safe and sneak paths are blocked. openMemristorPDK has no transistors, so this cell borrows one from IHP's SG13G2 PDK.</p>
+  </header>
+  <article class="step" id="step-1">
+    <div class="step-head"><span class="num">1</span><h3>Three wires</h3></div>
+    <p class="do">Do <a href="ihp.html">Add IHP's PDK</a> first if you haven't: it explains where IHP's PDK lives. This part only uses the copy that comes with the container.</p>
+    <dl class="explain">
+      <dt>word line (wl)</dt><dd>Goes to the transistor's gate. 3.3 V opens the door, 0 V shuts it.</dd>
+      <dt>bit line (bl)</dt><dd>Goes to the memristor. +1.5 V writes a 1, 0.2 V reads.</dd>
+      <dt>source line (sl)</dt><dd>Goes to the other side of the transistor. +2.0 V writes a 0 (the current flows backwards).</dd>
+    </dl>
+    <div class="tablewrap"><table class="views">
+      <thead><tr><th>Time</th><th>What happens</th><th>Door</th></tr></thead>
+      <tbody>
+        <tr><td>0–100 ns</td><td>read 1</td><td>open</td></tr>
+        <tr><td>100–200 ns</td><td>write a 1</td><td><b>shut</b></td></tr>
+        <tr><td>200–300 ns</td><td>read 2</td><td>open</td></tr>
+        <tr><td>300–400 ns</td><td>write a 1</td><td>open</td></tr>
+        <tr><td>400–500 ns</td><td>read 3</td><td>open</td></tr>
+        <tr><td>500–600 ns</td><td>write a 0</td><td>open</td></tr>
+        <tr><td>600–700 ns</td><td>read 4</td><td>open</td></tr>
+      </tbody>
+    </table></div>
+  </article>
+  <article class="step" id="step-2" data-img="img/t01_click_1t1r_tb.png" data-title="Pick the 1T1R testbench" data-do="In the memristor window’s Library Manager, with openmemristorpdk_pr selected, click memristor_hfo2_al_1t1r_tb.">
+    <div class="step-head"><span class="num">2</span><h3>Pick the 1T1R testbench</h3></div>
+    <p class="do">In the memristor window’s Library Manager, with <b>openmemristorpdk_pr</b> selected, click <b class="ui">memristor_hfo2_al_1t1r_tb</b>.</p>
+    <button class="shot" type="button"><img src="img/t01_click_1t1r_tb.png" alt="memristor_hfo2_al_1t1r_tb boxed in red in the Cells list" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-3" data-img="img/t02_open_xschem.png" data-title="Open it in xschem" data-do="On the Schematic row, click Open in xschem.">
+    <div class="step-head"><span class="num">3</span><h3>Open it in xschem</h3></div>
+    <p class="do">On the <b>Schematic</b> row, click <b class="ui">Open in xschem</b>.</p>
+    <button class="shot" type="button"><img src="img/t02_open_xschem.png" alt="Open in xschem on the Schematic row boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-4" data-img="img/t03_testbench.png" data-title="The 1T1R cell" data-do="Box 1 is the cell: the memristor on top, IHP’s transistor sg13_hv_nmos below it. Box 2 holds the three voltages.">
+    <div class="step-head"><span class="num">4</span><h3>The 1T1R cell</h3></div>
+    <p class="do">Box 1 is the cell: the memristor on top, IHP’s transistor <code>sg13_hv_nmos</code> below it. Box 2 holds the three voltages.</p>
+    <button class="shot" type="button"><img src="img/t03_testbench.png" alt="xschem with the memristor and the IHP transistor boxed as 1 and the vwl, vset and vreset lines boxed as 2" loading="lazy"></button>
+    <dl class="explain">
+      <dt>sg13_hv_nmos</dt><dd>IHP's "high-voltage" n-type transistor, made for up to 3.3 V. Its symbol comes from <code>/foss/pdks/ihp-sg13g2</code>, the memristor's from openMemristorPDK: one drawing, two PDKs.</dd>
+      <dt>.lib ... cornerMOShv.lib mos_tt</dt><dd>Loads IHP's transistor models at the typical corner (TT), like the corner library of <a href="corners-montecarlo.html">Corners and Monte Carlo</a>.</dd>
+      <dt>pre_osdi ... psp103.osdi</dt><dd>IHP's compiled transistor model (PSP 103), loaded next to our compiled memristor model.</dd>
+    </dl>
+  </article>
+  <article class="step" id="step-5" data-img="img/t04_netlist_simulate.png" data-title="Netlist, then Simulate" data-do="Click Netlist (1), then Simulate (2), and wait about 10 seconds.">
+    <div class="step-head"><span class="num">5</span><h3>Netlist, then Simulate</h3></div>
+    <p class="do">Click <b class="ui">Netlist</b> (1), then <b class="ui">Simulate</b> (2), and wait about 10 seconds.</p>
+    <button class="shot" type="button"><img src="img/t04_netlist_simulate.png" alt="Netlist boxed as 1, Simulate boxed as 2" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-6" data-img="img/t05_result.png" data-title="Two plots and the console" data-do="Two plot windows and the ngspice window open.">
+    <div class="step-head"><span class="num">6</span><h3>Two plots and the console</h3></div>
+    <p class="do">Two plot windows and the ngspice window open.</p>
+    <button class="shot" type="button"><img src="img/t05_result.png" alt="xschem, the ngspice window and two plot windows" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-7" data-img="img/t07_current.png" data-title="The current" data-do="The top plot is the current into the bit line, in mA.">
+    <div class="step-head"><span class="num">7</span><h3>The current</h3></div>
+    <p class="do">The top plot is the current into the bit line, in mA.</p>
+    <button class="shot" type="button"><img src="img/t07_current.png" alt="Current into the bit line: nothing until 300 ns, 1.7 mA from 300 to 400 ns, 0.25 mA from 400 to 500 ns, a dip to -1.3 mA at 510 ns, then almost zero" loading="lazy"></button>
+    <div class="see"><strong>How to read it</strong>
+      <span>100–200 ns: the bit line is at 1.5 V, but no current flows. The door is shut, so the write does nothing.</span>
+      <span>300–400 ns: the same write with the door open. Current flows (1.7 mA) and the memristor switches on.</span>
+      <span>400–500 ns: read 3 gives 0.25 mA, a 1. 500 ns: the write 0 pulls current backwards (the dip) and switches it off.</span>
+    </div>
+  </article>
+  <article class="step" id="step-8" data-img="img/t08_console.png" data-title="The four reads" data-do="Look at the end of the ngspice window.">
+    <div class="step-head"><span class="num">8</span><h3>The four reads</h3></div>
+    <p class="do">Look at the end of the ngspice window.</p>
+    <button class="shot" type="button"><img src="img/t08_console.png" alt="ngspice: read 1 3.98 uA, read 2 after write 1 door shut 3.98 uA, read 3 after write 1 door open 254.62 uA, read 4 after write 0 3.98 uA" loading="lazy"></button>
+    <div class="see"><strong>The bits</strong><span>0, then still <b>0</b> after the write with the door shut, then 1, then 0. The read with the door open gives 255 µA instead of 400 µA: the transistor adds a little resistance, but it's still far above the 100 µA line.</span></div>
+  </article>
+  <article class="step" id="step-9" data-img="img/t09_quit_current.png" data-title="Close the current plot" data-do="Click Quit in the top plot window.">
+    <div class="step-head"><span class="num">9</span><h3>Close the current plot</h3></div>
+    <p class="do">Click <b class="ui">Quit</b> in the top plot window.</p>
+    <button class="shot" type="button"><img src="img/t09_quit_current.png" alt="Quit in the current plot window boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-10" data-img="img/t06_voltages.png" data-title="The three wires" data-do="Now the other plot is fully visible: the three wire voltages over time.">
+    <div class="step-head"><span class="num">10</span><h3>The three wires</h3></div>
+    <p class="do">Now the other plot is fully visible: the three wire voltages over time.</p>
+    <button class="shot" type="button"><img src="img/t06_voltages.png" alt="Voltages: wl (red) at 3.3 V except 0 V from 100 to 200 ns, bl (blue) with 0.2 V reads and 1.5 V pulses at 100 and 300 ns, sl (orange) at 2 V from 500 to 600 ns" loading="lazy"></button>
+    <div class="see"><strong>How to read it</strong><span>The red word line drops to 0 V exactly while the first write pulse (blue) is on: the door is shut. The orange source line only moves for the write 0.</span></div>
+  </article>
+  <article class="step" id="step-11" data-img="img/t10_quit_voltages.png" data-title="Close the voltage plot" data-do="Click Quit in this plot window too.">
+    <div class="step-head"><span class="num">11</span><h3>Close the voltage plot</h3></div>
+    <p class="do">Click <b class="ui">Quit</b> in this plot window too.</p>
+    <button class="shot" type="button"><img src="img/t10_quit_voltages.png" alt="Quit in the voltage plot window boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-12" data-img="img/t11_quit_ngspice.png" data-title="Close the simulator" data-do="Click inside the white ngspice window, type quit and press Enter.">
+    <div class="step-head"><span class="num">12</span><h3>Close the simulator</h3></div>
+    <p class="do">Click inside the white ngspice window, type <code>quit</code> and press <kbd>Enter</kbd>.</p>
+    <button class="shot" type="button"><img src="img/t11_quit_ngspice.png" alt="The ngspice prompt boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-13" data-img="img/t12_close_xschem.png" data-title="Close xschem" data-do="Click the X at the top-right of the xschem window. You changed nothing, so it closes straight away.">
+    <div class="step-head"><span class="num">13</span><h3>Close xschem</h3></div>
+    <p class="do">Click the <b class="ui">X</b> at the top-right of the xschem window. You changed nothing, so it closes straight away.</p>
+    <button class="shot" type="button"><img src="img/t12_close_xschem.png" alt="xschem&#x27;s close button boxed in red" loading="lazy"></button>
+    <div class="oops"><strong>Try it</strong><span>Edit the code block and set <code>vwl = 1.2</code>, the gate voltage of IHP's ordinary low-voltage transistors: the door barely opens. Read 3 gives only about 47 µA, which counts as a 0 even though a 1 was written, and the write 0 can't change anything. Each time: Netlist, Simulate, close the plots and ngspice, and don't save when you close xschem.</span></div>
+  </article>
+</section>
+
+<nav class="pager" aria-label="Previous and next section"><a class="prev" href="digital-layout.html"><span class="dir">← Previous</span><span class="t">From gates to a chip layout</span></a><a class="next" href="index.html"><span class="dir">Back to →</span><span class="t">Guide overview</span></a></nav>
+<footer>
+  <p>Every screenshot was taken from the real programs with real mouse clicks: openPDKcreator, xschem, ngspice with OpenVAF-compiled models and KLayout, inside the IIC-OSIC-TOOLS container. The capture scripts are in <code>docs/for_dummies/_capture/</code>.</p>
+  <p>Created by R. Picos (<a href="mailto:rpicos.uib@gmail.com">rpicos.uib@gmail.com</a> / <a href="mailto:rodrigo.picos@uib.es">rodrigo.picos@uib.es</a>), as part of the research project <b>MemFRAME</b>.</p>
+  <div class="funding"><img src="img/miciu_aei.png" alt="Ministerio de Ciencia, Innovación y Universidades and Agencia Estatal de Investigación" width="1600" height="393"><p>Project PID2025-170062NB (MemFRAME) funded by <span class="nw">MICIU/AEI/<a href="https://doi.org/10.13039/501100011033">10.13039/501100011033</a></span></p></div>
+  <p><a href="https://github.com/rpicos-uib/openMemristorPDK">openMemristorPDK</a> · <a href="https://github.com/rpicos-uib/openpdkcreator-toolkit">openPDKcreator</a> · Apache License 2.0</p>
+</footer>
+</div>
+
+<div class="overlay" id="player" hidden role="dialog" aria-modal="true" aria-label="Step player">
+  <div class="bar">
+    <div class="title"><span class="n" id="p-n"></span><span id="p-title"></span></div>
+    <button type="button" id="p-close">Close ✕</button>
+  </div>
+  <div class="stage" id="p-stage"></div>
+  <div style="display:grid;gap:10px">
+    <p class="do-line" id="p-do"></p>
+    <div class="progress" aria-hidden="true"><i id="p-bar"></i></div>
+    <div class="ctrls">
+      <button type="button" id="p-prev">← Back</button>
+      <button type="button" class="primary" id="p-play">⏸ Pause</button>
+      <button type="button" id="p-next">Next →</button>
+    </div>
+  </div>
+</div>
+<script src="guide.js"></script>
+</body>
+</html>
