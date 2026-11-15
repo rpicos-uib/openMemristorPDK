@@ -72,7 +72,7 @@ meas tran r2 avg imem from=440n to=480n
 .endc
 .end</pre>
     </div>
-    <div class="oops"><strong>Note for us</strong><span>The erase takes about 70 ns instead of about 12 ns. The model's internal state keeps growing after the device is fully on, and has to come back down first. It's the same model quirk as in the TiO₂ models (the clamp is outside <code>idt</code>). Worth fixing in the models before we take screenshots for this section.</span></div>
+    <div class="see"><strong>How fast?</strong><span>Writing a 1 takes about 15 ns once the pulse passes +0.8 V, and writing a 0 about the same once it passes −0.6 V: the memory stops at fully on or fully off, so it is ready to switch back straight away. (A ns, nanosecond, is a billionth of a second.)</span></div>
   </article>
 </section>
 
@@ -177,7 +177,7 @@ endmodule</pre>
     <dl class="explain">
       <dt>Goal</dt><dd>Is the aim to <em>understand</em> memories (items A–C, all simulation) or to go through a real digital flow too (D–E: synthesis, place-and-route, a second PDK)?</dd>
       <dt>Device</dt><dd>Use the HfO₂ memristor for memory (clean thresholds, works as shown), and keep TiO₂ for the analog sections?</dd>
-      <dt>Models</dt><dd>Fix the <code>idt</code> clamp in all the Verilog-A models first? It changes the erase timing here and makes <code>x0</code> work. Section 2's plots would have to be re-shot.</dd>
+      <dt>Models</dt><dd>The HfO₂ model is fixed: its memory now starts at <code>x0</code> and stops at 0 and 1. The TiO₂ models still have the old problem. Fixing them changes nothing in sections 2, 3 and 5 if their testbenches start at <code>x0=0</code>, but about 60 screenshots show <code>x0=0.3</code> in xschem and would need re-shooting. When?</dd>
       <dt>Liberty</dt><dd>Leave the memristor's Liberty view as pins only, or invent a simple "memory macro" (e.g. the 2 × 2 crossbar plus its drivers) with real Verilog and Liberty views?</dd>
       <dt>Crossbar</dt><dd>The crossbars use the TiO₂ device. Make an HfO₂ version for the memory examples?</dd>
     </dl>

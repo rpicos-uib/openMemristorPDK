@@ -26,11 +26,19 @@
 // of a real bilayer RRAM stack elsewhere in the literature; here it's
 // simply the third, distinct real top-electrode metal this PDK's own
 // task called for, bottom electrode still always Au).
+//
+// State: x lives on a hidden node, dx = x - x0, integrated with
+// ddt() so that (1) the starting value x0 really is the starting
+// value (dx starts at 0), and (2) x stops at 0 and 1 instead of
+// piling up past them. (An earlier version clamped idt()'s output
+// from outside: the integral kept growing past 1, so switching back
+// was delayed, and x0 was ignored.)
 `include "disciplines.vams"
 
 module memristor_hfo2_al(BE, TE);
 inout BE, TE;
 electrical BE, TE;
+electrical dx;   // hidden node: how far x has moved from x0
 
 parameter real Ron = 500 from (0:inf);
 parameter real Roff = 50e3 from (0:inf);
@@ -39,17 +47,19 @@ parameter real Voff = -0.6 from (-inf:0);
 parameter real tau = 5n from (0:inf);
 parameter real x0 = 0.1 from [0:1];
 
-real x;
-real dxdt;
-real Rmem;
+real x, Rmem, dxdt;
 
 analog begin
-  dxdt = 0.0;
+  x = min(max(x0 + V(dx), 0.0), 1.0);   // the memory, kept between 0 and 1
+  dxdt = 0.0;                           // below the thresholds: no change
   if (V(BE, TE) > Von)
-    dxdt = (V(BE, TE) - Von) / tau;
+    dxdt = (V(BE, TE) - Von) / tau;     // SET: x grows
   else if (V(BE, TE) < Voff)
-    dxdt = (V(BE, TE) - Voff) / tau;
-  x = min(max(idt(dxdt, x0), 0.0), 1.0);
+    dxdt = (V(BE, TE) - Voff) / tau;    // RESET: x shrinks
+  if ((x >= 1.0 && dxdt > 0.0) || (x <= 0.0 && dxdt < 0.0))
+    dxdt = 0.0;                         // at an end: stop there
+  I(dx) <+ ddt(V(dx)) - dxdt;           // x moves at dxdt
+  I(dx) <+ 1e-12 * V(dx);               // keeps dx defined at rest
   Rmem = Roff * exp(-x * ln(Roff / Ron));
   I(BE, TE) <+ V(BE, TE) / Rmem;
 end

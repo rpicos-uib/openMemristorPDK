@@ -569,22 +569,29 @@ state-to-resistance mapping:
 \qquad
 R_{mem}(x) = R_{off}\, e^{-x\ln(R_{off}/R_{on})}
 \]
+$x$ is stored on a hidden node and stops at 0 and 1, so it starts at
+$x_0$ and can switch back at once. (A first version clamped the output
+of \texttt{idt()}; the integral kept growing past 1, which delayed
+RESET and ignored $x_0$.)
 \end{frame}
-\begin{frame}[fragile]{Step 18, continued -- authoring Model 2}
+\begin{frame}[fragile,shrink=5]{Step 18, continued -- authoring Model 2}
 \begin{va}
 module memristor_hfo2_al(BE, TE);
 inout BE, TE;
 electrical BE, TE;
+electrical dx;  // hidden node: x - x0
 parameter real Ron = 500, Roff = 50e3;
 parameter real Von = 0.8, Voff = -0.6 from (-inf:0);
 parameter real tau = 5n from (0:inf);
 parameter real x0 = 0.1 from [0:1];
 real x, dxdt, Rmem;
 analog begin
+  x = min(max(x0 + V(dx), 0.0), 1.0);
   dxdt = 0.0;
   if (V(BE,TE) > Von) dxdt = (V(BE,TE)-Von)/tau;
   else if (V(BE,TE) < Voff) dxdt = (V(BE,TE)-Voff)/tau;
-  x = min(max(idt(dxdt, x0), 0.0), 1.0);
+  if ((x >= 1.0 && dxdt > 0.0) || (x <= 0.0 && dxdt < 0.0)) dxdt = 0.0;
+  I(dx) <+ ddt(V(dx)) - dxdt;  I(dx) <+ 1e-12*V(dx);
   Rmem = Roff*exp(-x*ln(Roff/Ron));
   I(BE, TE) <+ V(BE, TE) / Rmem;
 end

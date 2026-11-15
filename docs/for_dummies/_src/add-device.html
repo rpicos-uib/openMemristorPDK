@@ -81,11 +81,19 @@
 // of a real bilayer RRAM stack elsewhere in the literature; here it&#x27;s
 // simply the third, distinct real top-electrode metal this PDK&#x27;s own
 // task called for, bottom electrode still always Au).
+//
+// State: x lives on a hidden node, dx = x - x0, integrated with
+// ddt() so that (1) the starting value x0 really is the starting
+// value (dx starts at 0), and (2) x stops at 0 and 1 instead of
+// piling up past them. (An earlier version clamped idt()&#x27;s output
+// from outside: the integral kept growing past 1, so switching back
+// was delayed, and x0 was ignored.)
 `include &quot;disciplines.vams&quot;
 
 module memristor_hfo2_al(BE, TE);
 inout BE, TE;
 electrical BE, TE;
+electrical dx;   // hidden node: how far x has moved from x0
 
 parameter real Ron = 500 from (0:inf);
 parameter real Roff = 50e3 from (0:inf);
@@ -94,17 +102,19 @@ parameter real Voff = -0.6 from (-inf:0);
 parameter real tau = 5n from (0:inf);
 parameter real x0 = 0.1 from [0:1];
 
-real x;
-real dxdt;
-real Rmem;
+real x, Rmem, dxdt;
 
 analog begin
-  dxdt = 0.0;
+  x = min(max(x0 + V(dx), 0.0), 1.0);   // the memory, kept between 0 and 1
+  dxdt = 0.0;                           // below the thresholds: no change
   if (V(BE, TE) &gt; Von)
-    dxdt = (V(BE, TE) - Von) / tau;
+    dxdt = (V(BE, TE) - Von) / tau;     // SET: x grows
   else if (V(BE, TE) &lt; Voff)
-    dxdt = (V(BE, TE) - Voff) / tau;
-  x = min(max(idt(dxdt, x0), 0.0), 1.0);
+    dxdt = (V(BE, TE) - Voff) / tau;    // RESET: x shrinks
+  if ((x &gt;= 1.0 &amp;&amp; dxdt &gt; 0.0) || (x &lt;= 0.0 &amp;&amp; dxdt &lt; 0.0))
+    dxdt = 0.0;                         // at an end: stop there
+  I(dx) &lt;+ ddt(V(dx)) - dxdt;           // x moves at dxdt
+  I(dx) &lt;+ 1e-12 * V(dx);               // keeps dx defined at rest
   Rmem = Roff * exp(-x * ln(Roff / Ron));
   I(BE, TE) &lt;+ V(BE, TE) / Rmem;
 end
@@ -138,11 +148,19 @@ EOF</pre><button class="copy" type="button" data-copy="cat &gt; ~/Documentos/rod
 // of a real bilayer RRAM stack elsewhere in the literature; here it&#x27;s
 // simply the third, distinct real top-electrode metal this PDK&#x27;s own
 // task called for, bottom electrode still always Au).
+//
+// State: x lives on a hidden node, dx = x - x0, integrated with
+// ddt() so that (1) the starting value x0 really is the starting
+// value (dx starts at 0), and (2) x stops at 0 and 1 instead of
+// piling up past them. (An earlier version clamped idt()&#x27;s output
+// from outside: the integral kept growing past 1, so switching back
+// was delayed, and x0 was ignored.)
 `include &quot;disciplines.vams&quot;
 
 module memristor_hfo2_al(BE, TE);
 inout BE, TE;
 electrical BE, TE;
+electrical dx;   // hidden node: how far x has moved from x0
 
 parameter real Ron = 500 from (0:inf);
 parameter real Roff = 50e3 from (0:inf);
@@ -151,17 +169,19 @@ parameter real Voff = -0.6 from (-inf:0);
 parameter real tau = 5n from (0:inf);
 parameter real x0 = 0.1 from [0:1];
 
-real x;
-real dxdt;
-real Rmem;
+real x, Rmem, dxdt;
 
 analog begin
-  dxdt = 0.0;
+  x = min(max(x0 + V(dx), 0.0), 1.0);   // the memory, kept between 0 and 1
+  dxdt = 0.0;                           // below the thresholds: no change
   if (V(BE, TE) &gt; Von)
-    dxdt = (V(BE, TE) - Von) / tau;
+    dxdt = (V(BE, TE) - Von) / tau;     // SET: x grows
   else if (V(BE, TE) &lt; Voff)
-    dxdt = (V(BE, TE) - Voff) / tau;
-  x = min(max(idt(dxdt, x0), 0.0), 1.0);
+    dxdt = (V(BE, TE) - Voff) / tau;    // RESET: x shrinks
+  if ((x &gt;= 1.0 &amp;&amp; dxdt &gt; 0.0) || (x &lt;= 0.0 &amp;&amp; dxdt &lt; 0.0))
+    dxdt = 0.0;                         // at an end: stop there
+  I(dx) &lt;+ ddt(V(dx)) - dxdt;           // x moves at dxdt
+  I(dx) &lt;+ 1e-12 * V(dx);               // keeps dx defined at rest
   Rmem = Roff * exp(-x * ln(Roff / Ron));
   I(BE, TE) &lt;+ V(BE, TE) / Rmem;
 end
@@ -208,11 +228,19 @@ EOF">Copy</button></div>
 // of a real bilayer RRAM stack elsewhere in the literature; here it&#x27;s
 // simply the third, distinct real top-electrode metal this PDK&#x27;s own
 // task called for, bottom electrode still always Au).
+//
+// State: x lives on a hidden node, dx = x - x0, integrated with
+// ddt() so that (1) the starting value x0 really is the starting
+// value (dx starts at 0), and (2) x stops at 0 and 1 instead of
+// piling up past them. (An earlier version clamped idt()&#x27;s output
+// from outside: the integral kept growing past 1, so switching back
+// was delayed, and x0 was ignored.)
 `include &quot;disciplines.vams&quot;
 
 module memristor_hfo2_al(BE, TE);
 inout BE, TE;
 electrical BE, TE;
+electrical dx;   // hidden node: how far x has moved from x0
 
 parameter real Ron = 500 from (0:inf);
 parameter real Roff = 50e3 from (0:inf);
@@ -221,17 +249,19 @@ parameter real Voff = -0.6 from (-inf:0);
 parameter real tau = 5n from (0:inf);
 parameter real x0 = 0.1 from [0:1];
 
-real x;
-real dxdt;
-real Rmem;
+real x, Rmem, dxdt;
 
 analog begin
-  dxdt = 0.0;
+  x = min(max(x0 + V(dx), 0.0), 1.0);   // the memory, kept between 0 and 1
+  dxdt = 0.0;                           // below the thresholds: no change
   if (V(BE, TE) &gt; Von)
-    dxdt = (V(BE, TE) - Von) / tau;
+    dxdt = (V(BE, TE) - Von) / tau;     // SET: x grows
   else if (V(BE, TE) &lt; Voff)
-    dxdt = (V(BE, TE) - Voff) / tau;
-  x = min(max(idt(dxdt, x0), 0.0), 1.0);
+    dxdt = (V(BE, TE) - Voff) / tau;    // RESET: x shrinks
+  if ((x &gt;= 1.0 &amp;&amp; dxdt &gt; 0.0) || (x &lt;= 0.0 &amp;&amp; dxdt &lt; 0.0))
+    dxdt = 0.0;                         // at an end: stop there
+  I(dx) &lt;+ ddt(V(dx)) - dxdt;           // x moves at dxdt
+  I(dx) &lt;+ 1e-12 * V(dx);               // keeps dx defined at rest
   Rmem = Roff * exp(-x * ln(Roff / Ron));
   I(BE, TE) &lt;+ V(BE, TE) / Rmem;
 end
@@ -239,7 +269,10 @@ endmodule</pre>
     </div>
     <dl class="explain">
       <dt>Von, Voff</dt><dd>The thresholds: above +0.8 V the memory turns <b>on</b> (SET), below −0.6 V it turns <b>off</b> (RESET). In between, nothing changes.</dd>
+      <dt>electrical dx</dt><dd>A hidden extra wire, like in the Joglekar model of <a href="add-model.html">Add a model</a>: its voltage stores how far the memory has moved since the start.</dd>
+      <dt>x = ...</dt><dd>The memory: the start value <code>x0</code> plus how far it has moved, kept between 0 and 1.</dd>
       <dt>dxdt</dt><dd>How fast the memory moves: zero between the thresholds, faster the further past them.</dd>
+      <dt>if (x &gt;= 1.0 ...)</dt><dd>Once the memory is fully on (1) or fully off (0), it stops moving that way. So it can switch back as soon as the voltage turns around.</dd>
       <dt>tau</dt><dd>How quickly it switches once past a threshold (the testbench uses 1 ms).</dd>
       <dt>Rmem = Roff * exp(...)</dt><dd>The resistance falls exponentially from Roff (50 kΩ, off) to Ron (500 Ω, on) as the memory goes from 0 to 1: a thin conducting filament growing through the HfO₂.</dd>
     </dl>
@@ -516,11 +549,13 @@ EOF">Copy</button></div>
     <p class="do">The plot window shows the rebuilt device switching on and off.</p>
     <button class="shot" type="button"><img src="img/d26_result.png" alt="xschem, the ngspice window and the plot" loading="lazy"></button>
     <div class="two">
-      <button class="shot" type="button"><img src="img/d27_plot_closeup.png" alt="Close-up of the HfO2 loop: flat, then a jump to 2.4 mA at +1.2 V, a straight line back, then a drop at -1.2 V" loading="lazy"></button>
+      <button class="shot" type="button"><img src="img/d27_plot_closeup.png" alt="Close-up of the HfO2 loop: flat, then a jump to 2.4 mA at +1.2 V, a straight line back through zero, then past -0.6 V a dip to about -1.3 mA and back to almost zero" loading="lazy"></button>
       <div class="see"><strong>How to read it</strong>
         <span>Starting at 0 V the device is <b>off</b>: almost no current (the flat part).</span>
         <span>Past +0.8 V it switches <b>on</b> (SET) and the current jumps to about 2.4 mA.</span>
         <span>It stays on all the way back through 0 V (the straight line through the middle) until, past −0.6 V, it switches <b>off</b> again (RESET).</span>
+        <span>Switching off takes a moment: the current first keeps growing, peaks at about −1.3 mA, then drops to almost nothing as the resistance climbs back to 50 kΩ.</span>
+        <span>The simulation runs two full swings, and both draw the same loop: the device switches on and off every time.</span>
         <span>Sharp jumps instead of the smooth TiO₂ loop: a different material, a different model.</span>
       </div>
     </div>
