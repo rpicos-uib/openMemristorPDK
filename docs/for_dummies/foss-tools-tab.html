@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>openPDKcreator&#x27;s Tools tab · openMemristorPDK Guide</title>
+<meta name="description" content="Let openPDKcreator check every program: found or missing, version, how to install it, and a button to start it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<header class="topbar"><div class="inner">
+  <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span>openMemristorPDK Guide</a>
+  <nav class="topnav" aria-label="Guide sections"><a href="index.html">Overview</a><a href="foss.html" aria-current="page">FOSS</a><a href="install.html">Install</a><a href="ihp.html">IHP PDK</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html">Monte Carlo</a><a href="digital.html">Digital</a></nav>
+</div></header>
+<div class="wrap">
+<header class="hero">
+  <div class="crumbs"><a href="index.html">Guide</a> · Section 1 · <a href="foss.html">Introduction to FOSS</a> · Part 5 · about 5 min · 7 steps</div>
+  <h1>openPDKcreator's Tools tab</h1>
+  <p class="lede">One tab in openPDKcreator checks every program on the other pages: is it there, which version, how to install it. It can also start them. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
+  <p class="prereq">Do <a href="install.html">Install from scratch</a> first, and start with openPDKcreator open (steps 1–5 of <a href="first-simulation.html">Your first simulation</a>).</p>
+  <div class="hero-row">
+    <button class="btn" type="button" id="play-all">▶ Play as video</button>
+    <span class="legend">
+      <span><i class="swatch-box"></i> click here</span>
+      <span>Click any screenshot to see it full size</span>
+      <span>Keys in the player: <kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd> <kbd>Esc</kbd></span>
+    </span>
+  </div>
+
+</header>
+
+<section class="chapter" id="tools-tab">
+  <header>
+    <div class="eyebrow">Hands on · about 5 minutes</div>
+    <h2>Let openPDKcreator check the programs</h2>
+    <p>openPDKcreator can check all these programs for you: which ones are installed, which version, where, and how to install the missing ones. It can also start any of them.</p>
+  </header>
+  <article class="step" id="step-1" data-img="img/f01_settings.png" data-title="Open Settings" data-do="Click the Settings tab at the top of openPDKcreator.">
+    <div class="step-head"><span class="num">1</span><h3>Open Settings</h3></div>
+    <p class="do">Click the <b class="ui">Settings</b> tab at the top of openPDKcreator.</p>
+    <button class="shot" type="button"><img src="img/f01_settings.png" alt="openPDKcreator showing the Wizard tab, with the Settings tab at the top boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-2" data-img="img/f02_tools_tab.png" data-title="Open the Tools tab" data-do="Click Tools, the second tab under Settings.">
+    <div class="step-head"><span class="num">2</span><h3>Open the Tools tab</h3></div>
+    <p class="do">Click <b class="ui">Tools</b>, the second tab under Settings.</p>
+    <button class="shot" type="button"><img src="img/f02_tools_tab.png" alt="The Settings tab with its General, Tools and Environment tabs; Tools is boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-3" data-img="img/f03_tools_list.png" data-title="Read the summary" data-do="Wait a few seconds while it checks every program, then read the line at the top.">
+    <div class="step-head"><span class="num">3</span><h3>Read the summary</h3></div>
+    <p class="do">Wait a few seconds while it checks every program, then read the line at the top.</p>
+    <button class="shot" type="button"><img src="img/f03_tools_list.png" alt="The Tools tab: Recheck and Launch Selected buttons, the summary 16/16 tool(s) found (1 superseded, not needed: openlane) boxed in red, and a table of 17 programs" loading="lazy"></button>
+    <div class="see"><strong>What you see</strong><span><b>16/16 tool(s) found</b>: inside the container every program is there. Below, one row per program: its short name (<b>Id</b>), its job (<b>Category</b>), whether a PDK flow needs it (<b>Required</b>), <b>Status</b>, the <b>Version</b> it reported and the <b>Path</b> of the program file. OpenLane says <b>superseded by librelane</b>: LibreLane replaced it, so it isn't needed.</span></div>
+  </article>
+  <article class="step" id="step-4" data-img="img/f04_tool_detail.png" data-title="Click a program" data-do="Click the ngspice row (1). Its card appears on the right (2).">
+    <div class="step-head"><span class="num">4</span><h3>Click a program</h3></div>
+    <p class="do">Click the <b class="ui">ngspice</b> row (1). Its card appears on the right (2).</p>
+    <button class="shot" type="button"><img src="img/f04_tool_detail.png" alt="The ngspice row selected (1) and, on the right (2), its card: what it is for, where it was found, its version, the install command sudo apt install ngspice, a note about Verilog-A support, and its website" loading="lazy"></button>
+    <div class="see"><strong>The card</strong><span>What the program is for, which part of a PDK it works with, where it was found and its version. Then how to install it on this kind of Linux (here <code>sudo apt install ngspice</code>), notes worth knowing, and its website. openPDKcreator only shows install commands: it never installs anything by itself.</span></div>
+  </article>
+  <article class="step" id="step-5" data-img="img/f05_launch.png" data-title="Start a program from here" data-do="Click the klayout row (1), then Launch Selected (2).">
+    <div class="step-head"><span class="num">5</span><h3>Start a program from here</h3></div>
+    <p class="do">Click the <b class="ui">klayout</b> row (1), then <b class="ui">Launch Selected</b> (2).</p>
+    <button class="shot" type="button"><img src="img/f05_launch.png" alt="The klayout row selected (1) and the Launch Selected button (2) boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" id="step-6" data-img="img/f06_klayout_open.png" data-title="KLayout opens" data-do="KLayout opens, empty and ready, with our PDK&#x27;s layer colours set up. Close it with its ✕.">
+    <div class="step-head"><span class="num">6</span><h3>KLayout opens</h3></div>
+    <p class="do">KLayout opens, empty and ready, with our PDK's layer colours set up. Close it with its <b class="ui">✕</b>.</p>
+    <button class="shot" type="button"><img src="img/f06_klayout_open.png" alt="An empty KLayout 0.30.12 window over openPDKcreator, saying Use File/Open to open a layout; its close button is boxed in red" loading="lazy"></button>
+    <div class="see"><strong>Same set-up as the Library Manager</strong><span>Launch Selected starts each program the way the Library Manager does: KLayout with this PDK's layers, xschem with this PDK's symbols, Magic with its technology file.</span></div>
+  </article>
+  <article class="step" id="step-7" data-img="img/f07_recheck.png" data-title="After installing something: Recheck" data-do="If you install a program while openPDKcreator is open, click Recheck to look again.">
+    <div class="step-head"><span class="num">7</span><h3>After installing something: Recheck</h3></div>
+    <p class="do">If you install a program while openPDKcreator is open, click <b class="ui">Recheck</b> to look again.</p>
+    <button class="shot" type="button"><img src="img/f07_recheck.png" alt="The Recheck button at the top left of the Tools tab boxed in red" loading="lazy"></button>
+    <div class="oops"><strong>A program says "missing"?</strong><span>That happens when you run openPDKcreator outside the container. Click its row, copy the install command from its card, run it in a terminal on your laptop, then click Recheck. Rows with <b>Required: no</b> are optional: you can work without them.</span></div>
+  </article>
+</section>
+
+<nav class="pager" aria-label="Previous and next section"><a class="prev" href="foss-digital.html"><span class="dir">← Previous</span><span class="t">Digital tools</span></a><a class="next" href="install.html"><span class="dir">Next →</span><span class="t">Install from scratch</span></a></nav>
+<footer>
+  <p>Every screenshot was taken from the real programs with real mouse clicks: openPDKcreator, xschem, ngspice with OpenVAF-compiled models and KLayout, inside the IIC-OSIC-TOOLS container. The capture scripts are in <code>docs/for_dummies/_capture/</code>.</p>
+  <p>Created by R. Picos (<a href="mailto:rpicos.uib@gmail.com">rpicos.uib@gmail.com</a> / <a href="mailto:rodrigo.picos@uib.es">rodrigo.picos@uib.es</a>), as part of the research project <b>MemFRAME</b>.</p>
+  <div class="funding"><img src="img/miciu_aei.png" alt="Ministerio de Ciencia, Innovación y Universidades and Agencia Estatal de Investigación" width="1600" height="393"><p>Project PID2025-170062NB (MemFRAME) funded by <span class="nw">MICIU/AEI/<a href="https://doi.org/10.13039/501100011033">10.13039/501100011033</a></span></p></div>
+  <p><a href="https://github.com/rpicos-uib/openMemristorPDK">openMemristorPDK</a> · <a href="https://github.com/rpicos-uib/openpdkcreator-toolkit">openPDKcreator</a> · Apache License 2.0</p>
+</footer>
+</div>
+
+<div class="overlay" id="player" hidden role="dialog" aria-modal="true" aria-label="Step player">
+  <div class="bar">
+    <div class="title"><span class="n" id="p-n"></span><span id="p-title"></span></div>
+    <button type="button" id="p-close">Close ✕</button>
+  </div>
+  <div class="stage" id="p-stage"></div>
+  <div style="display:grid;gap:10px">
+    <p class="do-line" id="p-do"></p>
+    <div class="progress" aria-hidden="true"><i id="p-bar"></i></div>
+    <div class="ctrls">
+      <button type="button" id="p-prev">← Back</button>
+      <button type="button" class="primary" id="p-play">⏸ Pause</button>
+      <button type="button" id="p-next">Next →</button>
+    </div>
+  </div>
+</div>
+<script src="guide.js"></script>
+</body>
+</html>

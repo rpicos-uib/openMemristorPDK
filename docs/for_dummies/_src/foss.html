@@ -22,240 +22,28 @@
   <header>
     <div class="eyebrow">The big picture</div>
     <h2>Which program does what</h2>
-    <p>Designing a chip is a chain of jobs, and each job has its own program. Your laptop only needs two of them; the container brings all the others.</p>
+    <p>Designing a chip is a chain of jobs, and each job has its own program. Your laptop only needs two of them; the container brings all the others. Click a program to open its tab.</p>
   </header>
   <article class="step">
     <div class="step-head"><span class="num">?</span><h3>The chain, from download to layout</h3></div>
     <div class="tablewrap"><table class="views">
       <thead><tr><th>Job</th><th>Program</th><th>Runs on</th></tr></thead>
       <tbody>
-        <tr><td>Download the projects</td><td><a href="#tool-git">Git</a></td><td>Laptop</td></tr>
-        <tr><td>Run the toolbox</td><td><a href="#tool-podman">Podman</a> + <a href="#tool-iic-osic-tools">IIC-OSIC-TOOLS</a></td><td>Laptop</td></tr>
-        <tr><td>Explore and build the PDK</td><td><a href="#tool-openpdkcreator">openPDKcreator</a></td><td>Container</td></tr>
-        <tr><td>Draw a circuit</td><td><a href="#tool-xschem">xschem</a></td><td>Container</td></tr>
-        <tr><td>Compile a device model</td><td><a href="#tool-openvaf">OpenVAF</a></td><td>Container</td></tr>
-        <tr><td>Simulate voltages and currents</td><td><a href="#tool-ngspice">ngspice</a></td><td>Container</td></tr>
-        <tr><td>Look at and check a layout</td><td><a href="#tool-klayout">KLayout</a>, <a href="#tool-magic">Magic</a></td><td>Container</td></tr>
-        <tr><td>Compare layout and schematic (LVS)</td><td><a href="#tool-netgen">Netgen</a></td><td>Container</td></tr>
-        <tr><td>Simulate bits and view them</td><td><a href="#tool-iverilog">Icarus Verilog</a>, <a href="#tool-gtkwave">GTKWave</a></td><td>Container</td></tr>
-        <tr><td>Turn Verilog into gates</td><td><a href="#tool-yosys">Yosys</a></td><td>Container</td></tr>
-        <tr><td>Place and wire the gates</td><td><a href="#tool-librelane">OpenROAD + LibreLane</a></td><td>Container</td></tr>
+        <tr><td>Download the projects</td><td><a href="foss-laptop.html#tool-git">Git</a></td><td>Laptop</td></tr>
+        <tr><td>Run the toolbox</td><td><a href="foss-laptop.html#tool-podman">Podman</a> + <a href="foss-laptop.html#tool-iic-osic-tools">IIC-OSIC-TOOLS</a></td><td>Laptop</td></tr>
+        <tr><td>Explore and build the PDK</td><td><a href="foss-analog.html#tool-openpdkcreator">openPDKcreator</a></td><td>Container</td></tr>
+        <tr><td>Draw a circuit</td><td><a href="foss-analog.html#tool-xschem">xschem</a></td><td>Container</td></tr>
+        <tr><td>Compile a device model</td><td><a href="foss-analog.html#tool-openvaf">OpenVAF</a></td><td>Container</td></tr>
+        <tr><td>Simulate voltages and currents</td><td><a href="foss-analog.html#tool-ngspice">ngspice</a></td><td>Container</td></tr>
+        <tr><td>Look at and check a layout</td><td><a href="foss-layout.html#tool-klayout">KLayout</a>, <a href="foss-layout.html#tool-magic">Magic</a></td><td>Container</td></tr>
+        <tr><td>Compare layout and schematic (LVS)</td><td><a href="foss-layout.html#tool-netgen">Netgen</a></td><td>Container</td></tr>
+        <tr><td>Simulate bits and view them</td><td><a href="foss-digital.html#tool-iverilog">Icarus Verilog</a>, <a href="foss-digital.html#tool-gtkwave">GTKWave</a></td><td>Container</td></tr>
+        <tr><td>Turn Verilog into gates</td><td><a href="foss-digital.html#tool-yosys">Yosys</a></td><td>Container</td></tr>
+        <tr><td>Place and wire the gates</td><td><a href="foss-digital.html#tool-librelane">OpenROAD + LibreLane</a></td><td>Container</td></tr>
       </tbody>
     </table></div>
   </article>
 </section>
 
 <!-- ================================================================ -->
-<section class="chapter" id="programs">
-  <header>
-    <div class="eyebrow">One tab per program</div>
-    <h2>The programs</h2>
-    <p>Pick a tab: what the program does, where this guide uses it, who makes it, and how to check and install it. Inside the container they are all already installed.</p>
-  </header>
-  <div class="tabs" data-tabs>
-    <div class="tablist" role="tablist" aria-label="Programs">
-      <button type="button" role="tab" id="tab-git" aria-controls="tool-git">Git</button>
-      <button type="button" role="tab" id="tab-podman" aria-controls="tool-podman">Podman</button>
-      <button type="button" role="tab" id="tab-iic-osic-tools" aria-controls="tool-iic-osic-tools">IIC-OSIC-TOOLS</button>
-      <button type="button" role="tab" id="tab-openpdkcreator" aria-controls="tool-openpdkcreator">openPDKcreator</button>
-      <button type="button" role="tab" id="tab-xschem" aria-controls="tool-xschem">xschem</button>
-      <button type="button" role="tab" id="tab-ngspice" aria-controls="tool-ngspice">ngspice</button>
-      <button type="button" role="tab" id="tab-openvaf" aria-controls="tool-openvaf">OpenVAF</button>
-      <button type="button" role="tab" id="tab-klayout" aria-controls="tool-klayout">KLayout</button>
-      <button type="button" role="tab" id="tab-magic" aria-controls="tool-magic">Magic</button>
-      <button type="button" role="tab" id="tab-netgen" aria-controls="tool-netgen">Netgen</button>
-      <button type="button" role="tab" id="tab-iverilog" aria-controls="tool-iverilog">Icarus Verilog</button>
-      <button type="button" role="tab" id="tab-gtkwave" aria-controls="tool-gtkwave">GTKWave</button>
-      <button type="button" role="tab" id="tab-yosys" aria-controls="tool-yosys">Yosys</button>
-      <button type="button" role="tab" id="tab-librelane" aria-controls="tool-librelane">OpenROAD + LibreLane</button>
-    </div>
-    <div class="tabpanel" id="tool-git" role="tabpanel" aria-labelledby="tab-git">
-      <h3>Git</h3>
-      <p class="tagline">Downloads projects and remembers every version of them.</p>
-      <p>Git keeps the whole history of a folder of files: every change, who made it and when, so you can always go back. <b>GitHub</b> is a website that stores Git projects for everyone to see; <code>git clone</code> downloads one to your computer. openPDKcreator, the memristor PDK and the container's launcher all live on GitHub.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Your laptop</dd><dt>Used in this guide</dt><dd><a href="install.html">Install from scratch</a>: downloading openPDKcreator, the PDK and the container launcher.</dd><dt>Made by</dt><dd>Linus Torvalds (the creator of Linux) in 2005; now a large community.</dd><dt>License</dt><dd>GNU GPL 2.0</dd><dt>Website</dt><dd><a href="https://git-scm.com">git-scm.com</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a terminal on your laptop:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>git --version</pre><button class="copy" type="button" data-copy="git --version">Copy</button></div></div>
-        <div><h4>Install it</h4><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y git</pre><button class="copy" type="button" data-copy="sudo apt install -y git">Copy</button></div><p>Already done in <a href="install.html">Install from scratch</a>.</p></div>
-      </div>
-    </div>
-    <div class="tabpanel" id="tool-podman" role="tabpanel" aria-labelledby="tab-podman">
-      <h3>Podman</h3>
-      <p class="tagline">Runs containers: a ready-made computer inside your computer.</p>
-      <p>A <b>container</b> is a complete, packed Linux system with programs already installed and set up. Podman downloads it and runs it, kept apart from the rest of your laptop. Installing forty chip-design programs one by one would take days; with a container it is one download. Podman does the same job as the better-known Docker, but needs no administrator program running in the background.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Your laptop</dd><dt>Used in this guide</dt><dd><a href="install.html">Install from scratch</a>: the launcher uses it to start the container.</dd><dt>Made by</dt><dd>Red Hat and the Podman community.</dd><dt>License</dt><dd>Apache 2.0</dd><dt>Website</dt><dd><a href="https://podman.io">podman.io</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a terminal on your laptop:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>podman --version</pre><button class="copy" type="button" data-copy="podman --version">Copy</button></div></div>
-        <div><h4>Install it</h4><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y podman</pre><button class="copy" type="button" data-copy="sudo apt install -y podman">Copy</button></div><p>Already done in <a href="install.html">Install from scratch</a>.</p></div>
-      </div>
-    </div>
-    <div class="tabpanel" id="tool-iic-osic-tools" role="tabpanel" aria-labelledby="tab-iic-osic-tools">
-      <h3>IIC-OSIC-TOOLS</h3>
-      <p class="tagline">The toolbox: dozens of chip-design programs in one container.</p>
-      <p>A container image with almost every open chip-design program already installed and working together: all the ones in these tabs, and many more. It also brings open PDKs from real factories (SkyWater sky130, GlobalFoundries gf180, IHP SG13G2). It opens a Linux desktop in a browser window, the <b>container desktop</b> you see in the screenshots. This guide uses version 2026.10.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Your laptop (it is the container itself)</dd><dt>Used in this guide</dt><dd>Every section from Your first simulation on: all the programs below run inside it.</dd><dt>Made by</dt><dd>The Institute for Integrated Circuits (IIC) at Johannes Kepler University Linz, Austria.</dd><dt>License</dt><dd>Apache 2.0</dd><dt>Website</dt><dd><a href="https://github.com/iic-jku/IIC-OSIC-TOOLS">github.com/iic-jku/IIC-OSIC-TOOLS</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>echo $IIC_OSIC_TOOLS_VERSION</pre><button class="copy" type="button" data-copy="echo $IIC_OSIC_TOOLS_VERSION">Copy</button></div></div>
-        <div><h4>Install it</h4><p>Follow <a href="install.html">Install from scratch</a>, steps D and E: download its launcher with Git, then start it. The first start downloads about 20 GB.</p></div>
-      </div>
-    </div>
-    <div class="tabpanel" id="tool-openpdkcreator" role="tabpanel" aria-labelledby="tab-openpdkcreator">
-      <h3>openPDKcreator</h3>
-      <p class="tagline">Build and explore a PDK in one window.</p>
-      <p>A window for looking inside a PDK and for building a new one: its layers, design rules, devices, symbols, models and layouts. Its <b>Library Manager</b> lists every cell and opens each view in the right program (a schematic in xschem, a layout in KLayout). It compiles Verilog-A models by itself when it starts, and its <b>Tools</b> tab checks the programs on this page (see <a href="#tools-tab">openPDKcreator's Tools tab</a> below). openMemristorPDK was built with it.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd>Every section.</dd><dt>Made by</dt><dd>R. Picos (University of the Balearic Islands), within the MemFRAME research project.</dd><dt>License</dt><dd>Apache 2.0</dd><dt>Website</dt><dd><a href="https://github.com/rpicos-uib/openpdkcreator-toolkit">github.com/rpicos-uib/openpdkcreator-toolkit</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>cd /foss/designs &amp;&amp; python3 main.py --help</pre><button class="copy" type="button" data-copy="cd /foss/designs &amp;&amp; python3 main.py --help">Copy</button></div></div>
-        <div><h4>Install it outside the container</h4><p>Download it with Git (<a href="install.html">Install from scratch</a>, step B); the container already has everything it needs. To run it outside the container you need Python 3 with Tk and two Python libraries:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y python3-tk python3-yaml</pre><button class="copy" type="button" data-copy="sudo apt install -y python3-tk python3-yaml">Copy</button></div><p>plus <code>./install_deps.sh</code> in the openPDKcreator folder for KLayout's Python module.</p></div>
-      </div>
-    </div>
-    <div class="tabpanel" id="tool-xschem" role="tabpanel" aria-labelledby="tab-xschem">
-      <h3>xschem</h3>
-      <p class="tagline">Draw circuits as schematics.</p>
-      <p>A schematic editor: you place symbols (a memristor, a voltage source, a transistor) and connect them with wires. Press <b>Netlist</b> and it writes the circuit as text for the simulator; press <b>Simulate</b> and it runs ngspice and shows the result.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="first-simulation.html">Your first simulation</a> onwards, every testbench.</dd><dt>Made by</dt><dd>Stefan Schippers, since 1998.</dd><dt>License</dt><dd>GNU GPL</dd><dt>Website</dt><dd><a href="https://xschem.sourceforge.io/stefan/index.html">xschem.sourceforge.io/stefan/index.html</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>xschem --version</pre><button class="copy" type="button" data-copy="xschem --version">Copy</button></div></div>
-        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y xschem</pre><button class="copy" type="button" data-copy="sudo apt install -y xschem">Copy</button></div><p>Ubuntu's version is older than the container's. For the newest one, build it from <a href="https://github.com/StefanSchippers/xschem">its GitHub page</a>.</p></div>
-      </div>
-    </div>
-    <div class="tabpanel" id="tool-ngspice" role="tabpanel" aria-labelledby="tab-ngspice">
-      <h3>ngspice</h3>
-      <p class="tagline">The circuit simulator: works out every voltage and current.</p>
-      <p>Give it a circuit (a netlist) and it computes how the voltages and currents change over time: the pinched hysteresis loop, the write and read currents of a bit. It grew out of SPICE, written at the University of California, Berkeley, in the 1970s, the program every circuit simulator since is based on. It can load models compiled by OpenVAF, which is how it simulates our memristors.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="first-simulation.html">Your first simulation</a> onwards: every analog simulation.</dd><dt>Made by</dt><dd>The ngspice team, on top of Berkeley SPICE.</dd><dt>License</dt><dd>BSD (modified)</dd><dt>Website</dt><dd><a href="https://ngspice.sourceforge.io">ngspice.sourceforge.io</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>ngspice --version</pre><button class="copy" type="button" data-copy="ngspice --version">Copy</button></div></div>
-        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y ngspice</pre><button class="copy" type="button" data-copy="sudo apt install -y ngspice">Copy</button></div><p>Check that <code>ngspice --version</code> says <b>ngspice-39 or newer</b>: older versions cannot load Verilog-A models.</p></div>
-      </div>
-    </div>
-    <div class="tabpanel" id="tool-openvaf" role="tabpanel" aria-labelledby="tab-openvaf">
-      <h3>OpenVAF</h3>
-      <p class="tagline">Turns a Verilog-A model into something ngspice can run.</p>
-      <p>Our memristor models are written in <b>Verilog-A</b>, a language for writing a device's equations (the <code>.va</code> files). OpenVAF compiles a <code>.va</code> file into an <code>.osdi</code> file that ngspice loads. openPDKcreator runs it for you every time it starts. The container has <b>OpenVAF-Reloaded</b>, the version the community keeps up to date.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="add-model.html">Add a model</a> and <a href="add-device.html">Add a new device</a>.</dd><dt>Made by</dt><dd>Pascal Kuthe, continued by the OpenVAF-Reloaded community.</dd><dt>License</dt><dd>GNU GPL</dd><dt>Website</dt><dd><a href="https://github.com/pascalkuthe/OpenVAF">github.com/pascalkuthe/OpenVAF</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>openvaf --version</pre><button class="copy" type="button" data-copy="openvaf --version">Copy</button></div></div>
-        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><p>No Ubuntu package. Download the ready-made program for Linux from its GitHub page, and copy it into <code>~/.local/bin</code>.</p></div>
-      </div>
-    </div>
-    <div class="tabpanel" id="tool-klayout" role="tabpanel" aria-labelledby="tab-klayout">
-      <h3>KLayout</h3>
-      <p class="tagline">Look at chip layouts and check them.</p>
-      <p>A <b>layout</b> is the drawing the factory builds from: coloured shapes, one colour per layer of material, stored in a GDS file. KLayout opens these files, even huge ones, fast. It also runs the <b>DRC</b> (design rule check): a script that measures every shape and complains when something is too small or too close.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="first-simulation.html">Your first simulation</a> and <a href="digital-layout.html">From gates to a chip layout</a>.</dd><dt>Made by</dt><dd>Matthias Köfferlein.</dd><dt>License</dt><dd>GNU GPL</dd><dt>Website</dt><dd><a href="https://www.klayout.de">www.klayout.de</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>klayout -v</pre><button class="copy" type="button" data-copy="klayout -v">Copy</button></div></div>
-        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><p>Ubuntu's package is old. Download the current <code>.deb</code> for your Ubuntu version from <a href="https://www.klayout.de/build.html">klayout.de/build.html</a> and open it to install.</p></div>
-      </div>
-    </div>
-    <div class="tabpanel" id="tool-magic" role="tabpanel" aria-labelledby="tab-magic">
-      <h3>Magic</h3>
-      <p class="tagline">The classic layout editor, which also reads circuits back out of layouts.</p>
-      <p>Another layout editor, first written at Berkeley in the 1980s and still used every day. Besides drawing, it can <b>extract</b> a layout: find the devices and wires in the shapes and write them as a netlist, so they can be compared with the schematic.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="add-device.html">Add a new device</a> (the <b>Magic Layout</b> row: Create, Run DRC), and inside LibreLane in <a href="digital-layout.html">From gates to a chip layout</a>.</dd><dt>Made by</dt><dd>John Ousterhout and students at UC Berkeley; maintained by Tim Edwards (Open Circuit Design).</dd><dt>License</dt><dd>Berkeley-style open license</dd><dt>Website</dt><dd><a href="http://opencircuitdesign.com/magic/">opencircuitdesign.com/magic</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>magic --version</pre><button class="copy" type="button" data-copy="magic --version">Copy</button></div></div>
-        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y magic</pre><button class="copy" type="button" data-copy="sudo apt install -y magic">Copy</button></div><p>Ubuntu's version is older; for real chip work, build it from its GitHub page.</p></div>
-      </div>
-    </div>
-    <div class="tabpanel" id="tool-netgen" role="tabpanel" aria-labelledby="tab-netgen">
-      <h3>Netgen</h3>
-      <p class="tagline">Checks that the layout is the same circuit as the schematic.</p>
-      <p>This check is called <b>LVS</b>, layout versus schematic. Netgen takes the netlist Magic extracted from the layout and the netlist from the schematic, and compares them device by device and wire by wire. If one wire is missing in the layout, LVS finds it before the factory does.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd>Inside LibreLane in <a href="digital-layout.html">From gates to a chip layout</a> ("0 LVS errors").</dd><dt>Made by</dt><dd>Tim Edwards (Open Circuit Design), the same family as Magic.</dd><dt>License</dt><dd>Free and open source (see its website)</dd><dt>Website</dt><dd><a href="http://opencircuitdesign.com/netgen/">opencircuitdesign.com/netgen</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>netgen -batch quit</pre><button class="copy" type="button" data-copy="netgen -batch quit">Copy</button></div></div>
-        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y netgen-lvs</pre><button class="copy" type="button" data-copy="sudo apt install -y netgen-lvs">Copy</button></div><p>Ubuntu calls it <code>netgen-lvs</code> (plain <code>netgen</code> is a different program). It is older than the container's.</p></div>
-      </div>
-    </div>
-    <div class="tabpanel" id="tool-iverilog" role="tabpanel" aria-labelledby="tab-iverilog">
-      <h3>Icarus Verilog</h3>
-      <p class="tagline">Simulates digital circuits written in Verilog.</p>
-      <p><b>Verilog</b> describes digital circuits as text: registers, logic, clocks. Icarus Verilog (<code>iverilog</code>) compiles that text and runs it, writing every signal's ones and zeros over time into a <code>.vcd</code> file. It is quick: no voltages, just bits.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="digital-twin.html">A digital twin in Verilog</a> and <a href="digital-gates.html">A controller made of real logic gates</a>.</dd><dt>Made by</dt><dd>Stephen Williams and contributors.</dd><dt>License</dt><dd>GNU GPL 2.0</dd><dt>Website</dt><dd><a href="https://steveicarus.github.io/iverilog/">steveicarus.github.io/iverilog</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>iverilog -V</pre><button class="copy" type="button" data-copy="iverilog -V">Copy</button></div></div>
-        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y iverilog</pre><button class="copy" type="button" data-copy="sudo apt install -y iverilog">Copy</button></div></div>
-      </div>
-    </div>
-    <div class="tabpanel" id="tool-gtkwave" role="tabpanel" aria-labelledby="tab-gtkwave">
-      <h3>GTKWave</h3>
-      <p class="tagline">Shows digital signals as waveforms.</p>
-      <p>Opens the <code>.vcd</code> file Icarus Verilog writes and draws each signal as a line going up and down over time, like a logic analyser. You pick the signals, zoom in, and read off when a bit changes.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="digital-twin.html">A digital twin in Verilog</a>.</dd><dt>Made by</dt><dd>Tony Bybell and contributors.</dd><dt>License</dt><dd>GNU GPL 2.0</dd><dt>Website</dt><dd><a href="https://gtkwave.sourceforge.net">gtkwave.sourceforge.net</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>gtkwave --version</pre><button class="copy" type="button" data-copy="gtkwave --version">Copy</button></div></div>
-        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y gtkwave</pre><button class="copy" type="button" data-copy="sudo apt install -y gtkwave">Copy</button></div></div>
-      </div>
-    </div>
-    <div class="tabpanel" id="tool-yosys" role="tabpanel" aria-labelledby="tab-yosys">
-      <h3>Yosys</h3>
-      <p class="tagline">Turns Verilog into real logic gates.</p>
-      <p>This step is called <b>synthesis</b>. Yosys reads a Verilog description and builds the same behaviour out of the logic gates a factory offers (here IHP's standard cells: NAND, flip-flops and so on), then counts them and their area.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="digital-gates.html">A controller made of real logic gates</a> (65 gates) and, inside LibreLane, <a href="digital-layout.html">From gates to a chip layout</a>.</dd><dt>Made by</dt><dd>Claire Wolf and YosysHQ.</dd><dt>License</dt><dd>ISC</dd><dt>Website</dt><dd><a href="https://yosyshq.net/yosys/">yosyshq.net/yosys</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>yosys -V</pre><button class="copy" type="button" data-copy="yosys -V">Copy</button></div></div>
-        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y yosys</pre><button class="copy" type="button" data-copy="sudo apt install -y yosys">Copy</button></div></div>
-      </div>
-    </div>
-    <div class="tabpanel" id="tool-librelane" role="tabpanel" aria-labelledby="tab-librelane">
-      <h3>OpenROAD and LibreLane</h3>
-      <p class="tagline">From logic gates to a finished chip layout, automatically.</p>
-      <p><b>OpenROAD</b> places the gates on the chip, builds the clock wiring, routes every wire and checks the timing (with OpenSTA). <b>LibreLane</b> is the recipe that runs the whole chain in order: Yosys, OpenROAD, then the Magic and KLayout DRC and the Netgen LVS, and collects the reports. One command goes from Verilog to a GDS file the factory could build. LibreLane continues OpenLane 2.</p>
-      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="digital-layout.html">From gates to a chip layout</a>.</dd><dt>Made by</dt><dd>OpenROAD: a project started at UC San Diego in 2018. LibreLane: the open-source silicon community, from OpenLane.</dd><dt>License</dt><dd>BSD 3-clause (OpenROAD), Apache 2.0 (LibreLane)</dd><dt>Website</dt><dd><a href="https://librelane.readthedocs.io">librelane.readthedocs.io</a></dd></dl>
-      <div class="two">
-        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>librelane --version</pre><button class="copy" type="button" data-copy="librelane --version">Copy</button></div></div>
-        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><p>Use the container. OpenROAD is large and hard to build, and LibreLane needs every other program on this page at the right version: the container already has them all, tested together.</p></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ================================================================ -->
-<section class="chapter" id="tools-tab">
-  <header>
-    <div class="eyebrow">Hands on · about 5 minutes</div>
-    <h2>openPDKcreator's Tools tab</h2>
-    <p>openPDKcreator can check all these programs for you: which ones are installed, which version, where, and how to install the missing ones. It can also start any of them. Do this part after <a href="install.html">Install from scratch</a>, with openPDKcreator open (steps 1–3 of <a href="first-simulation.html">Your first simulation</a>).</p>
-  </header>
-  <article class="step" data-img="img/f01_settings.png" data-title="Open Settings" data-do="Click the Settings tab at the top of openPDKcreator.">
-    <div class="step-head"><span class="num">1</span><h3>Open Settings</h3></div>
-    <p class="do">Click the <b class="ui">Settings</b> tab at the top of openPDKcreator.</p>
-    <button class="shot" type="button"><img src="img/f01_settings.png" alt="openPDKcreator showing the Wizard tab, with the Settings tab at the top boxed in red" loading="lazy"></button>
-  </article>
-  <article class="step" data-img="img/f02_tools_tab.png" data-title="Open the Tools tab" data-do="Click Tools, the second tab under Settings.">
-    <div class="step-head"><span class="num">2</span><h3>Open the Tools tab</h3></div>
-    <p class="do">Click <b class="ui">Tools</b>, the second tab under Settings.</p>
-    <button class="shot" type="button"><img src="img/f02_tools_tab.png" alt="The Settings tab with its General, Tools and Environment tabs; Tools is boxed in red" loading="lazy"></button>
-  </article>
-  <article class="step" data-img="img/f03_tools_list.png" data-title="Read the summary" data-do="Wait a few seconds while it checks every program, then read the line at the top.">
-    <div class="step-head"><span class="num">3</span><h3>Read the summary</h3></div>
-    <p class="do">Wait a few seconds while it checks every program, then read the line at the top.</p>
-    <button class="shot" type="button"><img src="img/f03_tools_list.png" alt="The Tools tab: Recheck and Launch Selected buttons, the summary 16/16 tool(s) found (1 superseded, not needed: openlane) boxed in red, and a table of 17 programs" loading="lazy"></button>
-    <div class="see"><strong>What you see</strong><span><b>16/16 tool(s) found</b>: inside the container every program is there. Below, one row per program: its short name (<b>Id</b>), its job (<b>Category</b>), whether a PDK flow needs it (<b>Required</b>), <b>Status</b>, the <b>Version</b> it reported and the <b>Path</b> of the program file. OpenLane says <b>superseded by librelane</b>: LibreLane replaced it, so it isn't needed.</span></div>
-  </article>
-  <article class="step" data-img="img/f04_tool_detail.png" data-title="Click a program" data-do="Click the ngspice row (1). Its card appears on the right (2).">
-    <div class="step-head"><span class="num">4</span><h3>Click a program</h3></div>
-    <p class="do">Click the <b class="ui">ngspice</b> row (1). Its card appears on the right (2).</p>
-    <button class="shot" type="button"><img src="img/f04_tool_detail.png" alt="The ngspice row selected (1) and, on the right (2), its card: what it is for, where it was found, its version, the install command sudo apt install ngspice, a note about Verilog-A support, and its website" loading="lazy"></button>
-    <div class="see"><strong>The card</strong><span>What the program is for, which part of a PDK it works with, where it was found and its version. Then how to install it on this kind of Linux (here <code>sudo apt install ngspice</code>), notes worth knowing, and its website. openPDKcreator only shows install commands: it never installs anything by itself.</span></div>
-  </article>
-  <article class="step" data-img="img/f05_launch.png" data-title="Start a program from here" data-do="Click the klayout row (1), then Launch Selected (2).">
-    <div class="step-head"><span class="num">5</span><h3>Start a program from here</h3></div>
-    <p class="do">Click the <b class="ui">klayout</b> row (1), then <b class="ui">Launch Selected</b> (2).</p>
-    <button class="shot" type="button"><img src="img/f05_launch.png" alt="The klayout row selected (1) and the Launch Selected button (2) boxed in red" loading="lazy"></button>
-  </article>
-  <article class="step" data-img="img/f06_klayout_open.png" data-title="KLayout opens" data-do="KLayout opens, empty and ready, with our PDK&#x27;s layer colours set up. Close it with its ✕.">
-    <div class="step-head"><span class="num">6</span><h3>KLayout opens</h3></div>
-    <p class="do">KLayout opens, empty and ready, with our PDK's layer colours set up. Close it with its <b class="ui">✕</b>.</p>
-    <button class="shot" type="button"><img src="img/f06_klayout_open.png" alt="An empty KLayout 0.30.12 window over openPDKcreator, saying Use File/Open to open a layout; its close button is boxed in red" loading="lazy"></button>
-    <div class="see"><strong>Same set-up as the Library Manager</strong><span>Launch Selected starts each program the way the Library Manager does: KLayout with this PDK's layers, xschem with this PDK's symbols, Magic with its technology file.</span></div>
-  </article>
-  <article class="step" data-img="img/f07_recheck.png" data-title="After installing something: Recheck" data-do="If you install a program while openPDKcreator is open, click Recheck to look again.">
-    <div class="step-head"><span class="num">7</span><h3>After installing something: Recheck</h3></div>
-    <p class="do">If you install a program while openPDKcreator is open, click <b class="ui">Recheck</b> to look again.</p>
-    <button class="shot" type="button"><img src="img/f07_recheck.png" alt="The Recheck button at the top left of the Tools tab boxed in red" loading="lazy"></button>
-    <div class="oops"><strong>A program says "missing"?</strong><span>That happens when you run openPDKcreator outside the container. Click its row, copy the install command from its card, run it in a terminal on your laptop, then click Recheck. Rows with <b>Required: no</b> are optional: you can work without them.</span></div>
-  </article>
-</section>
+<!--PARTS-->

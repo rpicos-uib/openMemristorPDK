@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Digital tools · openMemristorPDK Guide</title>
+<meta name="description" content="Icarus Verilog, GTKWave, Yosys, OpenROAD and LibreLane: from Verilog to a chip layout.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<header class="topbar"><div class="inner">
+  <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span>openMemristorPDK Guide</a>
+  <nav class="topnav" aria-label="Guide sections"><a href="index.html">Overview</a><a href="foss.html" aria-current="page">FOSS</a><a href="install.html">Install</a><a href="ihp.html">IHP PDK</a><a href="first-simulation.html">First simulation</a><a href="add-model.html">Add a model</a><a href="add-device.html">Add a device</a><a href="corners-montecarlo.html">Monte Carlo</a><a href="digital.html">Digital</a></nav>
+</div></header>
+<div class="wrap">
+<header class="hero">
+  <div class="crumbs"><a href="index.html">Guide</a> · Section 1 · <a href="foss.html">Introduction to FOSS</a> · Part 4 · about 4 min to read</div>
+  <h1>Digital tools</h1>
+  <p class="lede">Simulate bits, look at them as waveforms, turn Verilog into logic gates, and turn the gates into a chip layout.</p>
+
+</header>
+
+<section class="chapter" id="programs">
+  <header>
+    <div class="eyebrow">One tab per program</div>
+    <h2>Pick a program</h2>
+    <p>Each tab says what the program does, where this guide uses it, who makes it, and how to check and install it.</p>
+  </header>
+  <div class="tabs" data-tabs>
+    <div class="tablist" role="tablist" aria-label="Programs">
+      <button type="button" role="tab" id="tab-iverilog" aria-controls="tool-iverilog">Icarus Verilog</button>
+      <button type="button" role="tab" id="tab-gtkwave" aria-controls="tool-gtkwave">GTKWave</button>
+      <button type="button" role="tab" id="tab-yosys" aria-controls="tool-yosys">Yosys</button>
+      <button type="button" role="tab" id="tab-librelane" aria-controls="tool-librelane">OpenROAD + LibreLane</button>
+    </div>
+    <div class="tabpanel" id="tool-iverilog" role="tabpanel" aria-labelledby="tab-iverilog">
+      <h3>Icarus Verilog</h3>
+      <p class="tagline">Simulates digital circuits written in Verilog.</p>
+      <p><b>Verilog</b> describes digital circuits as text: registers, logic, clocks. Icarus Verilog (<code>iverilog</code>) compiles that text and runs it, writing every signal's ones and zeros over time into a <code>.vcd</code> file. It is quick: no voltages, just bits.</p>
+      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="digital-twin.html">A digital twin in Verilog</a> and <a href="digital-gates.html">A controller made of real logic gates</a>.</dd><dt>Made by</dt><dd>Stephen Williams and contributors.</dd><dt>License</dt><dd>GNU GPL 2.0</dd><dt>Website</dt><dd><a href="https://steveicarus.github.io/iverilog/">steveicarus.github.io/iverilog</a></dd></dl>
+      <div class="two">
+        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>iverilog -V</pre><button class="copy" type="button" data-copy="iverilog -V">Copy</button></div></div>
+        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y iverilog</pre><button class="copy" type="button" data-copy="sudo apt install -y iverilog">Copy</button></div></div>
+      </div>
+    </div>
+    <div class="tabpanel" id="tool-gtkwave" role="tabpanel" aria-labelledby="tab-gtkwave">
+      <h3>GTKWave</h3>
+      <p class="tagline">Shows digital signals as waveforms.</p>
+      <p>Opens the <code>.vcd</code> file Icarus Verilog writes and draws each signal as a line going up and down over time, like a logic analyser. You pick the signals, zoom in, and read off when a bit changes.</p>
+      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="digital-twin.html">A digital twin in Verilog</a>.</dd><dt>Made by</dt><dd>Tony Bybell and contributors.</dd><dt>License</dt><dd>GNU GPL 2.0</dd><dt>Website</dt><dd><a href="https://gtkwave.sourceforge.net">gtkwave.sourceforge.net</a></dd></dl>
+      <div class="two">
+        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>gtkwave --version</pre><button class="copy" type="button" data-copy="gtkwave --version">Copy</button></div></div>
+        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y gtkwave</pre><button class="copy" type="button" data-copy="sudo apt install -y gtkwave">Copy</button></div></div>
+      </div>
+    </div>
+    <div class="tabpanel" id="tool-yosys" role="tabpanel" aria-labelledby="tab-yosys">
+      <h3>Yosys</h3>
+      <p class="tagline">Turns Verilog into real logic gates.</p>
+      <p>This step is called <b>synthesis</b>. Yosys reads a Verilog description and builds the same behaviour out of the logic gates a factory offers (here IHP's standard cells: NAND, flip-flops and so on), then counts them and their area.</p>
+      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="digital-gates.html">A controller made of real logic gates</a> (65 gates) and, inside LibreLane, <a href="digital-layout.html">From gates to a chip layout</a>.</dd><dt>Made by</dt><dd>Claire Wolf and YosysHQ.</dd><dt>License</dt><dd>ISC</dd><dt>Website</dt><dd><a href="https://yosyshq.net/yosys/">yosyshq.net/yosys</a></dd></dl>
+      <div class="two">
+        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>yosys -V</pre><button class="copy" type="button" data-copy="yosys -V">Copy</button></div></div>
+        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y yosys</pre><button class="copy" type="button" data-copy="sudo apt install -y yosys">Copy</button></div></div>
+      </div>
+    </div>
+    <div class="tabpanel" id="tool-librelane" role="tabpanel" aria-labelledby="tab-librelane">
+      <h3>OpenROAD and LibreLane</h3>
+      <p class="tagline">From logic gates to a finished chip layout, automatically.</p>
+      <p><b>OpenROAD</b> places the gates on the chip, builds the clock wiring, routes every wire and checks the timing (with OpenSTA). <b>LibreLane</b> is the recipe that runs the whole chain in order: Yosys, OpenROAD, then the Magic and KLayout DRC and the Netgen LVS, and collects the reports. One command goes from Verilog to a GDS file the factory could build. LibreLane continues OpenLane 2.</p>
+      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="digital-layout.html">From gates to a chip layout</a>.</dd><dt>Made by</dt><dd>OpenROAD: a project started at UC San Diego in 2018. LibreLane: the open-source silicon community, from OpenLane.</dd><dt>License</dt><dd>BSD 3-clause (OpenROAD), Apache 2.0 (LibreLane)</dd><dt>Website</dt><dd><a href="https://librelane.readthedocs.io">librelane.readthedocs.io</a></dd></dl>
+      <div class="two">
+        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>librelane --version</pre><button class="copy" type="button" data-copy="librelane --version">Copy</button></div></div>
+        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><p>Use the container. OpenROAD is large and hard to build, and LibreLane needs every other program on this page at the right version: the container already has them all, tested together.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<nav class="pager" aria-label="Previous and next section"><a class="prev" href="foss-layout.html"><span class="dir">← Previous</span><span class="t">Layouts and checks</span></a><a class="next" href="foss-tools-tab.html"><span class="dir">Next →</span><span class="t">openPDKcreator's Tools tab</span></a></nav>
+<footer>
+  <p>Every screenshot was taken from the real programs with real mouse clicks: openPDKcreator, xschem, ngspice with OpenVAF-compiled models and KLayout, inside the IIC-OSIC-TOOLS container. The capture scripts are in <code>docs/for_dummies/_capture/</code>.</p>
+  <p>Created by R. Picos (<a href="mailto:rpicos.uib@gmail.com">rpicos.uib@gmail.com</a> / <a href="mailto:rodrigo.picos@uib.es">rodrigo.picos@uib.es</a>), as part of the research project <b>MemFRAME</b>.</p>
+  <div class="funding"><img src="img/miciu_aei.png" alt="Ministerio de Ciencia, Innovación y Universidades and Agencia Estatal de Investigación" width="1600" height="393"><p>Project PID2025-170062NB (MemFRAME) funded by <span class="nw">MICIU/AEI/<a href="https://doi.org/10.13039/501100011033">10.13039/501100011033</a></span></p></div>
+  <p><a href="https://github.com/rpicos-uib/openMemristorPDK">openMemristorPDK</a> · <a href="https://github.com/rpicos-uib/openpdkcreator-toolkit">openPDKcreator</a> · Apache License 2.0</p>
+</footer>
+</div>
+<script src="guide.js"></script>
+</body>
+</html>

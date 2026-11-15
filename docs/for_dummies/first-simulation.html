@@ -129,6 +129,7 @@
 module memristor_tio2_au(BE, TE);
 inout BE, TE;
 electrical BE, TE;
+electrical dx;   <span class="c">// hidden node: how far x has moved from x0</span>
 
 parameter real <mark>Ron = 100</mark> from (0:inf);
 parameter real <mark>Roff = 16e3</mark> from (0:inf);
@@ -136,13 +137,17 @@ parameter real D = 10n from (0:inf);
 parameter real uv = 1e-14 from (0:inf);
 parameter real x0 = 0.1 from [0:1];
 
-real x;
-real Rmem;
+real x, Rmem, dxdt;
 
 analog begin
-  <mark>x = min(max(idt((uv * Ron / (D * D)) * I(BE, TE), x0), 0.0), 1.0);</mark>
+  <mark>x = min(max(x0 + V(dx), 0.0), 1.0);</mark>   <span class="c">// the memory, kept between 0 and 1</span>
   <mark>Rmem = Ron * x + Roff * (1.0 - x);</mark>
   I(BE, TE) &lt;+ V(BE, TE) / Rmem;
+  <mark>dxdt = (uv * Ron / (D * D)) * V(BE, TE) / Rmem;</mark>   <span class="c">// the boundary moves with the current</span>
+  if ((x &gt;= 1.0 &amp;&amp; dxdt &gt; 0.0) || (x &lt;= 0.0 &amp;&amp; dxdt &lt; 0.0))
+    dxdt = 0.0;                         <span class="c">// at an end: stop there</span>
+  I(dx) &lt;+ ddt(V(dx)) - dxdt;           <span class="c">// x moves at dxdt</span>
+  I(dx) &lt;+ 1e-12 * V(dx);               <span class="c">// keeps dx defined at rest</span>
 end
 endmodule</pre>
     </div>
@@ -150,7 +155,9 @@ endmodule</pre>
       <dt>BE, TE</dt><dd>The two wires of the memristor: <b>B</b>ottom <b>E</b>lectrode and <b>T</b>op <b>E</b>lectrode.</dd>
       <dt>Ron, Roff</dt><dd>Its lowest and highest resistance: 100 Ω when fully "on", 16 000 Ω when fully "off".</dd>
       <dt>D</dt><dd>How thick the TiO₂ layer is: 10 nanometres, about 1/10 000 of a hair.</dd>
-      <dt>x</dt><dd>The memory. A number between 0 and 1 saying how much of the layer has been switched on. <code>idt(...)</code> means "add up over time", so <code>x</code> grows while current flows one way and shrinks when it flows back.</dd>
+      <dt>x</dt><dd>The memory. A number between 0 and 1 saying how much of the layer has been switched on. It starts at <code>x0</code>, and stops at 0 and at 1.</dd>
+      <dt>dxdt</dt><dd>How fast the memory moves: in step with the current. <code>x</code> grows while current flows one way and shrinks when it flows back.</dd>
+      <dt>dx, ddt</dt><dd>The trick that stores the memory: a hidden extra wire, <code>dx</code>, whose voltage is how far <code>x</code> has moved. <code>ddt(...)</code> means "how fast it changes", so that line says: make <code>dx</code> change at speed <code>dxdt</code>.</dd>
       <dt>Rmem</dt><dd>Today's resistance, a mix between <code>Roff</code> and <code>Ron</code> depending on <code>x</code>.</dd>
       <dt>I &lt;+ V / Rmem</dt><dd>Ohm's law: current = voltage ÷ resistance. The only twist is that the resistance keeps changing.</dd>
     </dl>
@@ -204,7 +211,7 @@ C {lab_wire.sym} 220 -100 0 0 {name=p1 sig_type=std_logic lab=te}
 C {vsource.sym} 400 -70 0 0 {name=V1 value="dc 0 sin(0 1.0 0.6)" savecurrent=false}
 C {gnd.sym} 400 -20 0 0 {name=l2 lab=0}
 C {code_shown.sym} -60 40 0 0 {name=s1 only_toplevel=false value="
-.model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0.3
+.model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0
 .control
 pre_osdi /foss/designs/openMemristorPDK/user_models/veriloga/memristor_tio2_au.osdi
 tran 300u 3.34
@@ -217,7 +224,7 @@ plot -i(V1) vs v(te) retraceplot title 'Memristor I-V loop' xlabel 'Voltage (V)'
       <dt>N ...</dt><dd>A wire, from one point to another. <code>lab=te</code> names it "te"; <code>lab=0</code> means ground (0 volts).</dd>
       <dt>C {...}</dt><dd>A component placed on the drawing: the memristor, two ground symbols, the wire label, the source <code>V1</code>, and the code block.</dd>
       <dt>sin(0 1.0 0.6)</dt><dd>The source makes a sine wave around 0 V, going up to 1 V and down to −1 V, 0.6 times per second.</dd>
-      <dt>.model mm ...</dt><dd>Which behaviour file to use for <code>n1</code>, and its numbers (the same ones from step 10). <code>x0=0.3</code> means the memory starts 30 % switched on.</dd>
+      <dt>.model mm ...</dt><dd>Which behaviour file to use for <code>n1</code>, and its numbers (the same ones from step 10). <code>x0=0</code> means the memory starts fully off: 16 000 Ω.</dd>
       <dt>pre_osdi ...</dt><dd>Loads the compiled version of the behaviour file (<code>memristor_tio2_au.osdi</code>, made automatically when openPDKcreator started) into the simulator before anything else.</dd>
       <dt>tran 300u 3.34</dt><dd>Simulate 3.34 seconds of time (two full waves), taking a snapshot every 0.3 milliseconds.</dd>
       <dt>plot ...</dt><dd>When it's done, draw the current (up/down) against the voltage (left/right).</dd>
@@ -246,7 +253,7 @@ plot -i(V1) vs v(te) retraceplot title 'Memristor I-V loop' xlabel 'Voltage (V)'
 <span class="c">**** begin user architecture code</span>
 
 
-.model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0.3
+.model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0
 .control
 pre_osdi /foss/designs/openMemristorPDK/user_models/veriloga/memristor_tio2_au.osdi
 tran 300u 3.34

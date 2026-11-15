@@ -211,8 +211,8 @@ found''}, Nature 453, 80--83 (2008).
 \vspace{0.3em}
 Textbook linear-drift form -- no window function. The template the
 Library Manager generated was replaced with this real physics,
-implemented via Verilog-A's \texttt{idt()} (the state's own integral,
-seeded at $x_0$).
+with the state $x$ stored on a hidden node that starts at $x_0$ and
+stops at 0 and 1.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -244,7 +244,7 @@ empirically-found issues, none of them documented anywhere obvious:
 % ---------------------------------------------------------------
 \begin{frame}[fragile]{The real testbench}
 \begin{va}
-.model mm hp_memristor ron=100 roff=16k d=10n uv=1e-14 x0=0.3
+.model mm hp_memristor ron=100 roff=16k d=10n uv=1e-14 x0=0
 n1 te 0 mm
 vte te 0 dc 0 sin(0 1.0 0.6)
 .tran 300u 3.34

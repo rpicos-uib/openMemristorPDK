@@ -16,7 +16,7 @@
 pre_osdi memristor_tio2_au.osdi
 .endc
 
-.model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0.3
+.model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0
 
 .subckt memristor_tio2_au_prim BE TE
 n1 BE TE mm

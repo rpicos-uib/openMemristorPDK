@@ -2,113 +2,113 @@
  "s01_gui_opens": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s02_click_library_manager": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s03_click_library": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s04_click_cell": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s05_click_view_veriloga": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s06_veriloga_file": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s07_click_tb_cell": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s08_click_open_xschem": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s09_xschem_opens": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s10_click_netlist": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s11_click_simulate": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s12_simulation_result": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s13_plot_closeup": {
   "note": "",
   "size": [
-   713,
-   545
+   714,
+   544
   ]
  },
  "s14_close_plot": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s15_quit_ngspice": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s16_close_xschem": {
   "note": "",
   "size": [
-   1853,
-   930
+   1680,
+   1019
   ]
  },
  "s17_layout_click_cell": {
@@ -296,8 +296,8 @@
  "m21_plot_closeup": {
   "note": "",
   "size": [
-   713,
-   545
+   714,
+   544
   ]
  },
  "m22_quit_plot": {
@@ -1554,6 +1554,27 @@
   ]
  },
  "f07_recheck": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "s01a_gui_first_look": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e10_xschem": {
+  "note": "",
+  "size": [
+   1680,
+   1019
+  ]
+ },
+ "e29_mc_xschem": {
   "note": "",
   "size": [
    1680,

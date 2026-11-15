@@ -23,11 +23,19 @@
 // the real, dimensionless state variable x = w/D (0 = fully
 // undoped/roff, 1 = fully doped/ron) tracks that boundary position.
 // This is the textbook linear-drift form (no window function).
+//
+// State: x lives on a hidden node, dx = x - x0, integrated with
+// ddt() so that (1) the starting value x0 really is the starting
+// value (dx starts at 0), and (2) x stops at 0 and 1 instead of
+// piling up past them. (An earlier version clamped idt()'s output
+// from outside: OpenVAF started the integral at 0 whatever x0 said,
+// and the integral kept growing past 1, so switching back was delayed.)
 `include "disciplines.vams"
 
 module hp_memristor(BE, TE);
 inout BE, TE;
 electrical BE, TE;
+electrical dx;   // hidden node: how far x has moved from x0
 
 parameter real ron = 100 from (0:inf);
 parameter real roff = 16e3 from (0:inf);
@@ -35,12 +43,16 @@ parameter real D = 10n from (0:inf);
 parameter real uv = 1e-14 from (0:inf);
 parameter real x0 = 0.1 from [0:1];
 
-real x;
-real rmem;
+real x, rmem, dxdt;
 
 analog begin
-  x = min(max(idt((uv * ron / (D * D)) * I(BE, TE), x0), 0.0), 1.0);
+  x = min(max(x0 + V(dx), 0.0), 1.0);   // the memory, kept between 0 and 1
   rmem = ron * x + roff * (1.0 - x);
   I(BE, TE) <+ V(BE, TE) / rmem;
+  dxdt = (uv * ron / (D * D)) * V(BE, TE) / rmem;   // the boundary moves with the current
+  if ((x >= 1.0 && dxdt > 0.0) || (x <= 0.0 && dxdt < 0.0))
+    dxdt = 0.0;                         // at an end: stop there
+  I(dx) <+ ddt(V(dx)) - dxdt;           // x moves at dxdt
+  I(dx) <+ 1e-12 * V(dx);               // keeps dx defined at rest
 end
 endmodule

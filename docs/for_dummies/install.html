@@ -20,15 +20,7 @@
 <header class="hero">
   <div class="crumbs"><a href="index.html">Guide</a> · Section 2 · 30–60 min, mostly waiting · once per computer</div>
   <h1>Install from scratch</h1>
-  <p class="lede">Everything you need, downloaded and set up on a new Linux computer: two programs, openPDKcreator, the memristor PDK, and the container with all the chip-design tools. You only do this once per computer. You only ever need to click whatever is inside the <b class="ui">red box</b>, or type exactly what is in a black box.</p>
-  <div class="hero-row">
-    <button class="btn" type="button" id="play-all">▶ Play as video</button>
-    <span class="legend">
-      <span><i class="swatch-box"></i> click here</span>
-      <span>Click any screenshot to see it full size</span>
-      <span>Keys in the player: <kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd> <kbd>Esc</kbd></span>
-    </span>
-  </div>
+  <p class="lede">Everything you need, downloaded and set up on a new Linux computer: two programs, openPDKcreator, the memristor PDK, and the container with all the chip-design tools. You only do this once per computer.</p>
 
 </header>
 
@@ -98,30 +90,13 @@
   </article>
 </section>
 
-<nav class="pager" aria-label="Previous and next section"><a class="prev" href="foss.html"><span class="dir">← Previous</span><span class="t">Introduction to FOSS</span></a><a class="next" href="ihp.html"><span class="dir">Next →</span><span class="t">Add IHP's PDK</span></a></nav>
+<nav class="pager" aria-label="Previous and next section"><a class="prev" href="foss-tools-tab.html"><span class="dir">← Previous</span><span class="t">openPDKcreator's Tools tab</span></a><a class="next" href="ihp.html"><span class="dir">Next →</span><span class="t">Add IHP's PDK</span></a></nav>
 <footer>
   <p>Every screenshot was taken from the real programs with real mouse clicks: openPDKcreator, xschem, ngspice with OpenVAF-compiled models and KLayout, inside the IIC-OSIC-TOOLS container. The capture scripts are in <code>docs/for_dummies/_capture/</code>.</p>
   <p>Created by R. Picos (<a href="mailto:rpicos.uib@gmail.com">rpicos.uib@gmail.com</a> / <a href="mailto:rodrigo.picos@uib.es">rodrigo.picos@uib.es</a>), as part of the research project <b>MemFRAME</b>.</p>
   <div class="funding"><img src="img/miciu_aei.png" alt="Ministerio de Ciencia, Innovación y Universidades and Agencia Estatal de Investigación" width="1600" height="393"><p>Project PID2025-170062NB (MemFRAME) funded by <span class="nw">MICIU/AEI/<a href="https://doi.org/10.13039/501100011033">10.13039/501100011033</a></span></p></div>
   <p><a href="https://github.com/rpicos-uib/openMemristorPDK">openMemristorPDK</a> · <a href="https://github.com/rpicos-uib/openpdkcreator-toolkit">openPDKcreator</a> · Apache License 2.0</p>
 </footer>
-</div>
-
-<div class="overlay" id="player" hidden role="dialog" aria-modal="true" aria-label="Step player">
-  <div class="bar">
-    <div class="title"><span class="n" id="p-n"></span><span id="p-title"></span></div>
-    <button type="button" id="p-close">Close ✕</button>
-  </div>
-  <div class="stage" id="p-stage"></div>
-  <div style="display:grid;gap:10px">
-    <p class="do-line" id="p-do"></p>
-    <div class="progress" aria-hidden="true"><i id="p-bar"></i></div>
-    <div class="ctrls">
-      <button type="button" id="p-prev">← Back</button>
-      <button type="button" class="primary" id="p-play">⏸ Pause</button>
-      <button type="button" id="p-next">Next →</button>
-    </div>
-  </div>
 </div>
 <script src="guide.js"></script>
 </body>

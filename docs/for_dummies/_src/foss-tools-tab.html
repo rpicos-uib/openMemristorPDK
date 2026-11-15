@@ -1,0 +1,46 @@
+<section class="chapter" id="tools-tab">
+  <header>
+    <div class="eyebrow">Hands on · about 5 minutes</div>
+    <h2>Let openPDKcreator check the programs</h2>
+    <p>openPDKcreator can check all these programs for you: which ones are installed, which version, where, and how to install the missing ones. It can also start any of them.</p>
+  </header>
+  <article class="step" data-img="img/f01_settings.png" data-title="Open Settings" data-do="Click the Settings tab at the top of openPDKcreator.">
+    <div class="step-head"><span class="num">1</span><h3>Open Settings</h3></div>
+    <p class="do">Click the <b class="ui">Settings</b> tab at the top of openPDKcreator.</p>
+    <button class="shot" type="button"><img src="img/f01_settings.png" alt="openPDKcreator showing the Wizard tab, with the Settings tab at the top boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/f02_tools_tab.png" data-title="Open the Tools tab" data-do="Click Tools, the second tab under Settings.">
+    <div class="step-head"><span class="num">2</span><h3>Open the Tools tab</h3></div>
+    <p class="do">Click <b class="ui">Tools</b>, the second tab under Settings.</p>
+    <button class="shot" type="button"><img src="img/f02_tools_tab.png" alt="The Settings tab with its General, Tools and Environment tabs; Tools is boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/f03_tools_list.png" data-title="Read the summary" data-do="Wait a few seconds while it checks every program, then read the line at the top.">
+    <div class="step-head"><span class="num">3</span><h3>Read the summary</h3></div>
+    <p class="do">Wait a few seconds while it checks every program, then read the line at the top.</p>
+    <button class="shot" type="button"><img src="img/f03_tools_list.png" alt="The Tools tab: Recheck and Launch Selected buttons, the summary 16/16 tool(s) found (1 superseded, not needed: openlane) boxed in red, and a table of 17 programs" loading="lazy"></button>
+    <div class="see"><strong>What you see</strong><span><b>16/16 tool(s) found</b>: inside the container every program is there. Below, one row per program: its short name (<b>Id</b>), its job (<b>Category</b>), whether a PDK flow needs it (<b>Required</b>), <b>Status</b>, the <b>Version</b> it reported and the <b>Path</b> of the program file. OpenLane says <b>superseded by librelane</b>: LibreLane replaced it, so it isn't needed.</span></div>
+  </article>
+  <article class="step" data-img="img/f04_tool_detail.png" data-title="Click a program" data-do="Click the ngspice row (1). Its card appears on the right (2).">
+    <div class="step-head"><span class="num">4</span><h3>Click a program</h3></div>
+    <p class="do">Click the <b class="ui">ngspice</b> row (1). Its card appears on the right (2).</p>
+    <button class="shot" type="button"><img src="img/f04_tool_detail.png" alt="The ngspice row selected (1) and, on the right (2), its card: what it is for, where it was found, its version, the install command sudo apt install ngspice, a note about Verilog-A support, and its website" loading="lazy"></button>
+    <div class="see"><strong>The card</strong><span>What the program is for, which part of a PDK it works with, where it was found and its version. Then how to install it on this kind of Linux (here <code>sudo apt install ngspice</code>), notes worth knowing, and its website. openPDKcreator only shows install commands: it never installs anything by itself.</span></div>
+  </article>
+  <article class="step" data-img="img/f05_launch.png" data-title="Start a program from here" data-do="Click the klayout row (1), then Launch Selected (2).">
+    <div class="step-head"><span class="num">5</span><h3>Start a program from here</h3></div>
+    <p class="do">Click the <b class="ui">klayout</b> row (1), then <b class="ui">Launch Selected</b> (2).</p>
+    <button class="shot" type="button"><img src="img/f05_launch.png" alt="The klayout row selected (1) and the Launch Selected button (2) boxed in red" loading="lazy"></button>
+  </article>
+  <article class="step" data-img="img/f06_klayout_open.png" data-title="KLayout opens" data-do="KLayout opens, empty and ready, with our PDK&#x27;s layer colours set up. Close it with its ✕.">
+    <div class="step-head"><span class="num">6</span><h3>KLayout opens</h3></div>
+    <p class="do">KLayout opens, empty and ready, with our PDK's layer colours set up. Close it with its <b class="ui">✕</b>.</p>
+    <button class="shot" type="button"><img src="img/f06_klayout_open.png" alt="An empty KLayout 0.30.12 window over openPDKcreator, saying Use File/Open to open a layout; its close button is boxed in red" loading="lazy"></button>
+    <div class="see"><strong>Same set-up as the Library Manager</strong><span>Launch Selected starts each program the way the Library Manager does: KLayout with this PDK's layers, xschem with this PDK's symbols, Magic with its technology file.</span></div>
+  </article>
+  <article class="step" data-img="img/f07_recheck.png" data-title="After installing something: Recheck" data-do="If you install a program while openPDKcreator is open, click Recheck to look again.">
+    <div class="step-head"><span class="num">7</span><h3>After installing something: Recheck</h3></div>
+    <p class="do">If you install a program while openPDKcreator is open, click <b class="ui">Recheck</b> to look again.</p>
+    <button class="shot" type="button"><img src="img/f07_recheck.png" alt="The Recheck button at the top left of the Tools tab boxed in red" loading="lazy"></button>
+    <div class="oops"><strong>A program says "missing"?</strong><span>That happens when you run openPDKcreator outside the container. Click its row, copy the install command from its card, run it in a terminal on your laptop, then click Recheck. Rows with <b>Required: no</b> are optional: you can work without them.</span></div>
+  </article>
+</section>

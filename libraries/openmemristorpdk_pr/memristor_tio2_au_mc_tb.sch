@@ -22,7 +22,7 @@ C {code_shown.sym} -60 40 0 0 {name=s1 only_toplevel=false value="
 .param ron_mc  = agauss(100, 10, 1)
 .param roff_mc = agauss(16k, 1.6k, 1)
 .param d_mc    = agauss(10n, 0.5n, 1)
-.model mm memristor_tio2_au ron=\{ron_mc\} roff=\{roff_mc\} d=\{d_mc\} uv=1e-14 x0=0.3
+.model mm memristor_tio2_au ron=\{ron_mc\} roff=\{roff_mc\} d=\{d_mc\} uv=1e-14 x0=0
 .options interp
 .control
 pre_osdi /foss/designs/openMemristorPDK/user_models/veriloga/memristor_tio2_au.osdi

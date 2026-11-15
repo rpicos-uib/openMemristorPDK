@@ -33,12 +33,66 @@ SECTIONS = [
         "title": "Introduction to FOSS",
         "short": "FOSS",
         "status": "ready",
-        "time": "about 15 min to read · 7 steps",
+        "time": "5 parts · about 20 min",
         "desc": "What free and open-source software is, what each program in this guide does and how to install it, "
                 "and openPDKcreator's Tools tab, which checks them all.",
         "lede": "Every program in this guide is free and open-source software. Meet them one by one: what each does, "
                 "who makes it, how to install it. Then let openPDKcreator's Tools tab check them for you.",
         "prereq": "",
+        "children": [
+            {
+                "slug": "foss-laptop",
+                "title": "On your laptop",
+                "status": "ready",
+                "time": "about 3 min to read",
+                "desc": "Git, Podman and IIC-OSIC-TOOLS: the two programs on the laptop and the container they start.",
+                "lede": "Two programs live on the laptop itself, Git and Podman. Together they bring the container that "
+                        "holds everything else.",
+                "prereq": "",
+            },
+            {
+                "slug": "foss-analog",
+                "title": "Drawing and simulating",
+                "status": "ready",
+                "time": "about 4 min to read",
+                "desc": "openPDKcreator, xschem, ngspice and OpenVAF: the programs the Analog sections use.",
+                "lede": "The PDK window, the schematic editor, the circuit simulator and the compiler that turns a "
+                        "memristor model into something the simulator can run.",
+                "prereq": "",
+            },
+            {
+                "slug": "foss-layout",
+                "title": "Layouts and checks",
+                "status": "ready",
+                "time": "about 3 min to read",
+                "desc": "KLayout, Magic and Netgen: look at a chip layout and check it (DRC and LVS).",
+                "lede": "The drawing the factory builds from, and the two checks every layout must pass before it "
+                        "goes to the factory.",
+                "prereq": "",
+            },
+            {
+                "slug": "foss-digital",
+                "title": "Digital tools",
+                "status": "ready",
+                "time": "about 4 min to read",
+                "desc": "Icarus Verilog, GTKWave, Yosys, OpenROAD and LibreLane: from Verilog to a chip layout.",
+                "lede": "Simulate bits, look at them as waveforms, turn Verilog into logic gates, and turn the gates "
+                        "into a chip layout.",
+                "prereq": "",
+            },
+            {
+                "slug": "foss-tools-tab",
+                "title": "openPDKcreator's Tools tab",
+                "status": "ready",
+                "time": "about 5 min",
+                "desc": "Let openPDKcreator check every program: found or missing, version, how to install it, "
+                        "and a button to start it.",
+                "lede": "One tab in openPDKcreator checks every program on the other pages: is it there, which version, "
+                        "how to install it. It can also start them.",
+                "prereq": 'Do <a href="install.html">Install from scratch</a> first, and start with openPDKcreator open '
+                          '(steps 1–5 of <a href="first-simulation.html">Your first simulation</a>).',
+            },
+        ],
     },
     {
         "slug": "install",
@@ -296,6 +350,12 @@ def parent_of(slug: str) -> dict | None:
     return None
 
 
+def steps_label(slug: str) -> str:
+    """" · N steps", or nothing for a reading-only page."""
+    n = count_steps(slug)
+    return f" · {n} steps" if n else ""
+
+
 def count_steps(slug: str) -> int:
     src = (HERE.parent / "_src" / f"{slug}.html").read_text(encoding="utf-8")
     return len(re.findall(r'<span class="num">\d+</span>', src))
@@ -374,7 +434,7 @@ def crumbs(s: dict) -> str:
         n = SECTIONS.index(par) + 1
         k = par["children"].index(s) + 1
         return (f'<a href="index.html">Guide</a> · Section {n} · <a href="{par["slug"]}.html">{par["title"]}</a>'
-                f' · Part {k} · {s["time"]} · {count_steps(s["slug"])} steps')
+                f' · Part {k} · {s["time"]}{steps_label(s["slug"])}')
     return f'<a href="index.html">Guide</a> · Section {SECTIONS.index(s) + 1} · {s["time"]}'
 
 
@@ -384,7 +444,7 @@ def section_page(i: int, s: dict) -> str:
     # A draft can already contain real screenshot steps: then it gets the
     # red-box hint and the step player too, plus its draft note.
     draft = s["status"] == "draft"
-    has_steps = not draft or 'data-img="' in src
+    has_steps = 'data-img="' in src  # reading-only pages get no player
     note = ""
     if draft:
         note = (f'  <p class="draftnote"><strong>Draft</strong> {s["draftnote"]}</p>'
@@ -400,7 +460,7 @@ def section_page(i: int, s: dict) -> str:
         f"{prereq}{note}{LEGEND + chr(10) if has_steps else ''}{on_this_page(src)}\n"
         "</header>"
     )
-    return page(f'{s["title"]} · {GUIDE_TITLE}', s["desc"], s["slug"], f"{hero}\n\n{src}\n{pager(s)}", player=True)
+    return page(f'{s["title"]} · {GUIDE_TITLE}', s["desc"], s["slug"], f"{hero}\n\n{src}\n{pager(s)}", player=has_steps)
 
 
 def part_cards(s: dict) -> str:
@@ -410,7 +470,7 @@ def part_cards(s: dict) -> str:
             cards.append(
                 f'  <a class="card" href="{c["slug"]}.html">\n'
                 f'    <span class="no">PART {k}</span><h3>{c["title"]}</h3><p>{c["desc"]}</p>\n'
-                f'    <span class="meta"><span class="pill ready">Ready</span>{c["time"]} · {count_steps(c["slug"])} steps</span>\n  </a>'
+                f'    <span class="meta"><span class="pill ready">Ready</span>{c["time"]}{steps_label(c["slug"])}</span>\n  </a>'
             )
         else:
             cards.append(
@@ -465,7 +525,7 @@ def index_page() -> str:
                 cards.append(section_card(n, dict(s, title=s["title"] + ": overview"), f"SECTION {n}"))
                 for k, c in enumerate(s["children"], 1):
                     if c["status"] in ("ready", "draft"):
-                        c = dict(c, time=f'{c["time"]} · {count_steps(c["slug"])} steps')
+                        c = dict(c, time=f'{c["time"]}{steps_label(c["slug"])}')
                     cards.append(section_card(n, c, f"SECTION {n} · PART {k}"))
             else:
                 cards.append(section_card(n, s))

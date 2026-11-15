@@ -11,7 +11,7 @@
 * user_models/veriloga/memristor_tio2_ti.va) once that file sits in
 * the simulation's own working directory -- the same real convention
 * docs/simulation/memristor_tio2_ti/mem_tran.sp already uses.
-.model mm memristor_tio2_ti ron=250 roff=20k d=10n uv=0.8e-14 x0=0.3
+.model mm memristor_tio2_ti ron=250 roff=20k d=10n uv=0.8e-14 x0=0
 
 .subckt memristor_tio2_ti_prim BE TE
 n1 BE TE mm

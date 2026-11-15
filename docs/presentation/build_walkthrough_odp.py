@@ -258,7 +258,7 @@ text_slide(
         ("dx/dt = (uv * Ron / D^2) * i(t)", True),
         ("Rmem(x) = Ron*x + Roff*(1-x)", True),
         ("v = Rmem(x) * i", True),
-        "Textbook linear-drift form -- no window function. Implemented via Verilog-A's idt() (the state's own integral, seeded at x0).",
+        "Textbook linear-drift form -- no window function. The state x is stored on a hidden node that starts at x0 and stops at 0 and 1.",
     ],
 )
 
@@ -278,7 +278,7 @@ text_slide(
 text_slide(
     "The real testbench",
     [
-        (".model mm hp_memristor ron=100 roff=16k d=10n uv=1e-14 x0=0.3", True),
+        (".model mm hp_memristor ron=100 roff=16k d=10n uv=1e-14 x0=0", True),
         ("n1 te 0 mm", True),
         ("vte te 0 dc 0 sin(0 1.0 0.6)", True),
         (".tran 300u 3.34", True),

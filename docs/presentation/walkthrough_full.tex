@@ -534,20 +534,30 @@ $x=w/D\in[0,1]$ tracks the doped/undoped boundary:
 \qquad
 R_{mem}(x) = R_{on}\,x + R_{off}\,(1-x)
 \]
+$x$ is stored on a hidden node and stops at 0 and 1, so it starts at
+$x_0$ and can switch back at once. (A first version clamped the output
+of \texttt{idt()}: OpenVAF started the integral at 0 whatever $x_0$
+said, and it kept growing past 1.)
+\end{frame}
+\begin{frame}[fragile,shrink=5]{Step 17, continued -- authoring Model 1}
 \begin{va}
 module memristor_tio2_au(BE, TE);
 inout BE, TE;
 electrical BE, TE;
+electrical dx;  // hidden node: x - x0
 parameter real Ron = 100 from (0:inf);
 parameter real Roff = 16e3 from (0:inf);
 parameter real D = 10n from (0:inf);
 parameter real uv = 1e-14 from (0:inf);
 parameter real x0 = 0.1 from [0:1];
-real x, Rmem;
+real x, Rmem, dxdt;
 analog begin
-  x = min(max(idt((uv*Ron/(D*D))*I(BE,TE), x0), 0.0), 1.0);
+  x = min(max(x0 + V(dx), 0.0), 1.0);
   Rmem = Ron*x + Roff*(1.0-x);
   I(BE, TE) <+ V(BE, TE) / Rmem;
+  dxdt = (uv*Ron/(D*D)) * V(BE,TE)/Rmem;
+  if ((x >= 1.0 && dxdt > 0.0) || (x <= 0.0 && dxdt < 0.0)) dxdt = 0.0;
+  I(dx) <+ ddt(V(dx)) - dxdt;  I(dx) <+ 1e-12*V(dx);
 end
 endmodule
 \end{va}
@@ -622,7 +632,7 @@ to every variant:
 % ---------------------------------------------------------------
 \begin{frame}[fragile]{Step 20 -- a real transient testbench, per variant}
 \begin{va}
-.model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0.3
+.model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0
 n1 te 0 mm
 vte te 0 dc 0 sin(0 1.0 0.6)
 .tran 300u 3.34
@@ -769,7 +779,7 @@ C {.../gnd.sym} -40 0 0 0 {name=l1 lab=0}
 C {.../vsource.sym} 200 -30 0 0 {name=V1 value="dc 0 sin(0 1.0 0.6)"}
 C {.../gnd.sym} 200 -60 0 0 {name=l2 lab=0}
 C {.../code_shown.sym} 0 -150 0 0
-  {name=s1 value=".model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0.3"}
+  {name=s1 value=".model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0"}
 N 40 0 200 0 {}
 \end{va}
 The memristor's own real \texttt{name=} attribute carries its device
@@ -796,7 +806,7 @@ xschem -n -s -q libraries/openmemristorpdk_pr/memristor_tio2_au.sch
 \begin{va}
 n1 0 net1 mm
 V1 0 net1 dc 0 sin(0 1.0 0.6)
-.model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0.3
+.model mm memristor_tio2_au ron=100 roff=16k d=10n uv=1e-14 x0=0
 \end{va}
 Run through real ngspice/OSDI: resistance window
 9343--16000\,$\Omega$ -- byte-for-byte the same real result as the

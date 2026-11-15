@@ -19,7 +19,7 @@ C {code_shown.sym} -60 40 0 0 {name=s1 only_toplevel=false value="
 * Process corner: TT (typical), FF (fast) or SS (slow).
 * To try another corner, change the last word of the .lib line.
 .lib /foss/designs/openMemristorPDK/data/openmemristorpdk/libs.tech/ngspice/models/openmemristorpdk_corners.lib TT
-.model mm memristor_tio2_au ron=\{ron_tio2_au\} roff=\{roff_tio2_au\} d=10n uv=1e-14 x0=0.3
+.model mm memristor_tio2_au ron=\{ron_tio2_au\} roff=\{roff_tio2_au\} d=10n uv=1e-14 x0=0
 .control
 pre_osdi /foss/designs/openMemristorPDK/user_models/veriloga/memristor_tio2_au.osdi
 tran 300u 3.34

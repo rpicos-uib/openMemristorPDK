@@ -17,11 +17,19 @@
 // values chosen to be directionally correct and documented as
 // illustrative, not measured from a real fabricated device (there is
 // none -- this is a from-scratch, bare-minimum teaching PDK).
+//
+// State: x lives on a hidden node, dx = x - x0, integrated with
+// ddt() so that (1) the starting value x0 really is the starting
+// value (dx starts at 0), and (2) x stops at 0 and 1 instead of
+// piling up past them. (An earlier version clamped idt()'s output
+// from outside: OpenVAF started the integral at 0 whatever x0 said,
+// and the integral kept growing past 1, so switching back was delayed.)
 `include "disciplines.vams"
 
 module memristor_tio2_au(BE, TE);
 inout BE, TE;
 electrical BE, TE;
+electrical dx;   // hidden node: how far x has moved from x0
 
 parameter real Ron = 100 from (0:inf);
 parameter real Roff = 16e3 from (0:inf);
@@ -29,12 +37,16 @@ parameter real D = 10n from (0:inf);
 parameter real uv = 1e-14 from (0:inf);
 parameter real x0 = 0.1 from [0:1];
 
-real x;
-real Rmem;
+real x, Rmem, dxdt;
 
 analog begin
-  x = min(max(idt((uv * Ron / (D * D)) * I(BE, TE), x0), 0.0), 1.0);
+  x = min(max(x0 + V(dx), 0.0), 1.0);   // the memory, kept between 0 and 1
   Rmem = Ron * x + Roff * (1.0 - x);
   I(BE, TE) <+ V(BE, TE) / Rmem;
+  dxdt = (uv * Ron / (D * D)) * V(BE, TE) / Rmem;   // the boundary moves with the current
+  if ((x >= 1.0 && dxdt > 0.0) || (x <= 0.0 && dxdt < 0.0))
+    dxdt = 0.0;                         // at an end: stop there
+  I(dx) <+ ddt(V(dx)) - dxdt;           // x moves at dxdt
+  I(dx) <+ 1e-12 * V(dx);               // keeps dx defined at rest
 end
 endmodule

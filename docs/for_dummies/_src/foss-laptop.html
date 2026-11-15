@@ -1,0 +1,44 @@
+<section class="chapter" id="programs">
+  <header>
+    <div class="eyebrow">One tab per program</div>
+    <h2>Pick a program</h2>
+    <p>Each tab says what the program does, where this guide uses it, who makes it, and how to check and install it.</p>
+  </header>
+  <div class="tabs" data-tabs>
+    <div class="tablist" role="tablist" aria-label="Programs">
+      <button type="button" role="tab" id="tab-git" aria-controls="tool-git">Git</button>
+      <button type="button" role="tab" id="tab-podman" aria-controls="tool-podman">Podman</button>
+      <button type="button" role="tab" id="tab-iic-osic-tools" aria-controls="tool-iic-osic-tools">IIC-OSIC-TOOLS</button>
+    </div>
+    <div class="tabpanel" id="tool-git" role="tabpanel" aria-labelledby="tab-git">
+      <h3>Git</h3>
+      <p class="tagline">Downloads projects and remembers every version of them.</p>
+      <p>Git keeps the whole history of a folder of files: every change, who made it and when, so you can always go back. <b>GitHub</b> is a website that stores Git projects for everyone to see; <code>git clone</code> downloads one to your computer. openPDKcreator, the memristor PDK and the container's launcher all live on GitHub.</p>
+      <dl class="facts"><dt>Runs on</dt><dd>Your laptop</dd><dt>Used in this guide</dt><dd><a href="install.html">Install from scratch</a>: downloading openPDKcreator, the PDK and the container launcher.</dd><dt>Made by</dt><dd>Linus Torvalds (the creator of Linux) in 2005; now a large community.</dd><dt>License</dt><dd>GNU GPL 2.0</dd><dt>Website</dt><dd><a href="https://git-scm.com">git-scm.com</a></dd></dl>
+      <div class="two">
+        <div><h4>Is it there?</h4><p>Type this in a terminal on your laptop:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>git --version</pre><button class="copy" type="button" data-copy="git --version">Copy</button></div></div>
+        <div><h4>Install it</h4><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y git</pre><button class="copy" type="button" data-copy="sudo apt install -y git">Copy</button></div><p>Already done in <a href="install.html">Install from scratch</a>.</p></div>
+      </div>
+    </div>
+    <div class="tabpanel" id="tool-podman" role="tabpanel" aria-labelledby="tab-podman">
+      <h3>Podman</h3>
+      <p class="tagline">Runs containers: a ready-made computer inside your computer.</p>
+      <p>A <b>container</b> is a complete, packed Linux system with programs already installed and set up. Podman downloads it and runs it, kept apart from the rest of your laptop. Installing forty chip-design programs one by one would take days; with a container it is one download. Podman does the same job as the better-known Docker, but needs no administrator program running in the background.</p>
+      <dl class="facts"><dt>Runs on</dt><dd>Your laptop</dd><dt>Used in this guide</dt><dd><a href="install.html">Install from scratch</a>: the launcher uses it to start the container.</dd><dt>Made by</dt><dd>Red Hat and the Podman community.</dd><dt>License</dt><dd>Apache 2.0</dd><dt>Website</dt><dd><a href="https://podman.io">podman.io</a></dd></dl>
+      <div class="two">
+        <div><h4>Is it there?</h4><p>Type this in a terminal on your laptop:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>podman --version</pre><button class="copy" type="button" data-copy="podman --version">Copy</button></div></div>
+        <div><h4>Install it</h4><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y podman</pre><button class="copy" type="button" data-copy="sudo apt install -y podman">Copy</button></div><p>Already done in <a href="install.html">Install from scratch</a>.</p></div>
+      </div>
+    </div>
+    <div class="tabpanel" id="tool-iic-osic-tools" role="tabpanel" aria-labelledby="tab-iic-osic-tools">
+      <h3>IIC-OSIC-TOOLS</h3>
+      <p class="tagline">The toolbox: dozens of chip-design programs in one container.</p>
+      <p>A container image with almost every open chip-design program already installed and working together: all the ones in these tabs, and many more. It also brings open PDKs from real factories (SkyWater sky130, GlobalFoundries gf180, IHP SG13G2). It opens a Linux desktop in a browser window, the <b>container desktop</b> you see in the screenshots. This guide uses version 2026.10.</p>
+      <dl class="facts"><dt>Runs on</dt><dd>Your laptop (it is the container itself)</dd><dt>Used in this guide</dt><dd>Every section from Your first simulation on: all the programs below run inside it.</dd><dt>Made by</dt><dd>The Institute for Integrated Circuits (IIC) at Johannes Kepler University Linz, Austria.</dd><dt>License</dt><dd>Apache 2.0</dd><dt>Website</dt><dd><a href="https://github.com/iic-jku/IIC-OSIC-TOOLS">github.com/iic-jku/IIC-OSIC-TOOLS</a></dd></dl>
+      <div class="two">
+        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>echo $IIC_OSIC_TOOLS_VERSION</pre><button class="copy" type="button" data-copy="echo $IIC_OSIC_TOOLS_VERSION">Copy</button></div></div>
+        <div><h4>Install it</h4><p>Follow <a href="install.html">Install from scratch</a>, steps D and E: download its launcher with Git, then start it. The first start downloads about 20 GB.</p></div>
+      </div>
+    </div>
+  </div>
+</section>

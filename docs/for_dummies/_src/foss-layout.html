@@ -1,0 +1,44 @@
+<section class="chapter" id="programs">
+  <header>
+    <div class="eyebrow">One tab per program</div>
+    <h2>Pick a program</h2>
+    <p>Each tab says what the program does, where this guide uses it, who makes it, and how to check and install it.</p>
+  </header>
+  <div class="tabs" data-tabs>
+    <div class="tablist" role="tablist" aria-label="Programs">
+      <button type="button" role="tab" id="tab-klayout" aria-controls="tool-klayout">KLayout</button>
+      <button type="button" role="tab" id="tab-magic" aria-controls="tool-magic">Magic</button>
+      <button type="button" role="tab" id="tab-netgen" aria-controls="tool-netgen">Netgen</button>
+    </div>
+    <div class="tabpanel" id="tool-klayout" role="tabpanel" aria-labelledby="tab-klayout">
+      <h3>KLayout</h3>
+      <p class="tagline">Look at chip layouts and check them.</p>
+      <p>A <b>layout</b> is the drawing the factory builds from: coloured shapes, one colour per layer of material, stored in a GDS file. KLayout opens these files, even huge ones, fast. It also runs the <b>DRC</b> (design rule check): a script that measures every shape and complains when something is too small or too close.</p>
+      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="first-simulation.html">Your first simulation</a> and <a href="digital-layout.html">From gates to a chip layout</a>.</dd><dt>Made by</dt><dd>Matthias Köfferlein.</dd><dt>License</dt><dd>GNU GPL</dd><dt>Website</dt><dd><a href="https://www.klayout.de">www.klayout.de</a></dd></dl>
+      <div class="two">
+        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>klayout -v</pre><button class="copy" type="button" data-copy="klayout -v">Copy</button></div></div>
+        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><p>Ubuntu's package is old. Download the current <code>.deb</code> for your Ubuntu version from <a href="https://www.klayout.de/build.html">klayout.de/build.html</a> and open it to install.</p></div>
+      </div>
+    </div>
+    <div class="tabpanel" id="tool-magic" role="tabpanel" aria-labelledby="tab-magic">
+      <h3>Magic</h3>
+      <p class="tagline">The classic layout editor, which also reads circuits back out of layouts.</p>
+      <p>Another layout editor, first written at Berkeley in the 1980s and still used every day. Besides drawing, it can <b>extract</b> a layout: find the devices and wires in the shapes and write them as a netlist, so they can be compared with the schematic.</p>
+      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd><a href="add-device.html">Add a new device</a> (the <b>Magic Layout</b> row: Create, Run DRC), and inside LibreLane in <a href="digital-layout.html">From gates to a chip layout</a>.</dd><dt>Made by</dt><dd>John Ousterhout and students at UC Berkeley; maintained by Tim Edwards (Open Circuit Design).</dd><dt>License</dt><dd>Berkeley-style open license</dd><dt>Website</dt><dd><a href="http://opencircuitdesign.com/magic/">opencircuitdesign.com/magic</a></dd></dl>
+      <div class="two">
+        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>magic --version</pre><button class="copy" type="button" data-copy="magic --version">Copy</button></div></div>
+        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y magic</pre><button class="copy" type="button" data-copy="sudo apt install -y magic">Copy</button></div><p>Ubuntu's version is older; for real chip work, build it from its GitHub page.</p></div>
+      </div>
+    </div>
+    <div class="tabpanel" id="tool-netgen" role="tabpanel" aria-labelledby="tab-netgen">
+      <h3>Netgen</h3>
+      <p class="tagline">Checks that the layout is the same circuit as the schematic.</p>
+      <p>This check is called <b>LVS</b>, layout versus schematic. Netgen takes the netlist Magic extracted from the layout and the netlist from the schematic, and compares them device by device and wire by wire. If one wire is missing in the layout, LVS finds it before the factory does.</p>
+      <dl class="facts"><dt>Runs on</dt><dd>Inside the container</dd><dt>Used in this guide</dt><dd>Inside LibreLane in <a href="digital-layout.html">From gates to a chip layout</a> ("0 LVS errors").</dd><dt>Made by</dt><dd>Tim Edwards (Open Circuit Design), the same family as Magic.</dd><dt>License</dt><dd>Free and open source (see its website)</dd><dt>Website</dt><dd><a href="http://opencircuitdesign.com/netgen/">opencircuitdesign.com/netgen</a></dd></dl>
+      <div class="two">
+        <div><h4>Is it there?</h4><p>Type this in a container terminal:</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>netgen -batch quit</pre><button class="copy" type="button" data-copy="netgen -batch quit">Copy</button></div></div>
+        <div><h4>Install it outside the container</h4><p class="small">Inside the container it is already installed: nothing to do. These commands are only for using it on your own Ubuntu, without the container.</p><div class="cmd-row"><pre class="term"><span class="p">$ </span>sudo apt install -y netgen-lvs</pre><button class="copy" type="button" data-copy="sudo apt install -y netgen-lvs">Copy</button></div><p>Ubuntu calls it <code>netgen-lvs</code> (plain <code>netgen</code> is a different program). It is older than the container's.</p></div>
+      </div>
+    </div>
+  </div>
+</section>

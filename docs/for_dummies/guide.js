@@ -40,6 +40,21 @@
   });
 })();
 
+/* Copy buttons (every page, with or without the step player). */
+(() => {
+  document.querySelectorAll('.copy').forEach(b => b.addEventListener('click', async () => {
+    const text = b.dataset.copy;
+    try { await navigator.clipboard.writeText(text); b.textContent = 'Copied'; }
+    catch {
+      const pre = b.parentElement.querySelector('pre');
+      const r = document.createRange(); r.selectNodeContents(pre);
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      b.textContent = 'Selected: press Ctrl+C';
+    }
+    setTimeout(() => (b.textContent = 'Copy'), 2000);
+  }));
+})();
+
 /* Shared step player, lightbox and copy buttons for every guide page. */
 (() => {
   if (!document.getElementById('player')) return;  // pages without steps (the index)
@@ -111,16 +126,5 @@
     // a secondary image (the plot close-up): show it alone
     open(at, false);
     stage.replaceChildren(Object.assign(new Image(), { src, alt: btn.querySelector('img').alt }));
-  }));
-  document.querySelectorAll('.copy').forEach(b => b.addEventListener('click', async () => {
-    const text = b.dataset.copy;
-    try { await navigator.clipboard.writeText(text); b.textContent = 'Copied'; }
-    catch {
-      const pre = b.parentElement.querySelector('pre');
-      const r = document.createRange(); r.selectNodeContents(pre);
-      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
-      b.textContent = 'Selected: press Ctrl+C';
-    }
-    setTimeout(() => (b.textContent = 'Copy'), 2000);
   }));
 })();
